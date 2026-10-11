@@ -1,108 +1,167 @@
 ---
-// Simple registration (name + email) that follows the visitor down the page.
-// Desktop: a card in the bottom corner. Phone: a slim bar that opens into the form.
+// Registration pop-up (name, email, optional phone) that comes back during a visit.
+// First shown after 20 seconds or 40% scroll; after "Maybe later" it returns 2 minutes later
+// (or on the next page), up to 3 times per visit. On desktop it also opens when the mouse heads
+// for the browser tabs (exit intent). Once someone registers it never shows again.
 // Saved to the Supabase `subscribers` table; no password, no email is sent.
 import { SITE } from "../site.config.mjs";
 import { t, type Lang } from "../i18n/ui";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 ---
-<aside class="reg" data-reg data-lang={lang} data-ok={t(lang, "reg.ok")} data-err={t(lang, "reg.err")} data-fail={t(lang, "reg.fail")} hidden aria-label={t(lang, "reg.title")}>
-  <button class="reg-bar" type="button" data-reg-open>
-    <span>{t(lang, "reg.bar")}</span>
-    <strong>{t(lang, "reg.submit")}</strong>
-  </button>
-  <div class="reg-card">
+<div class="reg" data-reg data-lang={lang} data-ok={t(lang, "reg.ok")} data-err={t(lang, "reg.err")} data-fail={t(lang, "reg.fail")} hidden>
+  <div class="reg-shade" data-reg-close></div>
+  <div class="reg-card" role="dialog" aria-modal="true" aria-labelledby={`reg-title-${lang}`}>
     <button class="reg-close" type="button" data-reg-close aria-label={t(lang, "reg.close")}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
-    <p class="reg-title">{t(lang, "reg.title")}</p>
+    <span class="reg-ico" aria-hidden="true">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+    </span>
+    <p class="reg-title" id={`reg-title-${lang}`}>{t(lang, "reg.title")}</p>
     <p class="reg-lead">{t(lang, "reg.lead")}</p>
     <form data-reg-form novalidate>
       <label class="visually-hidden" for={`reg-name-${lang}`}>{t(lang, "reg.name")}</label>
       <input id={`reg-name-${lang}`} name="name" type="text" required autocomplete="name" maxlength="80" placeholder={t(lang, "reg.name")} />
       <label class="visually-hidden" for={`reg-email-${lang}`}>{t(lang, "reg.email")}</label>
       <input id={`reg-email-${lang}`} name="email" type="email" required autocomplete="email" placeholder={t(lang, "reg.email")} />
+      <label class="visually-hidden" for={`reg-phone-${lang}`}>{t(lang, "reg.phone")}</label>
+      <input id={`reg-phone-${lang}`} name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30" placeholder={t(lang, "reg.phone")} />
       <button class="btn reg-submit" type="submit">{t(lang, "reg.submit")}</button>
     </form>
     <p class="reg-msg" data-reg-msg role="status" hidden></p>
-    <a class="reg-tg" href={SITE.telegram} target="_blank" rel="noopener">Telegram ↗</a>
+    <div class="reg-foot">
+      <button class="reg-later" type="button" data-reg-close>{t(lang, "reg.later")}</button>
+      <a class="reg-tg" href={SITE.telegram} target="_blank" rel="noopener">Telegram ↗</a>
+    </div>
   </div>
-</aside>
+</div>
 
 <script>
   import { getSupabase } from "../lib/client/supabase";
-  const KEY = "sh-reg";
-  const store = {
-    get: () => { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; } },
-    set: (v: object) => { try { localStorage.setItem(KEY, JSON.stringify({ ...store.get(), ...v })); } catch {} },
-  };
+  const MAX_PER_VISIT = 3, FIRST_DELAY = 20e3, AGAIN_AFTER = 120e3;
+  // localStorage remembers a registration for good; sessionStorage counts pop-ups in this visit.
+  const read = (s: Storage, k: string) => { try { return JSON.parse(s.getItem(k) || "{}"); } catch { return {}; } };
+  const write = (s: Storage, k: string, v: object) => { try { s.setItem(k, JSON.stringify({ ...read(s, k), ...v })); } catch {} };
+  const done = () => !!read(localStorage, "sh-reg").done;
+  const visit = () => read(sessionStorage, "sh-reg-visit") as { shown?: number; closed?: number };
+
   const box = document.querySelector<HTMLElement>("[data-reg]");
   if (box) {
-    const state = store.get();
-    const snoozed = state.closed && Date.now() - state.closed < 3 * 864e5;
-    const open = (expand: boolean) => { box.hidden = false; box.classList.toggle("expanded", expand); if (expand) box.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true }); };
-    // Show after the visitor scrolls a little, unless they registered or closed it recently.
-    if (!state.done && !snoozed) {
-      const onScroll = () => { if (scrollY > 500) { open(innerWidth > 720); removeEventListener("scroll", onScroll); } };
-      addEventListener("scroll", onScroll, { passive: true });
+    let timer = 0;
+    const isOpen = () => !box.hidden;
+    const open = (auto: boolean) => {
+      if (isOpen() || done()) return;
+      if (auto) {
+        const v = visit();
+        if ((v.shown || 0) >= MAX_PER_VISIT) return;
+        write(sessionStorage, "sh-reg-visit", { shown: (v.shown || 0) + 1 });
+      }
+      clearTimeout(timer);
+      box.hidden = false;
+      document.documentElement.classList.add("reg-open");
+      if (innerWidth > 720) box.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+    };
+    const close = () => {
+      box.hidden = true;
+      document.documentElement.classList.remove("reg-open");
+      write(sessionStorage, "sh-reg-visit", { closed: Date.now() });
+      schedule(AGAIN_AFTER);
+    };
+    // Plan the next automatic pop-up.
+    const schedule = (delay: number) => {
+      clearTimeout(timer);
+      if (done() || (visit().shown || 0) >= MAX_PER_VISIT) return;
+      timer = window.setTimeout(() => open(true), delay);
+    };
+
+    if (!done()) {
+      const v = visit();
+      // First pop-up of the visit: after 20 s or 40% scroll. Later ones: 2 minutes after the last close,
+      // or straight away on a new page if that time has already passed.
+      const wait = v.closed ? Math.max(3e3, AGAIN_AFTER - (Date.now() - v.closed)) : FIRST_DELAY;
+      schedule(wait);
+      if (!v.shown) {
+        const onScroll = () => {
+          const max = document.documentElement.scrollHeight - innerHeight;
+          if (max > 0 && scrollY / max >= 0.4) { removeEventListener("scroll", onScroll); open(true); }
+        };
+        addEventListener("scroll", onScroll, { passive: true });
+      }
+      // Desktop exit intent: the mouse leaves through the top of the window.
+      if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        document.addEventListener("mouseout", (e) => {
+          if (!e.relatedTarget && e.clientY <= 0) {
+            const c = visit().closed;
+            if (!c || Date.now() - c > 30e3) open(true);
+          }
+        });
+      }
     }
-    // The header "Register" button opens the box straight away.
+
+    // The header "Register" button always opens it.
     document.querySelectorAll<HTMLAnchorElement>("[data-reg-trigger]").forEach((a) => a.addEventListener("click", (e) => {
-      if (store.get().done) return;
-      e.preventDefault(); open(true);
+      if (done()) return;
+      e.preventDefault(); open(false);
     }));
-    box.querySelector("[data-reg-open]")!.addEventListener("click", () => open(true));
-    box.querySelector("[data-reg-close]")!.addEventListener("click", () => {
-      store.set({ closed: Date.now() });
-      if (innerWidth <= 720 && box.classList.contains("expanded")) box.classList.remove("expanded");
-      else box.hidden = true;
-    });
+    box.querySelectorAll("[data-reg-close]").forEach((b) => b.addEventListener("click", close));
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen()) close(); });
+
     const form = box.querySelector<HTMLFormElement>("[data-reg-form]")!;
     const msg = box.querySelector<HTMLElement>("[data-reg-msg]")!;
     const show = (text: string, ok: boolean) => { msg.hidden = false; msg.textContent = text; msg.classList.toggle("bad", !ok); };
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
-      const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim().toLowerCase();
+      const val = (n: string) => (form.elements.namedItem(n) as HTMLInputElement).value.trim();
+      const name = val("name"), email = val("email").toLowerCase(), phone = val("phone").replace(/[^\d+]/g, "");
       if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return show(box.dataset.err!, false);
       const btn = form.querySelector("button")!; btn.disabled = true;
       const sb = await getSupabase();
-      const { error } = sb ? await sb.from("subscribers").insert({ name, email, lang: box.dataset.lang }) : { error: { code: "off" } as any };
+      const row = { name, email, lang: box.dataset.lang, ...(phone ? { phone } : {}) };
+      const { error } = sb ? await sb.from("subscribers").insert(row) : { error: { code: "off" } as any };
       btn.disabled = false;
       // A duplicate email means they are already registered, which is fine.
       if (error && error.code !== "23505") return show(box.dataset.fail!, false);
-      store.set({ done: Date.now() });
+      write(localStorage, "sh-reg", { done: Date.now() });
+      clearTimeout(timer);
       form.hidden = true;
       show(box.dataset.ok!.replace("{name}", name.split(" ")[0]), true);
-      setTimeout(() => (box.hidden = true), 4000);
+      setTimeout(() => { box.hidden = true; document.documentElement.classList.remove("reg-open"); }, 3500);
     });
   }
 </script>
 
 <style>
-  .reg { position: fixed; z-index: 60; inset-inline-end: 20px; bottom: 20px; width: 340px; max-width: calc(100vw - 32px); }
-  .reg-bar { display: none; }
-  .reg-card { position: relative; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid #d92d20; border-radius: 16px; padding: 18px; box-shadow: 0 18px 40px rgb(12 43 76 / .25); display: grid; gap: 10px; animation: reg-in .3s ease-out; }
-  @keyframes reg-in { from { transform: translateY(16px); opacity: 0; } }
-  .reg:not(.expanded) .reg-card { display: none; }
-  .reg:not(.expanded) .reg-bar { display: flex; }
-  .reg-close { position: absolute; top: 10px; inset-inline-end: 10px; width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; }
-  .reg-close:hover { background: var(--surface-2); color: var(--ink); }
-  .reg-title { margin: 0; font-weight: 800; font-size: 1.15rem; color: var(--navy); padding-inline-end: 34px; }
-  .reg-lead { margin: 0; color: var(--muted); font-size: .9rem; }
-  .reg form { display: grid; gap: 8px; }
+  .reg { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; }
+  .reg[hidden] { display: none; }
+  .reg-shade { position: absolute; inset: 0; background: rgb(6 24 44 / .55); backdrop-filter: blur(2px); animation: reg-fade .25s ease-out; }
+  .reg-card { position: relative; width: 100%; max-width: 420px; max-height: calc(100dvh - 32px); overflow: auto; background: var(--surface); border-top: 6px solid #d92d20; border-radius: 20px; padding: 26px 24px 18px; box-shadow: 0 24px 60px rgb(6 24 44 / .4); display: grid; gap: 10px; text-align: center; animation: reg-pop .35s cubic-bezier(.2, 1.4, .4, 1); }
+  @keyframes reg-fade { from { opacity: 0; } }
+  @keyframes reg-pop { from { transform: scale(.85) translateY(20px); opacity: 0; } }
+  .reg-close { position: absolute; top: 10px; inset-inline-end: 10px; width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+  .reg-close:hover { background: var(--line); }
+  .reg-ico { justify-self: center; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--teal), var(--navy)); box-shadow: 0 8px 20px rgb(15 141 142 / .3); }
+  .reg-title { margin: 0; font-weight: 800; font-size: 1.45rem; color: var(--navy); }
+  .reg-lead { margin: 0 0 4px; color: var(--muted); font-size: .98rem; line-height: 1.5; }
+  .reg form { display: grid; gap: 10px; }
   .reg form[hidden] { display: none; }
-  .reg input { width: 100%; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--ink); font-size: 1rem; }
+  .reg input { width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--ink); font: inherit; font-size: 1rem; text-align: start; }
+  /* Browsers force phone fields left-to-right; keep the hint on the right in Arabic and Pashto until a number is typed. */
+  :global(html[dir="rtl"]) .reg input[type="tel"]:placeholder-shown { direction: rtl; }
   .reg input:focus { outline: 2px solid var(--teal); outline-offset: 0; border-color: var(--teal); }
-  .reg-submit { width: 100%; background: #d92d20; }
+  .reg-submit { width: 100%; padding: 14px; font-size: 1.05rem; background: #d92d20; }
   .reg-submit:hover { background: #b42318; }
   .reg-msg { margin: 0; font-weight: 700; color: var(--brand); }
   .reg-msg.bad { color: #b42318; }
-  .reg-tg { justify-self: center; font-size: .85rem; font-weight: 700; color: #229ed9; text-decoration: none; }
-  .reg-bar { width: 100%; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 10px 10px 16px; border: 0; border-radius: 14px; background: var(--navy); color: #fff; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px rgb(12 43 76 / .3); text-align: start; }
-  .reg-bar strong { background: #d92d20; padding: 8px 14px; border-radius: 10px; white-space: nowrap; }
+  .reg-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 2px; }
+  .reg-later { border: 0; background: none; padding: 6px 0; color: var(--muted); font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; text-decoration: underline; }
+  .reg-tg { font-size: .9rem; font-weight: 700; color: #229ed9; text-decoration: none; }
+  :global(html.reg-open) { overflow: hidden; }
+  /* Phones: a sheet that slides up from the bottom. */
   @media (max-width: 720px) {
-    .reg { inset-inline: 10px; bottom: 10px; width: auto; max-width: none; }
+    .reg { place-items: end stretch; padding: 0; }
+    .reg-card { max-width: none; border-radius: 20px 20px 0 0; padding-bottom: calc(18px + env(safe-area-inset-bottom)); animation-name: reg-up; }
+    @keyframes reg-up { from { transform: translateY(100%); } }
   }
+  @media (prefers-reduced-motion: reduce) { .reg-card, .reg-shade { animation: none; } }
 </style>

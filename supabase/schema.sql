@@ -59,6 +59,8 @@ create table if not exists public.subscribers (
 );
 -- Name from the simple registration box.
 alter table public.subscribers add column if not exists name text;
+-- Optional phone / WhatsApp number from the registration pop-up.
+alter table public.subscribers add column if not exists phone text check (phone is null or length(phone) <= 30);
 alter table public.subscribers enable row level security;
 -- Visitors can add their email but can never read the list.
 drop policy if exists "Anyone can subscribe" on public.subscribers;
