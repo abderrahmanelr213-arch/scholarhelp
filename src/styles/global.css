@@ -75,6 +75,12 @@ button, input, select { font: inherit; color: inherit; }
 .card { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); display: flex; flex-direction: column; min-width: 0; overflow: hidden; transition: border-color .15s, box-shadow .15s, transform .15s; }
 .card:hover { border-color: color-mix(in srgb, var(--teal) 45%, var(--line)); box-shadow: var(--shadow); transform: translateY(-2px); }
 .card.is-closed { opacity: .6; }
+.closing { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: .8rem; font-weight: 800; color: #fff; background: #e8590c; white-space: nowrap; }
+.closing::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff; animation: closing-pulse 1.4s ease-in-out infinite; }
+.closing.done { background: #6b7a8c; }
+.closing.done::before { animation: none; }
+@keyframes closing-pulse { 50% { opacity: .25; transform: scale(.6); } }
+@media (prefers-reduced-motion: reduce) { .closing::before { animation: none; } }
 .thumb { display: grid; place-items: center; height: 150px; background: var(--surface-2); border-bottom: 1px solid var(--line); padding: 16px; }
 /* Announcement-style picture: logo, the opportunity name, the flag and our address. */
 .thumb.promo { position: relative; height: auto; min-height: 210px; place-items: center; align-content: center; gap: 8px; padding: 22px 50px 42px; background: #fff; text-align: center; border-top: 5px solid var(--navy); }

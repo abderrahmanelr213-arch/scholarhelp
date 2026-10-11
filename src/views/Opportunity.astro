@@ -73,6 +73,7 @@ const shares = [
           {t(lang, "opp.by")} <strong>{t(lang, "opp.team")}</strong> · <time datetime={isoDate(d.published)}>{formatDate(d.published, lang)}</time>
           <span class={`badge ${d.category}`}>{t(lang, `cat.${d.category}.short` as any)}</span>
           <FundingBadge lang={lang} funding={d.funding} />
+          <span class="closing" data-closing data-deadline-of={isoDate(d.deadline)} hidden></span>
         </p>
 
         <div class="banner" data-deadline={isoDate(d.deadline)}>

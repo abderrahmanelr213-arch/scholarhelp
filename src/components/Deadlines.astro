@@ -2,7 +2,7 @@
 // Fills every [data-left] badge with "N days left" in the visitor's language, and marks closed cards.
 import { t, type Lang } from "../i18n/ui";
 const { lang } = Astro.props as { lang: Lang };
-const strings = { closed: t(lang, "opp.closed"), today: t(lang, "opp.today"), many: t(lang, "opp.daysLeft"), one: t(lang, "opp.dayLeft") };
+const strings = { closed: t(lang, "opp.closed"), today: t(lang, "opp.today"), many: t(lang, "opp.daysLeft"), soon: t(lang, "opp.closingSoon"), one: t(lang, "opp.dayLeft") };
 ---
 <script is:inline define:vars={{ strings }}>
   window.__shDays = function (iso) {
@@ -25,6 +25,15 @@ const strings = { closed: t(lang, "opp.closed"), today: t(lang, "opp.today"), ma
   document.querySelectorAll("[data-left]").forEach(function (el) {
     var host = el.closest("[data-deadline]");
     window.__shLabel(el, host ? host.getAttribute("data-deadline") : "");
+  });
+  // "Deadline is close" within 14 days, "Closed" once it has passed.
+  document.querySelectorAll("[data-closing]").forEach(function (el) {
+    var host = el.closest("[data-deadline]");
+    var d = window.__shDays(el.getAttribute("data-deadline-of") || (host && host.getAttribute("data-deadline")));
+    if (d === null || d > 14) return;
+    el.hidden = false;
+    el.className = "closing" + (d < 0 ? " done" : "");
+    el.textContent = d < 0 ? strings.closed : strings.soon;
   });
   document.querySelectorAll(".card[data-deadline]").forEach(function (card) {
     if (window.__shDays(card.getAttribute("data-deadline")) < 0) card.classList.add("is-closed");

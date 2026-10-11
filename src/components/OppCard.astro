@@ -35,6 +35,7 @@ const isNew = Date.now() - +d.published < 7 * 86400000;
     <div class="card-top">
       <span class={`badge ${d.category}`}>{t(lang, `cat.${d.category}.short` as any)}</span>
       <FundingBadge lang={lang} funding={d.funding} />
+      <span class="closing" data-closing hidden></span>
     </div>
     <div class="card-meta">
       {flag ? <img class="mini-flag" src={flag} alt="" width="20" height="15" /> : null}
