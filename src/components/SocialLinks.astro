@@ -1,22 +1,31 @@
 ---
 // "Follow us" row: white round buttons with the real brand icons. Hover adds a teal ring (our touch).
+// Accounts without a link yet (empty in site.config.mjs) still show, but don't go anywhere.
 import SocialIcon from "./SocialIcon.astro";
 import { SITE } from "../site.config.mjs";
 interface Props { label?: string; center?: boolean }
 const { label, center = false } = Astro.props;
+const items = [
+  { name: "facebook", label: "Facebook", href: SITE.social.facebook, size: 30 },
+  { name: "instagram", label: "Instagram", href: SITE.social.instagram, size: 28 },
+  { name: "youtube", label: "YouTube", href: SITE.social.youtube, size: 30 },
+  { name: "tiktok", label: "TikTok", href: SITE.social.tiktok, size: 26 },
+  { name: "telegram", label: "Telegram", href: SITE.telegram, size: 30 },
+] as const;
 ---
 <div class:list={["follow-row", { center }]}>
   {label && <p class="follow-label">{label}</p>}
   <div class="follow-icons">
-    <a class="follow-btn" href={SITE.telegram} target="_blank" rel="noopener" aria-label="Telegram" title="Telegram"><SocialIcon name="telegram" size={30} /></a>
-    {SITE.social.instagram && <a class="follow-btn" href={SITE.social.instagram} target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><SocialIcon name="instagram" glyph size={28} /></a>}
+    {items.map((i) => i.href
+      ? <a class="follow-btn" href={i.href} target="_blank" rel="noopener" aria-label={i.label} title={i.label}><SocialIcon name={i.name} glyph size={i.size} /></a>
+      : <span class="follow-btn soon" role="img" aria-label={`${i.label} (soon)`} title={`${i.label} (soon)`}><SocialIcon name={i.name} glyph size={i.size} /></span>)}
   </div>
 </div>
 <style>
   .follow-row { display: grid; gap: 10px; }
   .follow-row.center { justify-items: center; text-align: center; }
   .follow-label { margin: 0; font-weight: 700; color: var(--ink); }
-  .follow-icons { display: flex; gap: 14px; flex-wrap: wrap; }
-  .follow-btn { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 2px 6px rgb(12 43 76 / .06); transition: transform .15s, box-shadow .15s, border-color .15s; }
+  .follow-icons { display: flex; gap: 12px; flex-wrap: wrap; }
+  .follow-btn { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: #fff; border: 1.5px solid var(--line); box-shadow: 0 2px 6px rgb(12 43 76 / .06); transition: transform .15s, box-shadow .15s, border-color .15s; }
   .follow-btn:hover, .follow-btn:focus-visible { transform: translateY(-3px); border-color: var(--teal); box-shadow: 0 0 0 4px rgb(15 141 142 / .16), 0 8px 18px rgb(12 43 76 / .12); }
 </style>

@@ -5,6 +5,7 @@ import Newsletter from "../components/Newsletter.astro";
 import Deadlines from "../components/Deadlines.astro";
 import AdSlot from "../components/AdSlot.astro";
 import Logo from "../components/Logo.astro";
+import SocialLinks from "../components/SocialLinks.astro";
 import { SITE, CATEGORIES } from "../site.config.mjs";
 import { t, lp, type Lang } from "../i18n/ui";
 import type { Opp, Guide } from "../lib/opps";
@@ -105,11 +106,13 @@ const icons: Record<string, string> = {
     )}
 
     <Newsletter lang={lang} />
+    <section class="home-follow"><SocialLinks label={t(lang, "opp.follow")} center /></section>
   </div>
   <Deadlines lang={lang} />
 </Base>
 
 <style>
+  .home-follow { margin-top: 40px; }
   .hero { background: radial-gradient(circle at 85% 20%, var(--brand-soft), transparent 55%), linear-gradient(180deg, #fff, var(--bg)); border-bottom: 1px solid var(--line); }
   .hero-inner { padding-block: 48px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px; align-items: center; }
   .hero-copy { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; justify-items: start; min-width: 0; }
