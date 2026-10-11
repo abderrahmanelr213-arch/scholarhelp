@@ -72,7 +72,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
       <div class="bar-end">
         <details class="lang" data-lang-switch>
           <summary aria-label={t(lang, "nav.language")}>
-            <svg class="globe" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>
+            <svg class="globe" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="11.5" fill="var(--brand)" stroke="none"/><circle cx="12" cy="12" r="7.5"/><path d="M4.5 12h15M12 4.5c2 2.2 3.1 4.7 3.1 7.5s-1.1 5.3-3.1 7.5c-2-2.2-3.1-4.7-3.1-7.5S10 6.7 12 4.5z"/></svg>
             <span class="lang-label" data-names={JSON.stringify([lang, ...(LOCALES as Lang[]).filter((l) => l !== lang)].map((l) => LANG_NAMES[l]))}>{LANG_NAMES[lang]}</span>
           </summary>
           <ul>
@@ -134,7 +134,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   </footer>
   {!path.startsWith("/account") && <RegisterBox lang={lang} />}
   <script>
-    // Language switcher hint: the label cycles through the languages and the globe spins,
+    // Language switcher hint: the label cycles through the languages,
     // until the visitor opens the switcher once.
     (() => {
       const box = document.querySelector<HTMLDetailsElement>("[data-lang-switch]");
@@ -142,7 +142,12 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
       if (!box || !label) return;
       let seen = false;
       try { seen = localStorage.getItem("sh-lang-seen") === "1"; } catch {}
-      if (seen || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // The red Register button pops until the visitor registers.
+      let registered = false;
+      try { registered = !!JSON.parse(localStorage.getItem("sh-reg") || "{}").done; } catch {}
+      if (!registered && !still) document.querySelectorAll(".register").forEach((el) => el.classList.add("pop"));
+      if (seen || still) return;
       box.classList.add("hint");
       const names: string[] = JSON.parse(label.dataset.names || "[]");
       let i = 0;
@@ -192,10 +197,14 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   .lang ul { position: absolute; inset-inline-end: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); min-width: 150px; }
   .lang-label { display: inline-block; min-width: 4.4em; text-align: center; transition: opacity .25s, transform .25s; }
   .lang-label.out { opacity: 0; transform: translateY(-6px); }
-  .lang.hint summary { border-color: var(--teal); color: var(--teal); animation: lang-pulse 2.2s ease-out infinite; }
-  .lang.hint .globe { animation: lang-spin 2.2s ease-in-out infinite; }
-  @keyframes lang-pulse { 0% { box-shadow: 0 0 0 0 rgb(15 141 142 / .45); } 70%, 100% { box-shadow: 0 0 0 9px rgb(15 141 142 / 0); } }
-  @keyframes lang-spin { 0%, 55% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
+  .globe { flex: none; }
+  .register.pop { animation: reg-pop 2.4s ease-in-out infinite; }
+  @keyframes reg-pop {
+    0%, 60%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgb(217 45 32 / .5); }
+    70% { transform: scale(1.08); }
+    80% { transform: scale(1); box-shadow: 0 0 0 10px rgb(217 45 32 / 0); }
+  }
+  .register.pop:hover { animation: none; }
   .lang a { display: block; padding: 8px 10px; border-radius: 6px; text-decoration: none; color: var(--ink); }
   .lang a:hover, .lang a[aria-current] { background: var(--surface-2); }
   .auth-link { font-weight: 700; color: var(--ink); text-decoration: none; padding: 8px 6px; white-space: nowrap; }
