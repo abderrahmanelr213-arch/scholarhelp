@@ -157,7 +157,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   .brand-icon { height: 40px; width: auto; }
   .brand-word { height: 24px; width: auto; }
   .nav { display: flex; gap: 4px; }
-  .nav a { position: relative; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: var(--navy); font-weight: 700; font-size: 1rem; }
+  .nav a { position: relative; white-space: nowrap; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: var(--navy); font-weight: 700; font-size: 1rem; }
   .nav a::after { content: ""; position: absolute; inset-inline: 12px; bottom: 2px; height: 2.5px; border-radius: 2px; background: var(--teal); transform: scaleX(0); transition: transform .15s; }
   .nav a:hover { color: var(--teal); }
   .nav a:hover::after, .nav a[aria-current="page"]::after { transform: scaleX(1); }
@@ -180,7 +180,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   .menu nav { position: absolute; inset-inline-end: 0; top: calc(100% + 6px); display: grid; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); min-width: 240px; }
   .menu nav a { padding: 10px; text-decoration: none; color: var(--navy); font-weight: 700; border-radius: 6px; }
   .menu nav a:hover { background: var(--surface-2); }
-  @media (max-width: 1020px) {
+  @media (max-width: 1140px) {
     .nav { display: none; }
     .menu { display: block; }
   }
