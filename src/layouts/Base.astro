@@ -70,10 +70,10 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
         <a href={lp(lang, "/guides/")} aria-current={path.startsWith("/guides/") ? "page" : undefined}>{t(lang, "nav.guides")}</a>
       </nav>
       <div class="bar-end">
-        <details class="lang">
+        <details class="lang" data-lang-switch>
           <summary aria-label={t(lang, "nav.language")}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>
-            <span>{LANG_NAMES[lang]}</span>
+            <svg class="globe" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>
+            <span class="lang-label" data-names={JSON.stringify([lang, ...(LOCALES as Lang[]).filter((l) => l !== lang)].map((l) => LANG_NAMES[l]))}>{LANG_NAMES[lang]}</span>
           </summary>
           <ul>
             {(LOCALES as Lang[]).map((l) => (
@@ -134,6 +134,29 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   </footer>
   {!path.startsWith("/account") && <RegisterBox lang={lang} />}
   <script>
+    // Language switcher hint: the label cycles through the languages and the globe spins,
+    // until the visitor opens the switcher once.
+    (() => {
+      const box = document.querySelector<HTMLDetailsElement>("[data-lang-switch]");
+      const label = box?.querySelector<HTMLElement>(".lang-label");
+      if (!box || !label) return;
+      let seen = false;
+      try { seen = localStorage.getItem("sh-lang-seen") === "1"; } catch {}
+      if (seen || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      box.classList.add("hint");
+      const names: string[] = JSON.parse(label.dataset.names || "[]");
+      let i = 0;
+      const timer = setInterval(() => {
+        label.classList.add("out");
+        setTimeout(() => { i = (i + 1) % names.length; label.textContent = names[i]; label.classList.remove("out"); }, 250);
+      }, 2200);
+      box.addEventListener("toggle", () => {
+        if (!box.open) return;
+        clearInterval(timer); box.classList.remove("hint"); label.classList.remove("out"); label.textContent = names[0];
+        try { localStorage.setItem("sh-lang-seen", "1"); } catch {}
+      }, { once: true });
+    })();
+
     import { initSaveButtons } from "../lib/client/saved";
     import { currentUser } from "../lib/client/supabase";
     // Close the open dropdown when clicking elsewhere.
@@ -167,6 +190,12 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); font-weight: 700; font-size: .85rem; }
   summary::-webkit-details-marker { display: none; }
   .lang ul { position: absolute; inset-inline-end: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); min-width: 150px; }
+  .lang-label { display: inline-block; min-width: 4.4em; text-align: center; transition: opacity .25s, transform .25s; }
+  .lang-label.out { opacity: 0; transform: translateY(-6px); }
+  .lang.hint summary { border-color: var(--teal); color: var(--teal); animation: lang-pulse 2.2s ease-out infinite; }
+  .lang.hint .globe { animation: lang-spin 2.2s ease-in-out infinite; }
+  @keyframes lang-pulse { 0% { box-shadow: 0 0 0 0 rgb(15 141 142 / .45); } 70%, 100% { box-shadow: 0 0 0 9px rgb(15 141 142 / 0); } }
+  @keyframes lang-spin { 0%, 55% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
   .lang a { display: block; padding: 8px 10px; border-radius: 6px; text-decoration: none; color: var(--ink); }
   .lang a:hover, .lang a[aria-current] { background: var(--surface-2); }
   .auth-link { font-weight: 700; color: var(--ink); text-decoration: none; padding: 8px 6px; white-space: nowrap; }
