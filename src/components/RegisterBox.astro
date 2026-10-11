@@ -20,6 +20,7 @@ const { lang } = Astro.props;
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
     </span>
     <p class="reg-title" id={`reg-title-${lang}`}>{t(lang, "reg.title")}</p>
+    <p class="reg-gate" data-reg-gate hidden>{t(lang, "reg.gate")}</p>
     <p class="reg-lead">{t(lang, "reg.lead")}</p>
     <form data-reg-form novalidate>
       <label class="visually-hidden" for={`reg-name-${lang}`}>{t(lang, "reg.name")}</label>
@@ -43,6 +44,7 @@ const { lang } = Astro.props;
       <button class="btn reg-submit" type="submit">{t(lang, "reg.submit")}</button>
     </form>
     <p class="reg-msg" data-reg-msg role="status" hidden></p>
+    <a class="btn reg-go" data-reg-go href="#" target="_blank" rel="noopener nofollow" hidden>{t(lang, "reg.go")} ↗</a>
     <a class="reg-tg" href={SITE.telegram} target="_blank" rel="noopener">
       <SocialIcon name="telegram" size={26} />
       <span>{t(lang, "reg.tg")}</span>
@@ -59,15 +61,20 @@ const { lang } = Astro.props;
   // localStorage remembers a registration for good; sessionStorage counts pop-ups in this visit.
   const read = (s: Storage, k: string) => { try { return JSON.parse(s.getItem(k) || "{}"); } catch { return {}; } };
   const write = (s: Storage, k: string, v: object) => { try { s.setItem(k, JSON.stringify({ ...read(s, k), ...v })); } catch {} };
+  // done: the pop-ups stop (registered or joined Telegram). registered: the form was filled in, which unlocks official links.
   const done = () => !!read(localStorage, "sh-reg").done;
+  const registered = () => { const r = read(localStorage, "sh-reg"); return !!r.done && r.via !== "telegram"; };
   const visit = () => read(sessionStorage, "sh-reg-visit") as { shown?: number; closed?: number };
 
   const box = document.querySelector<HTMLElement>("[data-reg]");
   if (box) {
     let timer = 0;
     const isOpen = () => !box.hidden;
-    const open = (auto: boolean) => {
-      if (isOpen() || done()) return;
+    const gateLine = box.querySelector<HTMLElement>("[data-reg-gate]")!;
+    let gated = false;
+    const open = (auto: boolean, gate = false) => {
+      if (isOpen() || (done() && !gate)) return;
+      gated = gate; gateLine.hidden = !gate;
       if (auto) {
         const v = visit();
         if ((v.shown || 0) >= MAX_PER_VISIT) return;
@@ -91,7 +98,8 @@ const { lang } = Astro.props;
       document.documentElement.classList.remove("reg-open");
       write(sessionStorage, "sh-reg-visit", { closed: Date.now() });
       schedule(AGAIN_AFTER);
-      proceed();
+      // Official apply links stay locked until the form is filled in; anything else goes ahead.
+      if (gated) { pending = null; gated = false; } else proceed();
     };
     // Plan the next automatic pop-up.
     const schedule = (delay: number) => {
@@ -131,23 +139,26 @@ const { lang } = Astro.props;
     }));
     // Any click on a link or button shows the pop-up first, until the visitor registers.
     // Closing it is always possible, and the click then goes ahead as normal.
+    // Official apply links ([data-gate]) only open after the visitor has registered.
     document.addEventListener("click", (e) => {
-      if (replaying || done() || isOpen() || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      if (replaying || isOpen() || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
       const el = (e.target as HTMLElement).closest<HTMLElement>("a[href], button");
       if (!el || box.contains(el) || el.matches("[data-reg-trigger]")) return;
+      const gate = el.matches("[data-gate]") && !registered();
+      if (!gate && done()) return;
       e.preventDefault();
       e.stopImmediatePropagation();
       pending = el;
-      open(false);
+      open(false, gate);
     }, true);
     box.querySelectorAll("[data-reg-close]").forEach((b) => b.addEventListener("click", close));
     // Joining the Telegram group counts like registering: the pop-up stops for good.
     box.querySelector(".reg-tg")?.addEventListener("click", () => {
-      write(localStorage, "sh-reg", { done: Date.now(), via: "telegram" });
+      if (!registered()) write(localStorage, "sh-reg", { done: Date.now(), via: "telegram" });
       clearTimeout(timer);
       box.hidden = true;
       document.documentElement.classList.remove("reg-open");
-      proceed();
+      if (gated) { pending = null; gated = false; } else proceed();
     });
     addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen()) close(); });
 
@@ -224,14 +235,25 @@ const { lang } = Astro.props;
       const btn = form.querySelector<HTMLButtonElement>(".reg-submit")!; btn.disabled = true;
       const sb = await getSupabase();
       const row = { name, email, phone: fullPhone, lang: box.dataset.lang };
-      const { error } = sb ? await sb.from("subscribers").insert(row) : { error: { code: "off" } as any };
+      // Until Supabase is connected, the registration is only remembered in this browser.
+      const { error } = sb ? await sb.from("subscribers").insert(row) : { error: null };
       btn.disabled = false;
       // A duplicate email means they are already registered, which is fine.
       if (error && error.code !== "23505") return show(box.dataset.fail!, false);
-      write(localStorage, "sh-reg", { done: Date.now() });
+      write(localStorage, "sh-reg", { done: Date.now(), via: "form" });
       clearTimeout(timer);
       form.hidden = true;
+      gateLine.hidden = true;
       show(box.dataset.ok!.replace("{name}", name.split(" ")[0]), true);
+      const target = pending as HTMLAnchorElement | null;
+      if (gated && target?.href) {
+        // Browsers block new tabs opened without a tap, so the official link becomes a button to tap.
+        pending = null; gated = false;
+        const go = box.querySelector<HTMLAnchorElement>("[data-reg-go]")!;
+        go.href = target.href; go.hidden = false;
+        go.addEventListener("click", () => { box.hidden = true; document.documentElement.classList.remove("reg-open"); }, { once: true });
+        return;
+      }
       setTimeout(() => { box.hidden = true; document.documentElement.classList.remove("reg-open"); proceed(); }, pending ? 1800 : 3500);
     });
   }
@@ -269,6 +291,10 @@ const { lang } = Astro.props;
   .reg-submit { width: 100%; padding: 14px; font-size: 1.05rem; background: #d92d20; }
   .reg-submit:hover { background: #b42318; }
   .reg-msg { margin: 0; font-weight: 700; color: var(--brand); }
+  .reg-gate { margin: 0; padding: 10px 12px; border-radius: 12px; background: #fff3e8; color: #9a3b05; font-weight: 700; }
+  .reg-gate[hidden], .reg-go[hidden] { display: none; }
+  .reg-go { justify-self: center; background: #e8590c; }
+  .reg-go:hover { background: #c94a06; }
   .reg-msg.bad { color: #b42318; }
   .reg-later { justify-self: center; border: 0; background: none; padding: 4px 8px; color: var(--muted); font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; text-decoration: underline; }
   .reg-tg { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 11px 14px; border-radius: 12px; background: #229ed9; color: #fff; font-weight: 800; text-decoration: none; transition: background .15s; }

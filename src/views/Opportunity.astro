@@ -122,7 +122,7 @@ const shares = [
             {overview.map(([k, v, href]) => (
               <li><strong>{k}:</strong> {k === t(lang, "opp.location") && flag
                 ? <span class="loc"><img src={flag} alt="" width="24" height="18" />{v}</span>
-                : href ? <a class="official" href={href} target="_blank" rel="noopener nofollow">{v}<svg class="flip-rtl" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+                : href ? <a class="official" href={href} target="_blank" rel="noopener nofollow" data-gate>{v}<svg class="flip-rtl" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
                 : v}</li>
             ))}
             <li class="dl"><strong>{t(lang, "opp.deadline")}: {d.deadline ? <time datetime={isoDate(d.deadline)}>{formatDate(d.deadline, lang)}</time> : t(lang, "opp.rolling")}</strong> <span class="closing" data-closing hidden></span></li>
@@ -130,7 +130,7 @@ const shares = [
           </ul>
         </section>
 
-        <a class="btn apply-big" href={d.link} target="_blank" rel="noopener nofollow">{t(lang, "opp.applyNow")} ↗</a>
+        <a class="btn apply-big" href={d.link} target="_blank" rel="noopener nofollow" data-gate>{t(lang, "opp.applyNow")} ↗</a>
         <p class="apply-note">{t(lang, "opp.applyNote")}</p>
 
         <p class="disclaimer"><strong>{t(lang, "opp.disclaimerTitle")}:</strong> {t(lang, "opp.disclaimer")}</p>
