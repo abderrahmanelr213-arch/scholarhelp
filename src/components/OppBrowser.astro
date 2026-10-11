@@ -1,0 +1,210 @@
+---
+// The opportunity browser: search, filters (kept in the URL), sorting and the card grid.
+import OppCard from "./OppCard.astro";
+import { t, type Lang } from "../i18n/ui";
+import { CATEGORIES } from "../site.config.mjs";
+import type { Opp } from "../lib/opps";
+interface Props { opps: Opp[]; lang: Lang; category?: string }
+const { opps, lang, category } = Astro.props;
+const levels = ["Bachelor", "Master", "PhD", "Postdoc"];
+const countries = [...new Map(opps.map((o) => [o.countryKey, { key: o.countryKey, label: o.entry.data.country, code: o.entry.data.countryCode }])).values()]
+  .sort((a, b) => a.label.localeCompare(b.label));
+const id = (n: string) => `${n}-${lang}`;
+---
+<div class="browser" data-browser data-results={t(lang, "list.results")} data-fixed-cat={category ?? ""}>
+  <div class="browser-top">
+    <div class="search-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <label class="visually-hidden" for={id("q")}>{t(lang, "home.search")}</label>
+      <input id={id("q")} type="search" placeholder={t(lang, "home.search")} data-f="q" />
+    </div>
+    <label class="sort">
+      <span>{t(lang, "browse.sort")}</span>
+      <select id={id("sort")} data-f="sort">
+        <option value="deadline">{t(lang, "browse.sortDeadline")}</option>
+        <option value="new">{t(lang, "browse.sortNewest")}</option>
+      </select>
+    </label>
+    <button class="btn outline filter-toggle" type="button" data-toggle-filters aria-expanded="false">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+      {t(lang, "browse.filters")} <span class="active-count" data-active-count hidden></span>
+    </button>
+  </div>
+
+  <div class="browser-body">
+    <aside class="filters-panel" data-panel>
+      {!category && (
+        <fieldset>
+          <legend>{t(lang, "browse.category")}</legend>
+          {CATEGORIES.map((c) => (
+            <label class="check"><input type="checkbox" name="cat" value={c} data-f="cat" /> <span class={`dot ${c}`}></span>{t(lang, `cat.${c}` as any)}</label>
+          ))}
+        </fieldset>
+      )}
+      <fieldset>
+        <legend>{t(lang, "list.level")}</legend>
+        {levels.map((l) => <label class="check"><input type="checkbox" name="level" value={l} data-f="level" /> {t(lang, `level.${l}` as any)}</label>)}
+      </fieldset>
+      <fieldset>
+        <legend><label for={id("country")}>{t(lang, "browse.country")}</label></legend>
+        <select id={id("country")} data-f="country">
+          <option value="">{t(lang, "browse.anyCountry")}</option>
+          {countries.map((c) => <option value={c.key}>{c.label}</option>)}
+        </select>
+      </fieldset>
+      <fieldset>
+        <legend>{t(lang, "list.funding")}</legend>
+        {(["full", "partial", "travel"] as const).map((f) => <label class="check"><input type="checkbox" name="funding" value={f} data-f="funding" /> {t(lang, `funding.${f}`)}</label>)}
+      </fieldset>
+      <fieldset>
+        <legend>{t(lang, "browse.deadline")}</legend>
+        {[["", "browse.anyDeadline"], ["30", "browse.within30"], ["90", "browse.within90"], ["rolling", "browse.rolling"]].map(([v, k]) => (
+          <label class="check"><input type="radio" name={id("within")} value={v} data-f="within" checked={v === ""} /> {t(lang, k as any)}</label>
+        ))}
+        <label class="check"><input type="checkbox" data-f="closed" /> {t(lang, "list.showClosed")}</label>
+      </fieldset>
+      <div class="panel-actions">
+        <button class="btn outline" type="button" data-reset>{t(lang, "browse.reset")}</button>
+        <button class="btn show-results" type="button" data-close-panel></button>
+      </div>
+    </aside>
+
+    <div class="results">
+      <p class="result-count" data-count aria-live="polite"></p>
+      <div class="cards" data-cards>
+        {opps.map((o) => <OppCard opp={o} lang={lang} />)}
+      </div>
+      <p class="empty" data-empty hidden>{t(lang, "list.empty")}</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const days = (iso: string) => (iso ? Math.round((+new Date(iso + "T00:00:00") - +today()) / 86400000) : null);
+
+  document.querySelectorAll<HTMLElement>("[data-browser]").forEach((root) => {
+    const $ = <T extends Element>(s: string) => root.querySelector<T>(s)!;
+    const $$ = <T extends Element>(s: string) => [...root.querySelectorAll<T>(s)];
+    const cards = $$<HTMLElement>(".card");
+    const grid = $<HTMLElement>("[data-cards]");
+    const panel = $<HTMLElement>("[data-panel]");
+    const toggle = $<HTMLButtonElement>("[data-toggle-filters]");
+    const word = root.dataset.results || "";
+    const showBtn = $<HTMLButtonElement>("[data-close-panel]");
+    const showTpl = (document.documentElement.lang === "ar" ? "عرض {n} نتيجة" : document.documentElement.lang === "ps" ? "{n} پایلې وښایاست" : "Show {n} results");
+
+    const read = () => ({
+      q: $<HTMLInputElement>('[data-f="q"]').value.trim().toLowerCase(),
+      sort: $<HTMLSelectElement>('[data-f="sort"]').value,
+      cat: $$<HTMLInputElement>('[data-f="cat"]:checked').map((i) => i.value),
+      level: $$<HTMLInputElement>('[data-f="level"]:checked').map((i) => i.value),
+      country: $<HTMLSelectElement>('[data-f="country"]').value,
+      funding: $$<HTMLInputElement>('[data-f="funding"]:checked').map((i) => i.value),
+      within: $$<HTMLInputElement>('[data-f="within"]:checked')[0]?.value || "",
+      closed: $<HTMLInputElement>('[data-f="closed"]').checked,
+    });
+
+    // Restore filters from the link (?q=&cat=&level=&country=&funding=&within=&closed=1&sort=new).
+    const p = new URLSearchParams(location.search);
+    $<HTMLInputElement>('[data-f="q"]').value = p.get("q") || "";
+    if (p.get("sort")) $<HTMLSelectElement>('[data-f="sort"]').value = p.get("sort")!;
+    const multi = (k: string) => (p.get(k) || "").split(",").filter(Boolean);
+    $$<HTMLInputElement>('[data-f="cat"]').forEach((i) => (i.checked = multi("cat").includes(i.value)));
+    $$<HTMLInputElement>('[data-f="level"]').forEach((i) => (i.checked = multi("level").includes(i.value)));
+    $$<HTMLInputElement>('[data-f="funding"]').forEach((i) => (i.checked = multi("funding").includes(i.value)));
+    if (p.get("country")) $<HTMLSelectElement>('[data-f="country"]').value = p.get("country")!;
+    $$<HTMLInputElement>('[data-f="within"]').forEach((i) => (i.checked = i.value === (p.get("within") || "")));
+    $<HTMLInputElement>('[data-f="closed"]').checked = p.get("closed") === "1";
+
+    function apply() {
+      const f = read();
+      let shown = 0;
+      for (const c of cards) {
+        const d = days(c.dataset.deadline || "");
+        const levels = (c.dataset.levels || "").split(",").filter(Boolean);
+        const ok =
+          (!f.cat.length || f.cat.includes(c.dataset.cat!)) &&
+          (!f.level.length || !levels.length || levels.includes("Any") || f.level.some((l) => levels.includes(l))) &&
+          (!f.country || c.dataset.country === f.country) &&
+          (!f.funding.length || f.funding.includes(c.dataset.funding!)) &&
+          (f.closed || d === null || d >= 0) &&
+          (!f.within || (f.within === "rolling" ? d === null : d !== null && d >= 0 && d <= +f.within)) &&
+          (!f.q || (c.dataset.text || "").includes(f.q));
+        c.hidden = !ok;
+        if (ok) shown++;
+      }
+      // Sort: open with soonest deadline first, rolling after, closed last; or newest first.
+      const key = (c: HTMLElement) => {
+        if (f.sort === "new") return String(99999999 - +(c.dataset.published || "0").replaceAll("-", ""));
+        const d = days(c.dataset.deadline || "");
+        return d === null ? "1" : d < 0 ? "2" + String(100000 + d).padStart(6, "0") : "0" + String(d).padStart(6, "0");
+      };
+      cards.slice().sort((a, b) => key(a).localeCompare(key(b))).forEach((c) => grid.appendChild(c));
+
+      $<HTMLElement>("[data-count]").textContent = `${shown} ${word}`;
+      $<HTMLElement>("[data-empty]").hidden = shown > 0;
+      showBtn.textContent = showTpl.replace("{n}", String(shown));
+      const active = f.cat.length + f.level.length + f.funding.length + (f.country ? 1 : 0) + (f.within ? 1 : 0) + (f.closed ? 1 : 0);
+      const badge = $<HTMLElement>("[data-active-count]");
+      badge.hidden = !active; badge.textContent = String(active);
+
+      const q = new URLSearchParams();
+      if (f.q) q.set("q", f.q);
+      if (f.cat.length) q.set("cat", f.cat.join(","));
+      if (f.level.length) q.set("level", f.level.join(","));
+      if (f.country) q.set("country", f.country);
+      if (f.funding.length) q.set("funding", f.funding.join(","));
+      if (f.within) q.set("within", f.within);
+      if (f.closed) q.set("closed", "1");
+      if (f.sort !== "deadline") q.set("sort", f.sort);
+      history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash);
+    }
+
+    root.addEventListener("input", apply);
+    root.addEventListener("change", apply);
+    $<HTMLButtonElement>("[data-reset]").addEventListener("click", () => {
+      $$<HTMLInputElement>("input[type=checkbox]").forEach((i) => (i.checked = false));
+      $$<HTMLInputElement>('[data-f="within"]').forEach((i) => (i.checked = i.value === ""));
+      $<HTMLSelectElement>('[data-f="country"]').value = "";
+      $<HTMLInputElement>('[data-f="q"]').value = "";
+      apply();
+    });
+    const setOpen = (open: boolean) => { panel.classList.toggle("open", open); toggle.setAttribute("aria-expanded", String(open)); document.body.classList.toggle("no-scroll", open); };
+    toggle.addEventListener("click", () => setOpen(!panel.classList.contains("open")));
+    showBtn.addEventListener("click", () => setOpen(false));
+    apply();
+  });
+</script>
+
+<style>
+  .browser-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
+  .search-wrap { flex: 1 1 320px; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); }
+  .search-wrap:focus-within { border-color: var(--teal); box-shadow: 0 0 0 3px var(--brand-soft); }
+  .search-wrap input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; padding: 13px 0; color: var(--ink); }
+  .sort { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: .9rem; font-weight: 600; }
+  .filters-panel select { width: 100%; }
+  .sort select, .filters-panel select { padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); max-width: 100%; }
+  .filter-toggle { display: none; }
+  .active-count { background: var(--brand); color: #fff; border-radius: 999px; font-size: .75rem; padding: 1px 7px; }
+  .browser-body { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 28px; align-items: start; }
+  .filters-panel { position: sticky; top: 84px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; gap: 18px; max-height: calc(100vh - 100px); overflow-y: auto; }
+  fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; min-width: 0; }
+  legend { font-weight: 800; font-size: .95rem; margin-bottom: 6px; padding: 0; color: var(--navy); }
+  .check { display: flex; align-items: center; gap: 8px; font-size: .94rem; cursor: pointer; }
+  .check input { width: 17px; height: 17px; accent-color: var(--brand); flex: none; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .dot.scholarships { background: var(--sch); } .dot.conferences { background: var(--conf); } .dot.exchange { background: var(--exch); }
+  .panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .panel-actions .btn { flex: 1; padding: 10px 12px; }
+  .show-results { display: none !important; }
+  .results { min-width: 0; }
+  @media (max-width: 900px) {
+    .browser-body { grid-template-columns: 1fr; }
+    .filter-toggle { display: inline-flex; }
+    .filters-panel { display: none; position: fixed; inset: auto 0 0 0; top: auto; max-height: 85vh; z-index: 50; border-radius: 18px 18px 0 0; box-shadow: 0 -10px 40px rgb(12 43 76 / .25); padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+    .filters-panel.open { display: grid; }
+    .show-results { display: inline-flex !important; }
+  }
+  :global(body.no-scroll) { overflow: hidden; }
+</style>

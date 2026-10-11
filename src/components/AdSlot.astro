@@ -1,0 +1,11 @@
+---
+// Renders a Google AdSense unit once SITE.adsenseClient is set. Until then it renders nothing.
+import { SITE } from "../site.config.mjs";
+const { slot = "" } = Astro.props;
+---
+{SITE.adsenseClient && slot && (
+  <div class="ad-slot">
+    <ins class="adsbygoogle" style="display:block" data-ad-client={SITE.adsenseClient} data-ad-slot={slot} data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script is:inline>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+)}

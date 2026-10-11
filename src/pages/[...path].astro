@@ -1,0 +1,42 @@
+---
+import Home from "../views/Home.astro";
+import Browse from "../views/Browse.astro";
+import Category from "../views/Category.astro";
+import Opportunity from "../views/Opportunity.astro";
+import Guides from "../views/Guides.astro";
+import GuidePage from "../views/Guide.astro";
+import Account from "../views/Account.astro";
+import Page from "../views/Page.astro";
+import { LOCALES, CATEGORIES } from "../site.config.mjs";
+import { getOpps, getGuides } from "../lib/opps";
+import type { Lang } from "../i18n/ui";
+
+export async function getStaticPaths() {
+  const PAGES = ["about", "contact", "privacy", "terms"];
+  const routes = [];
+  for (const lang of LOCALES as Lang[]) {
+    const pre = lang === "en" ? "" : `${lang}/`;
+    const opps = await getOpps(lang);
+    const guides = await getGuides(lang);
+    routes.push({ params: { path: lang === "en" ? undefined : lang }, props: { view: "home", lang, opps, guides } });
+    routes.push({ params: { path: `${pre}opportunities` }, props: { view: "browse", lang, opps } });
+    for (const c of CATEGORIES) routes.push({ params: { path: `${pre}${c}` }, props: { view: "category", lang, opps, category: c } });
+    for (const o of opps) routes.push({ params: { path: `${pre}opportunities/${o.slug}` }, props: { view: "opp", lang, opps, opp: o } });
+    routes.push({ params: { path: `${pre}guides` }, props: { view: "guides", lang, guides } });
+    for (const g of guides) routes.push({ params: { path: `${pre}guides/${g.slug}` }, props: { view: "guide", lang, guides, guide: g } });
+    routes.push({ params: { path: `${pre}account` }, props: { view: "account", lang, opps } });
+    for (const p of PAGES) routes.push({ params: { path: `${pre}${p}` }, props: { view: "page", lang, page: p } });
+  }
+  return routes;
+}
+
+const { view, lang, opps, guides, category, opp, guide, page } = Astro.props as any;
+---
+{view === "home" && <Home lang={lang} opps={opps} guides={guides} />}
+{view === "browse" && <Browse lang={lang} opps={opps} />}
+{view === "category" && <Category lang={lang} opps={opps} category={category} />}
+{view === "opp" && <Opportunity lang={lang} opps={opps} opp={opp} />}
+{view === "guides" && <Guides lang={lang} guides={guides} />}
+{view === "guide" && <GuidePage lang={lang} guides={guides} guide={guide} />}
+{view === "account" && <Account lang={lang} />}
+{view === "page" && <Page lang={lang} page={page} />}

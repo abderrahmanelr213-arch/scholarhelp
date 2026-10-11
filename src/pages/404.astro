@@ -1,0 +1,13 @@
+---
+import Base from "../layouts/Base.astro";
+import { t, lp } from "../i18n/ui";
+const lang = "en";
+---
+<Base lang={lang} title={t(lang, "404.title")} description={t(lang, "404.lead")} path="/404/" alternates={["en"]} noindex>
+  <div class="container nf">
+    <h1>{t(lang, "404.title")}</h1>
+    <p>{t(lang, "404.lead")}</p>
+    <a class="btn" href={lp(lang, "/")}>{t(lang, "404.back")}</a>
+  </div>
+</Base>
+<style>.nf { padding-block: 80px; display: grid; gap: 12px; justify-items: start; } h1 { font-size: 2.2rem; } p { color: var(--muted); margin: 0; }</style>

@@ -1,0 +1,48 @@
+---
+import Base from "../layouts/Base.astro";
+import { SITE } from "../site.config.mjs";
+import { t, lp, type Lang } from "../i18n/ui";
+interface Props { lang: Lang; page: "about" | "contact" | "privacy" | "terms" }
+const { lang, page } = Astro.props;
+const N = SITE.name;
+const E = SITE.email;
+
+const PAGES = {
+  about: {
+    en: { title: "About ScholarHelp", body: `<p>${N} helps students find fully funded scholarships, conferences and cultural exchange programs that are open to applicants from every country, with a special focus on students from the Arab world and Asia.</p><h2>What we do</h2><p>We read the official calls, check who can apply, and publish a clear summary with the deadline and a direct link to the official website. You always apply directly with the organization that offers the opportunity.</p><h2>Free, always</h2><p>${N} is free for students. We never ask for application fees and we never apply on your behalf. If anyone asks you to pay to receive a scholarship, it is a scam.</p><h2>Follow us</h2><p>New opportunities are posted on our Telegram channel as soon as they are published here.</p>` },
+    ar: { title: "من نحن", body: `<p>يساعد ${N} الطلاب على إيجاد منح دراسية ومؤتمرات وبرامج تبادل ثقافي ممولة بالكامل ومفتوحة لجميع الجنسيات، مع اهتمام خاص بطلاب العالم العربي وآسيا.</p><h2>ماذا نقدم</h2><p>نقرأ الإعلانات الرسمية ونتحقق من شروط التقديم، ثم ننشر ملخصًا واضحًا مع الموعد النهائي ورابطًا مباشرًا للموقع الرسمي. التقديم يكون دائمًا مباشرة لدى الجهة المانحة.</p><h2>مجاني دائمًا</h2><p>${N} مجاني للطلاب. لا نطلب أي رسوم ولا نقدّم نيابة عنك. إذا طلب منك أحد دفع المال للحصول على منحة، فهذه عملية احتيال.</p><h2>تابعنا</h2><p>ننشر الفرص الجديدة على قناتنا في تيليجرام فور نشرها هنا.</p>` },
+    ps: { title: "د ScholarHelp په اړه", body: `<p>${N} زده کوونکو سره مرسته کوي چې بشپړ تمویل شوي بورسونه، کنفرانسونه او کلتوري تبادلې پروګرامونه ومومي چې د ټولو هېوادونو غوښتونکو ته پرانیستي دي، په ځانګړي ډول د افغانستان، عربي نړۍ او اسیا زده کوونکو ته.</p><h2>موږ څه کوو</h2><p>موږ رسمي اعلانونه لولو، ګورو چې څوک غوښتنه کولی شي، او د وروستۍ نېټې او رسمي لینک سره روښانه لنډیز خپروو. غوښتنه تل مستقیم له هغې ادارې سره کېږي چې فرصت وړاندې کوي.</p><h2>تل وړیا</h2><p>${N} د زده کوونکو لپاره وړیا دی. موږ هېڅکله فیس نه غواړو او ستاسو پر ځای غوښتنه نه کوو. که څوک تاسو څخه د بورس لپاره پیسې وغواړي، دا درغلي ده.</p><h2>موږ تعقیب کړئ</h2><p>نوې فرصتونه زموږ په ټیلیګرام چینل او انسټاګرام کې هم خپرېږي.</p>` },
+  },
+  contact: {
+    en: { title: "Contact", body: `<p>Questions, corrections or an opportunity to share? Write to us at <strong>${E}</strong> or send a message on our <a href="${SITE.telegram}">Telegram channel</a>.</p><p>We cannot answer questions about the status of your application. Please contact the organization that offers the opportunity.</p>` },
+    ar: { title: "اتصل بنا", body: `<p>لديك سؤال أو تصحيح أو فرصة تريد مشاركتها؟ راسلنا على <strong>${E}</strong> أو عبر <a href="${SITE.telegram}">قناتنا على تيليجرام</a>.</p><p>لا يمكننا الإجابة عن حالة طلبك. يرجى التواصل مع الجهة المانحة مباشرة.</p>` },
+    ps: { title: "اړیکه", body: `<p>پوښتنه، سمون یا د شریکولو وړ فرصت لرئ؟ موږ ته په <strong>${E}</strong> ولیکئ یا زموږ <a href="${SITE.telegram}">ټیلیګرام چینل</a> ته پیغام ولېږئ.</p><p>موږ ستاسو د غوښتنلیک د حالت په اړه ځواب نه شو ورکولی. مهرباني وکړئ مستقیم له اړوندې ادارې سره اړیکه ونیسئ.</p>` },
+  },
+  privacy: {
+    en: { title: "Privacy policy", body: `<p>This policy explains what information ${N} collects when you visit ${SITE.url}.</p><h2>Information we collect</h2><p>If you create an account, we store your email, name, saved opportunities and alert preferences. If you subscribe to email news, we use your address only to send you new opportunities. You can unsubscribe or ask us to delete your account at any time.</p><h2>Cookies and advertising</h2><p>We may use Google AdSense to show ads. Google and its partners use cookies to show ads based on your previous visits to this and other websites. You can turn off personalized ads in <a href="https://www.google.com/settings/ads">Google Ads Settings</a>. Learn more at <a href="https://policies.google.com/technologies/ads">How Google uses cookies in advertising</a>.</p><h2>Analytics</h2><p>We may use privacy-friendly analytics to count visits. This data is anonymous and is not used to identify you.</p><h2>External links</h2><p>Listings link to official websites that have their own privacy policies.</p><h2>Contact</h2><p>For any privacy request, write to ${E}.</p>` },
+    ar: { title: "سياسة الخصوصية", body: `<p>توضح هذه السياسة المعلومات التي يجمعها ${N} عند زيارتك للموقع.</p><h2>المعلومات التي نجمعها</h2><p>إذا أنشأت حسابًا، نحفظ بريدك واسمك والفرص المحفوظة وتفضيلات التنبيهات. إذا اشتركت في النشرة البريدية، نستخدم بريدك فقط لإرسال الفرص الجديدة. يمكنك إلغاء الاشتراك أو طلب حذف حسابك في أي وقت.</p><h2>ملفات تعريف الارتباط والإعلانات</h2><p>قد نستخدم Google AdSense لعرض الإعلانات. تستخدم Google وشركاؤها ملفات تعريف الارتباط لعرض إعلانات بناءً على زياراتك السابقة. يمكنك إيقاف الإعلانات المخصصة من <a href="https://www.google.com/settings/ads">إعدادات إعلانات Google</a>.</p><h2>الإحصاءات</h2><p>قد نستخدم أدوات إحصاء تحترم الخصوصية لعدّ الزيارات بشكل مجهول.</p><h2>الروابط الخارجية</h2><p>تؤدي الإعلانات إلى مواقع رسمية لها سياسات خصوصية خاصة بها.</p><h2>التواصل</h2><p>لأي طلب يخص الخصوصية، راسلنا على ${E}.</p>` },
+    ps: { title: "د محرمیت تګلاره", body: `<p>دا تګلاره روښانه کوي چې ${N} ستاسو د لیدنې پر مهال کوم معلومات راټولوي.</p><h2>هغه معلومات چې راټولوو یې</h2><p>که حساب جوړ کړئ، ستاسو برېښنالیک، نوم، خوندي شوې فرصتونه او د خبرتیاوو غوره توبونه ساتو. که د برېښنالیک خبرونو لپاره ګډون وکړئ، برېښنالیک مو یوازې د نویو فرصتونو د لېږلو لپاره کاروو. هر وخت کولی شئ ګډون لغوه کړئ یا د حساب د ړنګولو غوښتنه وکړئ.</p><h2>کوکیز او اعلانونه</h2><p>ښايي د اعلانونو لپاره Google AdSense وکاروو. ګوګل او شریکان یې کوکیز کاروي. شخصي اعلانونه په <a href="https://www.google.com/settings/ads">د ګوګل د اعلانونو تنظیماتو</a> کې بندولی شئ.</p><h2>اړیکه</h2><p>د محرمیت د هرې غوښتنې لپاره ${E} ته ولیکئ.</p>` },
+  },
+  terms: {
+    en: { title: "Terms of use", body: `<p>${N} publishes summaries of opportunities offered by other organizations. We check each listing carefully, but deadlines and conditions can change without notice.</p><ul><li>Always confirm the details on the official website before applying.</li><li>${N} is not affiliated with the organizations listed and does not decide who is selected.</li><li>${N} never charges students and never asks for payment to apply.</li><li>You may share our pages with a link back to ${N}. Copying our texts in full is not allowed.</li></ul>` },
+    ar: { title: "شروط الاستخدام", body: `<p>ينشر ${N} ملخصات لفرص تقدمها جهات أخرى. نتحقق من كل إعلان بعناية، لكن المواعيد والشروط قد تتغير دون إشعار.</p><ul><li>تأكد دائمًا من التفاصيل على الموقع الرسمي قبل التقديم.</li><li>${N} غير تابع للجهات المذكورة ولا يقرر من يتم اختياره.</li><li>${N} لا يطلب أي رسوم من الطلاب.</li><li>يمكنك مشاركة صفحاتنا مع ذكر الرابط. لا يُسمح بنسخ نصوصنا كاملة.</li></ul>` },
+    ps: { title: "د کارونې شرایط", body: `<p>${N} د نورو ادارو لخوا وړاندې شویو فرصتونو لنډیزونه خپروي. موږ هر اعلان په دقت ګورو، خو نېټې او شرایط ښايي بې خبرتیا بدل شي.</p><ul><li>تل له غوښتنې مخکې جزییات په رسمي ویبپاڼه کې تایید کړئ.</li><li>${N} له یادو ادارو سره تړاو نه لري او د ټاکنې پرېکړه نه کوي.</li><li>${N} هېڅکله له زده کوونکو پیسې نه غواړي.</li><li>زموږ پاڼې د ${N} لینک سره شریکولی شئ. زموږ د متنونو بشپړ کاپي کول اجازه نه لري.</li></ul>` },
+  },
+};
+const { title, body } = PAGES[page][lang];
+---
+<Base lang={lang} title={title} description={body.replace(/<[^>]+>/g, "").slice(0, 155)} path={`/${page}/`}>
+  <div class="container">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href={lp(lang, "/")}>{t(lang, "nav.home")}</a> / <span>{title}</span></nav>
+    <article class="page">
+      <h1>{title}</h1>
+      <div class="prose" set:html={body} />
+    </article>
+  </div>
+</Base>
+<style>
+  .crumbs { padding-top: 20px; font-size: .9rem; color: var(--muted); }
+  .crumbs a { color: var(--muted); }
+  .page { padding-block: 16px 24px; }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 800; margin-bottom: 12px; }
+</style>

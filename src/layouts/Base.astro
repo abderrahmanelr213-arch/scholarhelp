@@ -1,0 +1,198 @@
+---
+import SocialIcon from "../components/SocialIcon.astro";
+import "../styles/global.css";
+import { SITE, LOCALES, CATEGORIES } from "../site.config.mjs";
+import { t, lp, DIR, LANG_NAMES, OG_LOCALE, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** Path without the language prefix, e.g. "/opportunities/chevening/". Used for hreflang and the language switcher. */
+  path: string;
+  /** Languages this page exists in (defaults to all). */
+  alternates?: Lang[];
+  ogType?: string;
+  jsonLd?: object | object[];
+  noindex?: boolean;
+}
+const { lang, title, description, path, alternates = LOCALES as Lang[], ogType = "website", jsonLd, noindex = false } = Astro.props;
+const fullTitle = title === SITE.name ? `${SITE.name} | ${t(lang, "site.tagline")}` : `${title} | ${SITE.name}`;
+const canonical = new URL(lp(lang, path), SITE.url).href;
+const ogImage = new URL("/og-image.png", SITE.url).href;
+const year = new Date().getFullYear();
+const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+<!doctype html>
+<html lang={lang} dir={DIR[lang]}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  {noindex && <meta name="robots" content="noindex" />}
+  {alternates.map((l) => <link rel="alternate" hreflang={l} href={new URL(lp(l, path), SITE.url).href} />)}
+  <link rel="alternate" hreflang="x-default" href={new URL(lp("en", path), SITE.url).href} />
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="icon" href="/favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta name="theme-color" content="#0c2b4c" />
+  <meta property="og:site_name" content={SITE.name} />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:locale" content={OG_LOCALE[lang]} />
+  <meta name="twitter:card" content="summary_large_image" />
+  {SITE.googleVerification && <meta name="google-site-verification" content={SITE.googleVerification} />}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" />
+  {lang === "ar" && <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" />}
+  {lang === "ps" && <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800&display=swap" />}
+  {SITE.adsenseClient && <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE.adsenseClient}`} crossorigin="anonymous"></script>}
+  {ld.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+</head>
+<body>
+  <a class="skip visually-hidden" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container bar">
+      <a class="brand" href={lp(lang, "/")} aria-label={SITE.name}>
+        <img class="brand-icon" src="/brand-icon.png" alt="" width="46" height="40" />
+        <img class="brand-word" src="/brand-wordmark.png" alt={SITE.name} width="138" height="24" />
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a href={lp(lang, "/opportunities/")} aria-current={path === "/opportunities/" ? "page" : undefined}>{t(lang, "nav.opportunities")}</a>
+        {CATEGORIES.map((c) => <a href={lp(lang, `/${c}/`)} aria-current={path === `/${c}/` ? "page" : undefined}>{t(lang, `cat.${c}.short` as any)}</a>)}
+        <a href={lp(lang, "/guides/")} aria-current={path.startsWith("/guides/") ? "page" : undefined}>{t(lang, "nav.guides")}</a>
+      </nav>
+      <div class="bar-end">
+        <details class="lang">
+          <summary aria-label={t(lang, "nav.language")}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>
+            <span>{LANG_NAMES[lang]}</span>
+          </summary>
+          <ul>
+            {(LOCALES as Lang[]).map((l) => (
+              <li><a href={lp(l, alternates.includes(l) ? path : "/")} hreflang={l} lang={l} aria-current={l === lang ? "true" : undefined}>{LANG_NAMES[l]}</a></li>
+            ))}
+          </ul>
+        </details>
+        <a class="auth-link" href={lp(lang, "/account/")} data-auth-out>{t(lang, "nav.login")}</a>
+        <a class="btn auth-btn register" href={lp(lang, "/account/") + "#signup"} data-auth-out>{t(lang, "nav.register")}</a>
+        <a class="btn outline auth-btn" href={lp(lang, "/account/")} data-auth-in hidden>{t(lang, "nav.account")}</a>
+        <details class="menu">
+          <summary aria-label={t(lang, "nav.menu")}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </summary>
+          <nav aria-label="Mobile">
+            <a href={lp(lang, "/")}>{t(lang, "nav.home")}</a>
+            <a href={lp(lang, "/opportunities/")}>{t(lang, "nav.opportunities")}</a>
+            {CATEGORIES.map((c) => <a href={lp(lang, `/${c}/`)}>{t(lang, `cat.${c}` as any)}</a>)}
+            <a href={lp(lang, "/guides/")}>{t(lang, "nav.guides")}</a>
+            <a href={lp(lang, "/account/")}>{t(lang, "nav.account")}</a>
+            <a href={SITE.telegram} target="_blank" rel="noopener">{t(lang, "nav.telegram")}</a>
+          </nav>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <slot />
+  </main>
+
+  <footer class="site-footer">
+    <div class="container foot-grid">
+      <div class="foot-brand">
+        <a href={lp(lang, "/")} aria-label={SITE.name}><img src="/brand-logo.png" alt={SITE.name} width="160" height="108" /></a>
+        <p>{t(lang, "site.tagline")}</p>
+        <div class="socials">
+          <a class="social tg" href={SITE.telegram} target="_blank" rel="noopener" aria-label="Telegram"><SocialIcon name="telegram" /><span>Telegram</span></a>
+          {SITE.social.instagram && <a class="social ig" href={SITE.social.instagram} target="_blank" rel="noopener" aria-label="Instagram"><SocialIcon name="instagram" /><span>Instagram</span></a>}
+        </div>
+      </div>
+      <nav aria-label="Categories">
+        <a href={lp(lang, "/opportunities/")}>{t(lang, "browse.title")}</a>
+        {CATEGORIES.map((c) => <a href={lp(lang, `/${c}/`)}>{t(lang, `cat.${c}` as any)}</a>)}
+        <a href={lp(lang, "/guides/")}>{t(lang, "guides.title")}</a>
+      </nav>
+      <nav aria-label={SITE.name}>
+        <a href={lp(lang, "/about/")}>{t(lang, "nav.about")}</a>
+        <a href={lp(lang, "/contact/")}>{t(lang, "nav.contact")}</a>
+        <a href={lp(lang, "/privacy/")}>{t(lang, "footer.privacy")}</a>
+        <a href={lp(lang, "/terms/")}>{t(lang, "footer.terms")}</a>
+      </nav>
+    </div>
+    <div class="container foot-bottom">
+      <p>{t(lang, "footer.disclaimer")}</p>
+      <p>© {year} {SITE.name}. {t(lang, "footer.rights")}</p>
+    </div>
+  </footer>
+  <script>
+    import { initSaveButtons } from "../lib/client/saved";
+    import { currentUser } from "../lib/client/supabase";
+    // Close the open dropdown when clicking elsewhere.
+    document.addEventListener("click", (e) => {
+      document.querySelectorAll("details[open]").forEach((d) => { if (!d.contains(e.target as Node)) d.removeAttribute("open"); });
+    });
+    initSaveButtons();
+    currentUser().then((u) => {
+      document.querySelectorAll<HTMLElement>("[data-auth-in]").forEach((el) => (el.hidden = !u));
+      document.querySelectorAll<HTMLElement>("[data-auth-out]").forEach((el) => (el.hidden = !!u));
+    });
+  </script>
+</body>
+</html>
+
+<style>
+  .skip:focus { position: fixed; inset-inline-start: 12px; top: 12px; width: auto; height: auto; clip: auto; z-index: 100; background: var(--surface); padding: 8px 12px; }
+  .site-header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .bar { display: flex; align-items: center; gap: 20px; min-height: 64px; }
+  .brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; flex: none; }
+  .brand-icon { height: 40px; width: auto; }
+  .brand-word { height: 24px; width: auto; }
+  .nav { display: flex; gap: 4px; }
+  .nav a { padding: 8px 12px; border-radius: 8px; text-decoration: none; color: var(--muted); font-weight: 600; font-size: .95rem; }
+  .nav a:hover, .nav a[aria-current="page"] { color: var(--ink); background: var(--surface-2); }
+  .bar-end { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; }
+  details { position: relative; }
+  summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); font-weight: 700; font-size: .85rem; }
+  summary::-webkit-details-marker { display: none; }
+  .lang ul { position: absolute; inset-inline-end: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); min-width: 150px; }
+  .lang a { display: block; padding: 8px 10px; border-radius: 6px; text-decoration: none; color: var(--ink); }
+  .lang a:hover, .lang a[aria-current] { background: var(--surface-2); }
+  .auth-link { font-weight: 700; color: var(--ink); text-decoration: none; padding: 8px 6px; white-space: nowrap; }
+  .auth-btn { padding: 9px 16px; font-size: .92rem; white-space: nowrap; }
+  .register { background: #d92d20; border-color: #d92d20; color: #fff; }
+  .register:hover { background: #b42318; border-color: #b42318; }
+  .socials { display: flex; gap: 8px; flex-wrap: wrap; }
+  .social { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 700; font-size: .9rem; }
+  .social:hover { border-color: var(--teal); color: var(--brand); }
+  .menu { display: none; }
+  .menu nav { position: absolute; inset-inline-end: 0; top: calc(100% + 6px); display: grid; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); min-width: 240px; }
+  .menu nav a { padding: 10px; text-decoration: none; color: var(--ink); border-radius: 6px; }
+  .menu nav a:hover { background: var(--surface-2); }
+  @media (max-width: 1020px) {
+    .nav { display: none; }
+    .menu { display: block; }
+  }
+  @media (max-width: 560px) {
+    .brand-word { display: none; }
+    .auth-link { display: none; }
+    .lang summary span { display: none; }
+  }
+  .site-footer { margin-top: 64px; background: var(--surface); border-top: 1px solid var(--line); padding-block: 40px 24px; }
+  .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; }
+  .foot-brand { display: grid; gap: 12px; align-content: start; justify-items: start; }
+  .foot-brand img { height: 90px; width: auto; }
+  .foot-brand p { color: var(--muted); max-width: 40ch; }
+  .site-footer nav { display: grid; gap: 8px; align-content: start; }
+  .site-footer nav a { color: var(--muted); text-decoration: none; }
+  .site-footer nav a:hover { color: var(--ink); }
+  .foot-bottom { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; display: grid; gap: 4px; }
+  .foot-bottom p { margin: 0; }
+  @media (max-width: 720px) { .foot-grid { grid-template-columns: 1fr 1fr; } .foot-brand { grid-column: 1 / -1; } }
+</style>

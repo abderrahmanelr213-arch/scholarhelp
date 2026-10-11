@@ -1,0 +1,76 @@
+---
+import SocialIcon from "./SocialIcon.astro";
+import { SITE } from "../site.config.mjs";
+import { t, type Lang } from "../i18n/ui";
+const { lang } = Astro.props as { lang: Lang };
+const on = Boolean(SITE.supabaseUrl && SITE.supabaseAnonKey);
+---
+<section class="news" data-news data-lang={lang} data-ok={t(lang, "news.success")} data-err={t(lang, "news.error")}>
+  <div class="news-copy">
+    <h2>{t(lang, "news.title")}</h2>
+    <p>{t(lang, "news.lead")}</p>
+  </div>
+  <div class="news-actions">
+    {on ? (
+      <form class="news-form" data-news-form novalidate>
+        <label class="visually-hidden" for={`news-email-${lang}`}>{t(lang, "news.email")}</label>
+        <input id={`news-email-${lang}`} type="email" name="email" required autocomplete="email" placeholder={t(lang, "news.email")} />
+        <button class="btn" type="submit">{t(lang, "news.subscribe")}</button>
+      </form>
+    ) : (
+      <p class="news-soon">{t(lang, "news.soon")}</p>
+    )}
+    <p class="news-msg" data-news-msg role="status" hidden></p>
+    <div class="news-social">
+      <a class="pill tg" href={SITE.telegram} target="_blank" rel="noopener">
+        <SocialIcon name="telegram" />
+        {t(lang, "nav.telegram")}
+      </a>
+      {SITE.social.instagram && (
+        <a class="pill ig" href={SITE.social.instagram} target="_blank" rel="noopener">
+          <SocialIcon name="instagram" />
+          {t(lang, "news.instagram")}
+        </a>
+      )}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { getSupabase } from "../lib/client/supabase";
+  document.querySelectorAll<HTMLElement>("[data-news]").forEach((box) => {
+    const form = box.querySelector<HTMLFormElement>("[data-news-form]");
+    const msg = box.querySelector<HTMLElement>("[data-news-msg]")!;
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
+      const show = (ok: boolean) => { msg.hidden = false; msg.textContent = ok ? box.dataset.ok! : box.dataset.err!; msg.classList.toggle("bad", !ok); };
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return show(false);
+      const sb = await getSupabase();
+      if (!sb) return show(false);
+      const { error } = await sb.from("subscribers").insert({ email, lang: box.dataset.lang });
+      // A duplicate email means they are already subscribed, which is fine.
+      const ok = !error || error.code === "23505";
+      show(ok);
+      if (ok) form.reset();
+    });
+  });
+</script>
+
+<style>
+  .news { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; padding: 32px; border-radius: 20px; background: linear-gradient(135deg, var(--navy), #12406b); color: #fff; }
+  .news h2 { font-size: 1.6rem; }
+  .news-copy p { margin: 8px 0 0; opacity: .85; }
+  .news-actions { display: grid; gap: 14px; }
+  .news-form { display: flex; gap: 8px; flex-wrap: wrap; }
+  .news-form input { flex: 1 1 220px; min-width: 0; padding: 13px 14px; border-radius: 10px; border: 0; background: #fff; color: var(--ink); }
+  .news-form .btn { background: var(--teal); }
+  .news-form .btn:hover { background: #0b6d6e; }
+  .news-soon { margin: 0; opacity: .9; }
+  .news-msg { margin: 0; font-weight: 700; color: #7fe3d5; }
+  .news-msg.bad { color: #ffb4ab; }
+  .news-social { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: rgb(255 255 255 / .12); color: #fff; text-decoration: none; font-weight: 700; font-size: .92rem; }
+  .pill:hover { background: rgb(255 255 255 / .2); }
+  @media (max-width: 760px) { .news { grid-template-columns: 1fr; padding: 24px; } }
+</style>

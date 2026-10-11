@@ -1,0 +1,34 @@
+---
+import Base from "../layouts/Base.astro";
+import OppBrowser from "../components/OppBrowser.astro";
+import Newsletter from "../components/Newsletter.astro";
+import Deadlines from "../components/Deadlines.astro";
+import AdSlot from "../components/AdSlot.astro";
+import { SITE } from "../site.config.mjs";
+import { t, lp, type Lang } from "../i18n/ui";
+import type { Opp } from "../lib/opps";
+interface Props { lang: Lang; opps: Opp[]; category: string }
+const { lang, opps, category } = Astro.props;
+const list = opps.filter((o) => o.entry.data.category === category);
+const name = t(lang, `cat.${category}` as any);
+const jsonLd = {
+  "@context": "https://schema.org", "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: SITE.name, item: new URL(lp(lang, "/"), SITE.url).href },
+    { "@type": "ListItem", position: 2, name, item: new URL(lp(lang, `/${category}/`), SITE.url).href },
+  ],
+};
+---
+<Base lang={lang} title={name} description={t(lang, `cat.${category}.desc` as any)} path={`/${category}/`} jsonLd={jsonLd}>
+  <div class="container">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href={lp(lang, "/")}>{t(lang, "nav.home")}</a> / <span>{name}</span></nav>
+    <header class="page-head">
+      <h1>{name}</h1>
+      <p>{t(lang, `cat.${category}.desc` as any)}</p>
+    </header>
+    <AdSlot slot="" />
+    <OppBrowser opps={list} lang={lang} category={category} />
+    <Newsletter lang={lang} />
+  </div>
+  <Deadlines lang={lang} />
+</Base>

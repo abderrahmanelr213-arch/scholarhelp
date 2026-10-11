@@ -1,0 +1,24 @@
+---
+import Base from "../layouts/Base.astro";
+import OppBrowser from "../components/OppBrowser.astro";
+import Newsletter from "../components/Newsletter.astro";
+import Deadlines from "../components/Deadlines.astro";
+import AdSlot from "../components/AdSlot.astro";
+import { t, lp, type Lang } from "../i18n/ui";
+import type { Opp } from "../lib/opps";
+interface Props { lang: Lang; opps: Opp[] }
+const { lang, opps } = Astro.props;
+---
+<Base lang={lang} title={t(lang, "browse.title")} description={t(lang, "browse.lead")} path="/opportunities/">
+  <div class="container">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href={lp(lang, "/")}>{t(lang, "nav.home")}</a> / <span>{t(lang, "browse.title")}</span></nav>
+    <header class="page-head">
+      <h1>{t(lang, "browse.title")}</h1>
+      <p>{t(lang, "browse.lead")}</p>
+    </header>
+    <AdSlot slot="" />
+    <OppBrowser opps={opps} lang={lang} />
+    <Newsletter lang={lang} />
+  </div>
+  <Deadlines lang={lang} />
+</Base>
