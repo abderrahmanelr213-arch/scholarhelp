@@ -24,6 +24,11 @@ const jsonLd = [
   { "@context": "https://schema.org", "@type": "Organization", name: SITE.name, url: SITE.url, logo: new URL("/brand-logo.png", SITE.url).href,
     sameAs: [SITE.telegram, ...Object.values(SITE.social)].filter(Boolean) },
 ];
+const stepIcons = [
+  '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',
+  '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+];
 const icons: Record<string, string> = {
   scholarships: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/>',
   conferences: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
@@ -84,7 +89,21 @@ const icons: Record<string, string> = {
       <h2>{t(lang, "how.title")}</h2>
       <ol class="steps">
         {[1, 2, 3].map((n) => (
-          <li><span class="step-n">{n}</span><strong>{t(lang, `how.${n}.t` as any)}</strong><span>{t(lang, `how.${n}.d` as any)}</span></li>
+          <>
+            <li class="step">
+              <span class="step-ico">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={stepIcons[n - 1]} />
+                <span class="step-n">{n}</span>
+              </span>
+              <strong>{t(lang, `how.${n}.t` as any)}</strong>
+              <span class="step-d">{t(lang, `how.${n}.d` as any)}</span>
+            </li>
+            {n < 3 && (
+              <li class="step-arrow" aria-hidden="true">
+                <svg width="64" height="24" viewBox="0 0 64 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path class="dash" d="M2 12h52" /><path d="M48 5l8 7-8 7" /></svg>
+              </li>
+            )}
+          </>
         ))}
       </ol>
     </section>
@@ -137,9 +156,26 @@ const icons: Record<string, string> = {
   .cat-count { font-weight: 800; color: var(--teal); font-variant-numeric: tabular-nums; font-size: 1.1rem; }
 
   .how h2 { color: var(--navy); font-size: 1.5rem; margin-bottom: 16px; }
-  .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 14px; }
-  .steps li { display: grid; gap: 6px; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
-  .steps span:not(.step-n) { color: var(--muted); font-size: .95rem; }
-  .step-n { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--navy); color: #fff; font-weight: 800; }
+  .steps { list-style: none; padding: 0; margin: 0; display: flex; align-items: stretch; gap: 0; }
+  .step { flex: 1 1 0; position: relative; display: grid; justify-items: center; text-align: center; gap: 8px; padding: 28px 22px 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; }
+  .step:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgb(12 43 76 / .12); }
+  .step strong { font-size: 1.2rem; color: var(--navy); }
+  .step-d { color: var(--muted); font-size: .98rem; }
+  .step-ico { position: relative; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--teal), var(--navy)); box-shadow: 0 8px 20px rgb(15 141 142 / .3); margin-bottom: 4px; }
+  .step-n { position: absolute; top: -4px; inset-inline-end: -4px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #d92d20; color: #fff; font-weight: 800; font-size: .9rem; border: 3px solid var(--surface); }
+  .step-arrow { flex: none; width: 76px; display: grid; place-items: center; color: var(--teal); }
+  html[dir="rtl"] .step-arrow svg { transform: scaleX(-1); }
+  .step-arrow .dash { stroke-dasharray: 6 6; animation: step-flow 1s linear infinite; }
+  .step-arrow svg { animation: step-nudge 1.6s ease-in-out infinite; }
+  html[dir="rtl"] .step-arrow svg { animation-name: step-nudge-rtl; }
+  @keyframes step-flow { to { stroke-dashoffset: -12; } }
+  @keyframes step-nudge { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(4px); } }
+  @keyframes step-nudge-rtl { 0%, 100% { transform: scaleX(-1) translateX(-3px); } 50% { transform: scaleX(-1) translateX(4px); } }
+  @media (max-width: 760px) {
+    .steps { flex-direction: column; }
+    .step-arrow { width: auto; height: 56px; }
+    .step-arrow svg, html[dir="rtl"] .step-arrow svg { transform: rotate(90deg); animation: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .step-arrow svg, .step-arrow .dash { animation: none; } }
 
 </style>
