@@ -9,6 +9,7 @@ export const OG_LOCALE: Record<Lang, string> = { en: "en_US", ar: "ar_AR", ps: "
 const ui = {
   en: {
     "home.countries": "Countries",
+    "home.full": "Fully funded",
     "nav.opportunities": "Opportunities",
     "nav.guides": "Guides",
     "nav.login": "Sign in",
@@ -184,6 +185,7 @@ const ui = {
   },
   ar: {
     "home.countries": "دولة",
+    "home.full": "ممولة بالكامل",
     "nav.opportunities": "الفرص",
     "nav.guides": "الأدلة",
     "nav.login": "تسجيل الدخول",
@@ -359,6 +361,7 @@ const ui = {
   },
   ps: {
     "home.countries": "هېوادونه",
+    "home.full": "بشپړ تمویل شوي",
     "nav.opportunities": "فرصتونه",
     "nav.guides": "لارښودونه",
     "nav.login": "ننوتل",

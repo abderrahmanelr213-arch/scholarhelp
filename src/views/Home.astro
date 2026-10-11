@@ -15,6 +15,7 @@ const open = opps.filter(isOpen);
 const latest = open.slice(0, 6);
 const closing = open.filter((o) => o.entry.data.deadline).sort((a, b) => +a.entry.data.deadline! - +b.entry.data.deadline!).slice(0, 3);
 const counts = Object.fromEntries(CATEGORIES.map((c) => [c, open.filter((o) => o.entry.data.category === c).length]));
+const fully = open.filter((o) => o.entry.data.funding === "full").length;
 const countries = new Set(open.map((o) => o.countryKey)).size;
 const home = new URL(lp(lang, "/"), SITE.url).href;
 const jsonLd = [
@@ -46,7 +47,7 @@ const icons: Record<string, string> = {
         <div class="stats">
           <div><b>{open.length}</b><span>{t(lang, "home.count")}</span></div>
           <div><b>{countries}</b><span>{t(lang, "home.countries")}</span></div>
-          <div><b>3</b><span>English · العربية · پښتو</span></div>
+          <div><b>{fully}</b><span>{t(lang, "home.full")}</span></div>
         </div>
       </div>
       <img class="hero-logo" src="/brand-logo.png" alt="" width="534" height="360" />
