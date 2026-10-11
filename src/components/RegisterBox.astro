@@ -161,7 +161,8 @@ const { lang } = Astro.props;
     let names: Intl.DisplayNames | null = null;
     try { names = new Intl.DisplayNames([lang, "en"], { type: "region" }); } catch {}
     const countries = DIAL.split(",").map((p) => { const [iso, code] = p.split(":"); return { iso, code, name: names?.of(iso) || iso }; })
-      .sort((a, b) => a.name.localeCompare(b.name, lang));
+      // United States first, then the rest in alphabetical order.
+      .sort((a, b) => (b.iso === "US" ? 1 : 0) - (a.iso === "US" ? 1 : 0) || a.name.localeCompare(b.name, lang));
     let cc = "";
     const pick = (iso: string) => {
       const c = countries.find((x) => x.iso === iso); if (!c) return;
@@ -171,14 +172,8 @@ const { lang } = Astro.props;
       phone.querySelector<SVGElement>("[data-cc-globe]")!.style.display = "none";
       phone.querySelector("[data-cc-code]")!.textContent = "+" + c.code;
     };
-    // Guess the visitor's country from their time zone, then their browser language.
-    const TZ: Record<string, string> = { Algiers: "DZ", Kabul: "AF", Cairo: "EG", Casablanca: "MA", Tunis: "TN", Tripoli: "LY", Khartoum: "SD", Riyadh: "SA", Baghdad: "IQ", Amman: "JO", Beirut: "LB", Damascus: "SY", Dubai: "AE", Muscat: "OM", Qatar: "QA", Kuwait: "KW", Bahrain: "BH", Aden: "YE", Gaza: "PS", Hebron: "PS", Nouakchott: "MR", Karachi: "PK", Tehran: "IR", Istanbul: "TR", Kolkata: "IN", Calcutta: "IN", Dhaka: "BD", Jakarta: "ID", Kuala_Lumpur: "MY", Lagos: "NG", Nairobi: "KE", Accra: "GH", Addis_Ababa: "ET", Mogadishu: "SO", Dakar: "SN", Tashkent: "UZ", Dushanbe: "TJ", London: "GB", Paris: "FR", Berlin: "DE", Madrid: "ES", Rome: "IT" };
-    const guess = () => {
-      try { const z = Intl.DateTimeFormat().resolvedOptions().timeZone.split("/").pop()!; if (TZ[z]) return TZ[z]; } catch {}
-      for (const l of navigator.languages || []) { const r = l.split("-")[1]; if (r && r.length === 2 && countries.some((c) => c.iso === r.toUpperCase())) return r.toUpperCase(); }
-      return lang === "ps" ? "AF" : "";
-    };
-    const g = guess(); if (g) pick(g);
+    // The United States (+1) is selected by default; visitors can change it in the list.
+    pick("US");
     const render = (q: string) => {
       const n = q.trim().toLowerCase().replace(/^\+/, "");
       list.innerHTML = "";
