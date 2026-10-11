@@ -1,4 +1,5 @@
 ---
+import FundingBadge from "./FundingBadge.astro";
 import { t, lp, type Lang } from "../i18n/ui";
 import { isoDate, formatDate, type Opp } from "../lib/opps";
 interface Props { opp: Opp; lang: Lang }
@@ -6,7 +7,6 @@ const { opp, lang } = Astro.props;
 const d = opp.entry.data;
 const fundMatch = d.title.match(/^(.*?)\s*(\((?:fully|partially) funded\))\s*$/i);
 const titleMain = fundMatch ? fundMatch[1] : d.title;
-const fundTag = fundMatch ? fundMatch[2] : "";
 const text = [d.title, d.host, d.country, opp.countryKey, d.summary, d.eligible, ...d.levels].join(" ").toLowerCase();
 const href = lp(lang, `/opportunities/${opp.slug}/`);
 const flag = d.countryCode ? `/flags/${d.countryCode.toLowerCase()}.svg` : "";
@@ -28,16 +28,9 @@ const isNew = Date.now() - +d.published < 7 * 86400000;
   <div class="card-body">
     <div class="card-top">
       <span class={`badge ${d.category}`}>{t(lang, `cat.${d.category}.short` as any)}</span>
-      <span class={`badge funding ${d.funding}`}>
-        <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true">
-          {d.funding === "full" && <><circle cx="8" cy="8" r="7" fill="currentColor" /><path d="M4.8 8.2l2.1 2.1 4.3-4.6" fill="none" stroke="#d92d20" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" /></>}
-          {d.funding === "partial" && <><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6" /><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4z" fill="currentColor" /></>}
-          {d.funding === "travel" && <path d="M14.5 6.5 9.8 8 7 13H5.6l1.3-4.4-3.1.9L2.6 11H1.5l.6-3-.6-3h1.1l1.2 1.5 3.1.9L5.6 3H7l2.8 5 4.7 1.5z" fill="currentColor" transform="rotate(-90 8 8)" />}
-        </svg>
-        {t(lang, `funding.${d.funding}` as any)}
-      </span>
+      <FundingBadge lang={lang} funding={d.funding} />
     </div>
-    <h3><a href={href}>{titleMain}{fundTag && <> <span class={`fund-tag ${d.funding}`}>{fundTag}</span></>}</a></h3>
+    <h3><a href={href}>{titleMain}</a></h3>
     <div class="card-meta">
       {flag ? <img class="mini-flag" src={flag} alt="" width="20" height="15" /> : null}
       <span class="clip">{d.country}{d.host ? ` · ${d.host}` : ""}</span>

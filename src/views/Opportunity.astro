@@ -6,6 +6,7 @@ import Newsletter from "../components/Newsletter.astro";
 import Deadlines from "../components/Deadlines.astro";
 import AdSlot from "../components/AdSlot.astro";
 import SocialIcon from "../components/SocialIcon.astro";
+import FundingBadge from "../components/FundingBadge.astro";
 import { SITE } from "../site.config.mjs";
 import { t, lp, type Lang } from "../i18n/ui";
 import { isoDate, formatDate, type Opp } from "../lib/opps";
@@ -66,10 +67,11 @@ const shares = [
 
     <div class="layout">
       <article class="main">
-        <h1>{shortName}{shortName !== d.title && <> <span class={`fund-tag ${d.funding}`}>{d.title.slice(shortName.length).trim()}</span></>}</h1>
+        <h1>{shortName}</h1>
         <p class="byline">
           {t(lang, "opp.by")} <strong>{t(lang, "opp.team")}</strong> · <time datetime={isoDate(d.published)}>{formatDate(d.published, lang)}</time>
           <span class={`badge ${d.category}`}>{t(lang, `cat.${d.category}.short` as any)}</span>
+          <FundingBadge lang={lang} funding={d.funding} />
         </p>
 
         <div class="banner" data-deadline={isoDate(d.deadline)}>
@@ -78,7 +80,7 @@ const shares = [
               : flag ? <img class="banner-flag" src={flag} alt={d.country} width="160" height="120" />
               : <svg class="banner-globe" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>}
           </div>
-          <p class="banner-title">{d.title}</p>
+          <p class="banner-title">{shortName}</p>
           <img class="banner-brand" src="/brand-wordmark.png" alt="" width="127" height="22" />
           <span class="banner-deadline">
             {t(lang, "opp.deadline")}: {d.deadline ? formatDate(d.deadline, lang) : t(lang, "opp.rolling")}
@@ -156,7 +158,7 @@ const shares = [
               {latest.map((o) => (
                 <li><a href={lp(lang, `/opportunities/${o.slug}/`)}>
                   {o.entry.data.countryCode ? <img src={`/flags/${o.entry.data.countryCode.toLowerCase()}.svg`} alt="" width="40" height="30" loading="lazy" /> : <span class="globe">🌐</span>}
-                  <span>{o.entry.data.title}</span>
+                  <span>{o.entry.data.title.replace(/\s*\((fully|partially) funded\)\s*$/i, "")}</span>
                 </a></li>
               ))}
             </ul>
