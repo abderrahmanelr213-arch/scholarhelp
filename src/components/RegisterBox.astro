@@ -54,7 +54,8 @@ const { lang } = Astro.props;
 <script>
   import { getSupabase } from "../lib/client/supabase";
   import { DIAL } from "../lib/dial-codes";
-  const MAX_PER_VISIT = 3, FIRST_DELAY = 20e3, AGAIN_AFTER = 120e3;
+  // No limit per visit: it keeps coming back until the visitor registers.
+  const MAX_PER_VISIT = Infinity, FIRST_DELAY = 20e3, AGAIN_AFTER = 120e3;
   // localStorage remembers a registration for good; sessionStorage counts pop-ups in this visit.
   const read = (s: Storage, k: string) => { try { return JSON.parse(s.getItem(k) || "{}"); } catch { return {}; } };
   const write = (s: Storage, k: string, v: object) => { try { s.setItem(k, JSON.stringify({ ...read(s, k), ...v })); } catch {} };
@@ -77,13 +78,13 @@ const { lang } = Astro.props;
       document.documentElement.classList.add("reg-open");
       if (innerWidth > 720) box.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
     };
-    // A link the visitor clicked before the pop-up appeared; they continue to it afterwards.
-    let pending: HTMLAnchorElement | null = null;
+    // The link or button the visitor clicked before the pop-up appeared; it runs once they close or register.
+    let pending: HTMLElement | null = null, replaying = false;
     const proceed = () => {
-      const a = pending; pending = null;
-      if (!a) return;
-      if (a.target === "_blank") window.open(a.href, "_blank", "noopener");
-      else location.href = a.href;
+      const el = pending; pending = null;
+      if (!el || !el.isConnected) return;
+      replaying = true;
+      try { el.click(); } finally { replaying = false; }
     };
     const close = () => {
       box.hidden = true;
@@ -128,15 +129,15 @@ const { lang } = Astro.props;
       if (done()) return;
       e.preventDefault(); open(false);
     }));
-    // Clicking an opportunity (its card, Apply Now or the "Apply here" button) shows the pop-up first.
+    // Any click on a link or button shows the pop-up first, until the visitor registers.
+    // Closing it is always possible, and the click then goes ahead as normal.
     document.addEventListener("click", (e) => {
-      if (done() || e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
-      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[href]");
-      if (!a || box.contains(a)) return;
-      const toOpp = a.origin === location.origin && /\/opportunities\/[^/]+\/?$/.test(a.pathname);
-      if (!toOpp && !a.classList.contains("apply-big")) return;
+      if (replaying || done() || isOpen() || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      const el = (e.target as HTMLElement).closest<HTMLElement>("a[href], button");
+      if (!el || box.contains(el) || el.matches("[data-reg-trigger]")) return;
       e.preventDefault();
-      pending = a;
+      e.stopImmediatePropagation();
+      pending = el;
       open(false);
     }, true);
     box.querySelectorAll("[data-reg-close]").forEach((b) => b.addEventListener("click", close));
