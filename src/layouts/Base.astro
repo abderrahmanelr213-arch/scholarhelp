@@ -1,5 +1,5 @@
 ---
-import SocialIcon from "../components/SocialIcon.astro";
+import SocialLinks from "../components/SocialLinks.astro";
 import RegisterBox from "../components/RegisterBox.astro";
 import Logo from "../components/Logo.astro";
 import "../styles/global.css";
@@ -110,10 +110,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
       <div class="foot-brand">
         <a class="foot-logo" href={lp(lang, "/")} aria-label={SITE.name}><Logo variant="stacked" animate={false} /></a>
         <p>{t(lang, "site.tagline")}</p>
-        <div class="socials">
-          <a class="social tg" href={SITE.telegram} target="_blank" rel="noopener" aria-label="Telegram"><SocialIcon name="telegram" /><span>Telegram</span></a>
-          {SITE.social.instagram && <a class="social ig" href={SITE.social.instagram} target="_blank" rel="noopener" aria-label="Instagram"><SocialIcon name="instagram" /><span>Instagram</span></a>}
-        </div>
+        <SocialLinks label={t(lang, "opp.follow")} />
       </div>
       <nav aria-label="Categories">
         <a href={lp(lang, "/opportunities/")}>{t(lang, "browse.title")}</a>
@@ -212,7 +209,6 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   .auth-btn { padding: 9px 16px; font-size: .92rem; white-space: nowrap; }
   .register { background: #d92d20; border-color: #d92d20; color: #fff; }
   .register:hover { background: #b42318; border-color: #b42318; }
-  .socials { display: flex; gap: 8px; flex-wrap: wrap; }
   .social { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 700; font-size: .9rem; }
   .social:hover { border-color: var(--teal); color: var(--brand); }
   .menu { display: none; }

@@ -5,7 +5,7 @@ import OppCard from "../components/OppCard.astro";
 import Newsletter from "../components/Newsletter.astro";
 import Deadlines from "../components/Deadlines.astro";
 import AdSlot from "../components/AdSlot.astro";
-import SocialIcon from "../components/SocialIcon.astro";
+import SocialLinks from "../components/SocialLinks.astro";
 import FundingBadge from "../components/FundingBadge.astro";
 import Logo from "../components/Logo.astro";
 import { SITE } from "../site.config.mjs";
@@ -131,13 +131,7 @@ const shares = [
 
         <p class="disclaimer"><strong>{t(lang, "opp.disclaimerTitle")}:</strong> {t(lang, "opp.disclaimer")}</p>
 
-        <div class="follow">
-          <p>{t(lang, "opp.follow")}</p>
-          <div>
-            <a href={SITE.telegram} target="_blank" rel="noopener" aria-label="Telegram"><SocialIcon name="telegram" size={44} /></a>
-            {SITE.social.instagram && <a href={SITE.social.instagram} target="_blank" rel="noopener" aria-label="Instagram"><SocialIcon name="instagram" size={44} /></a>}
-          </div>
-        </div>
+        <div class="follow"><SocialLinks label={t(lang, "opp.follow")} center /></div>
       </article>
 
       <aside class="side" aria-label={t(lang, "opp.details")}>
@@ -224,10 +218,6 @@ const shares = [
   .apply-note { margin: 10px 0 0; color: var(--ink); font-size: .95rem; font-weight: 600; text-align: center; }
   .disclaimer { margin-top: 24px; padding: 14px 16px; border-radius: 10px; background: var(--surface-2); line-height: 1.7; font-size: 1rem; color: var(--ink); }
   .follow { margin-top: 24px; text-align: center; }
-  .follow p { margin: 0 0 10px; font-weight: 600; }
-  .follow div { display: flex; justify-content: center; gap: 12px; }
-  .follow a { border-radius: 12px; transition: transform .15s; }
-  .follow a:hover { transform: translateY(-2px); }
   .side { position: sticky; top: 84px; display: grid; gap: 18px; }
   .label { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
   html[dir="rtl"] .label { text-transform: none; letter-spacing: 0; }
