@@ -1,6 +1,7 @@
 ---
 import FundingBadge from "./FundingBadge.astro";
 import Logo from "./Logo.astro";
+import Landmark from "./Landmark.astro";
 import { SITE } from "../site.config.mjs";
 import { t, lp, type Lang } from "../i18n/ui";
 import { isoDate, formatDate, type Opp } from "../lib/opps";
@@ -22,6 +23,7 @@ const isNew = Date.now() - +d.published < 7 * 86400000;
 <article class="card" data-slug={opp.slug} data-cat={d.category} data-levels={d.levels.join(",")} data-funding={d.funding}
   data-country={opp.countryKey} data-deadline={isoDate(d.deadline)} data-published={isoDate(d.published)} data-text={text} data-new={isNew ? "1" : undefined}>
   <a class={`thumb promo ${d.category}`} href={href}>
+    <Landmark code={d.countryCode} class="promo-lm" />
     {d.image
       ? <img class="promo-img" src={d.image} alt="" loading="lazy" />
       : <Logo variant="icon" animate={false} class="promo-logo" />}

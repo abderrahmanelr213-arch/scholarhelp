@@ -20,11 +20,13 @@ Newest first. Every change is also in the GitHub commit history.
 - Days-left counter removed. A "Deadline is close" badge shows in the last 14 days, and "Closed" after the deadline.
 
 ### Cards
+- Light line-art landmark of the host country behind every card picture and page banner, for 12 countries and Europe.
 - Announcement-style picture: large opportunity name, flag, small logo and "scholarhelp.com".
 - Apply Now opens our own page.
 - Fully funded tag in red; partially funded tag in amber.
 
 ### Home page
+- Subtitle: Scholarships, conferences and exchange programs in bold green with a highlight line.
 - Compact category tiles. On phones, the categories become a swipeable row and listings appear on the first screen.
 - "How it works" step cards with animated arrows.
 - Gradient subscribe band, and a "Follow us" row with brand icons (Facebook, Instagram, YouTube, TikTok, Telegram).

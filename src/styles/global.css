@@ -87,6 +87,10 @@ button, input, select { font: inherit; color: inherit; }
 .thumb.promo.conferences { border-top-color: #5b3fa0; }
 .thumb.promo.exchange { border-top-color: #1f5fa8; }
 .promo-logo { height: 24px; width: auto; }
+/* Line-art landmark of the host country, behind the title */
+.promo-lm { position: absolute; bottom: 38px; inset-inline-end: 8px; width: 112px; height: calc(100% - 50px); color: var(--teal); opacity: .26; pointer-events: none; }
+.promo-lm.wide { width: 150px; opacity: .2; }
+.thumb.promo > :not(.promo-lm, .promo-site) { position: relative; z-index: 1; }
 .promo-img { max-height: 40px; max-width: 60%; object-fit: contain; }
 .card .promo-title { margin: 0; font-size: 1.68rem; font-weight: 900; line-height: 1.2; letter-spacing: -.01em; color: #06182c; text-wrap: balance; }
 .thumb.promo:hover .promo-title { color: #06182c; }

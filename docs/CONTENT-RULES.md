@@ -30,6 +30,7 @@ Rules Abdou set for ScholarHelp. Follow them for every new listing, page and des
 - **Readable text:** dark, at least 17px, weight 500 or more. Menu links are dark navy and bold.
 - **Real brand icons** for Telegram, Instagram, Facebook, YouTube and TikTok.
 - **Card picture:** announcement style. The opportunity name in large dark text, the country flag, our small logo and "scholarhelp.com". No days-left counter. A "Deadline is close" badge appears in the last 14 days.
+- **Landmark:** a light teal line drawing of the host country's landmark sits behind the card picture and the page banner (Eiffel Tower, Big Ben, Statue of Liberty...). It is picked from the country flag code. A new country needs one line in `src/components/Landmark.astro`; until then the picture simply has no landmark.
 - **Phones first:** most visitors use phones. Opportunities must appear on the first screen of the home page.
 
 ## Social media posts
