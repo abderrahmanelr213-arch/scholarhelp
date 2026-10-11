@@ -11,12 +11,13 @@ import FundingBadge from "../components/FundingBadge.astro";
 import Logo from "../components/Logo.astro";
 import { SITE } from "../site.config.mjs";
 import { t, lp, type Lang } from "../i18n/ui";
-import { isoDate, formatDate, type Opp } from "../lib/opps";
+import { isoDate, formatDate, translatedLangs, type Opp } from "../lib/opps";
 interface Props { lang: Lang; opps: Opp[]; opp: Opp }
 const { lang, opps, opp } = Astro.props;
 const d = opp.entry.data;
 const { Content } = await render(opp.entry);
 const path = `/opportunities/${opp.slug}/`;
+const translatedIn = await translatedLangs("opportunities", opp.slug);
 const url = new URL(lp(lang, path), SITE.url).href;
 const catName = t(lang, `cat.${d.category}` as any);
 const related = opps.filter((o) => o.slug !== opp.slug && o.entry.data.category === d.category).slice(0, 3);
@@ -62,7 +63,7 @@ const shares = [
   ["x", "X", `https://twitter.com/intent/tweet?url=${enc}&text=${shareText}`, '<path d="M17.8 3h3.1l-6.8 7.7L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.2-8.3L1.8 3h6.4l4.4 5.8zm-1.1 16.2h1.7L7.4 4.7H5.6z"/>'],
 ];
 ---
-<Base lang={lang} title={title} description={d.summary} path={path} ogType="article" jsonLd={jsonLd}>
+<Base lang={lang} title={title} description={d.summary} path={path} ogType="article" jsonLd={jsonLd} translatedIn={translatedIn}>
   <div class="container">
     <nav class="crumbs" aria-label="Breadcrumb">
       <a href={lp(lang, "/")}>{t(lang, "nav.home")}</a> › <a href={lp(lang, `/${d.category}/`)}>{catName}</a> › <span>{shortName}</span>

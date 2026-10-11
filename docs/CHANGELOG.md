@@ -4,6 +4,10 @@ Newest first. Every change is also in the GitHub commit history.
 
 ## 2026-10-11
 
+### SEO
+- New `launched` switch in `src/site.config.mjs`. While it is `false`, robots.txt blocks search engines and every page has a noindex tag.
+- Arabic and Pashto pages that still show English text now point Google to the English page, and are left out of hreflang tags and the sitemap. Real translations are listed as before.
+
 ### Listings
 - 15 real, verified listings. Hansen Leadership Institute 2027 (USA) was added.
 - Every listing has a full explanation (about 650 to 950 words), checked against the official pages.

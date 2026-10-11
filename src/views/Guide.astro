@@ -5,12 +5,13 @@ import Newsletter from "../components/Newsletter.astro";
 import AdSlot from "../components/AdSlot.astro";
 import { SITE } from "../site.config.mjs";
 import { t, lp, type Lang } from "../i18n/ui";
-import { isoDate, formatDate, type Guide } from "../lib/opps";
+import { isoDate, formatDate, translatedLangs, type Guide } from "../lib/opps";
 interface Props { lang: Lang; guides: Guide[]; guide: Guide }
 const { lang, guides, guide } = Astro.props;
 const d = guide.entry.data;
 const { Content } = await render(guide.entry);
 const path = `/guides/${guide.slug}/`;
+const translatedIn = await translatedLangs("guides", guide.slug);
 const url = new URL(lp(lang, path), SITE.url).href;
 const more = guides.filter((g) => g.slug !== guide.slug).slice(0, 3);
 const jsonLd = [
@@ -23,7 +24,7 @@ const jsonLd = [
     { "@type": "ListItem", position: 3, name: d.title, item: url } ] },
 ];
 ---
-<Base lang={lang} title={d.title} description={d.summary} path={path} ogType="article" jsonLd={jsonLd}>
+<Base lang={lang} title={d.title} description={d.summary} path={path} ogType="article" jsonLd={jsonLd} translatedIn={translatedIn}>
   <div class="container">
     <nav class="crumbs" aria-label="Breadcrumb"><a href={lp(lang, "/")}>{t(lang, "nav.home")}</a> / <a href={lp(lang, "/guides/")}>{t(lang, "guides.title")}</a></nav>
     <article class="guide">

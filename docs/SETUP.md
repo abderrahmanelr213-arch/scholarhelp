@@ -42,8 +42,9 @@ Paste the Facebook, YouTube and TikTok links into `social` in `src/site.config.m
 2. Vercel → project → **Settings → Domains** → add it and follow the DNS steps.
 3. Change `url` in `src/site.config.mjs`, and `site_url` and `display_url` in `public/admin/config.yml`, to `https://scholarhelp.com`.
 4. Update the Supabase Site URL to the new domain.
-5. Turn off Vercel Deployment Protection.
-6. Add the site to Google Search Console and Bing Webmaster Tools and submit `https://scholarhelp.com/sitemap.xml`.
+5. Set `launched: true` in `src/site.config.mjs`. Until then every page tells Google and Bing not to index it.
+6. Turn off Vercel Deployment Protection.
+7. Add the site to Google Search Console and Bing Webmaster Tools and submit `https://scholarhelp.com/sitemap.xml`.
 
 ## Ads, later
 

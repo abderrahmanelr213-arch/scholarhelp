@@ -3,6 +3,9 @@ export const SITE = {
   name: "ScholarHelp",
   // Your real domain once you buy it, with https:// and no trailing slash.
   url: "https://scholarhelp.com",
+  // false = Google and Bing are told not to index the site (robots.txt blocks everything and every page
+  // gets a noindex tag). Switch to true on launch day, after the real domain works.
+  launched: false,
   email: "contact@scholarhelp.com",
   telegram: "https://t.me/Scholarhelp213",
   social: {
