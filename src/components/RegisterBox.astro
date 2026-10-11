@@ -1,8 +1,8 @@
 ---
-// Registration pop-up (name, email, optional phone) that comes back during a visit.
-// First shown after 20 seconds or 40% scroll; after "Maybe later" it returns 2 minutes later
-// (or on the next page), up to 3 times per visit. On desktop it also opens when the mouse heads
-// for the browser tabs (exit intent). Once someone registers it never shows again.
+// Registration pop-up (name, email, phone) that keeps coming back until the visitor registers.
+// First shown after 20 seconds or 40% scroll, and on any link or button click. After "Maybe later"
+// it returns 30 seconds later (or on the next page), with no limit. On desktop it also opens when the
+// mouse heads for the browser tabs (exit intent). Registering or joining the Telegram group stops it for good.
 // Saved to the Supabase `subscribers` table; no password, no email is sent.
 import { SITE } from "../site.config.mjs";
 import SocialIcon from "./SocialIcon.astro";
@@ -55,7 +55,7 @@ const { lang } = Astro.props;
   import { getSupabase } from "../lib/client/supabase";
   import { DIAL } from "../lib/dial-codes";
   // No limit per visit: it keeps coming back until the visitor registers.
-  const MAX_PER_VISIT = Infinity, FIRST_DELAY = 20e3, AGAIN_AFTER = 120e3;
+  const MAX_PER_VISIT = Infinity, FIRST_DELAY = 20e3, AGAIN_AFTER = 30e3;
   // localStorage remembers a registration for good; sessionStorage counts pop-ups in this visit.
   const read = (s: Storage, k: string) => { try { return JSON.parse(s.getItem(k) || "{}"); } catch { return {}; } };
   const write = (s: Storage, k: string, v: object) => { try { s.setItem(k, JSON.stringify({ ...read(s, k), ...v })); } catch {} };
@@ -102,7 +102,7 @@ const { lang } = Astro.props;
 
     if (!done()) {
       const v = visit();
-      // First pop-up of the visit: after 20 s or 40% scroll. Later ones: 2 minutes after the last close,
+      // First pop-up of the visit: after 20 s or 40% scroll. Later ones: 30 seconds after the last close,
       // or straight away on a new page if that time has already passed.
       const wait = v.closed ? Math.max(3e3, AGAIN_AFTER - (Date.now() - v.closed)) : FIRST_DELAY;
       schedule(wait);
@@ -141,6 +141,14 @@ const { lang } = Astro.props;
       open(false);
     }, true);
     box.querySelectorAll("[data-reg-close]").forEach((b) => b.addEventListener("click", close));
+    // Joining the Telegram group counts like registering: the pop-up stops for good.
+    box.querySelector(".reg-tg")?.addEventListener("click", () => {
+      write(localStorage, "sh-reg", { done: Date.now(), via: "telegram" });
+      clearTimeout(timer);
+      box.hidden = true;
+      document.documentElement.classList.remove("reg-open");
+      proceed();
+    });
     addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen()) close(); });
 
     // Country code picker: flag + dialing code, names in the page language, searchable.
