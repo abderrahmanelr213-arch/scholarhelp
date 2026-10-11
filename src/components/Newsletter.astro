@@ -5,34 +5,26 @@ import { t, type Lang } from "../i18n/ui";
 const { lang } = Astro.props as { lang: Lang };
 const on = Boolean(SITE.supabaseUrl && SITE.supabaseAnonKey);
 ---
-<section class="news" data-news data-lang={lang} data-ok={t(lang, "news.success")} data-err={t(lang, "news.error")}>
-  <div class="news-copy">
-    <h2>{t(lang, "news.title")}</h2>
-    <p>{t(lang, "news.lead")}</p>
-  </div>
-  <div class="news-actions">
-    {on ? (
-      <form class="news-form" data-news-form novalidate>
-        <label class="visually-hidden" for={`news-email-${lang}`}>{t(lang, "news.email")}</label>
-        <input id={`news-email-${lang}`} type="email" name="email" required autocomplete="email" placeholder={t(lang, "news.email")} />
-        <button class="btn" type="submit">{t(lang, "news.subscribe")}</button>
-      </form>
-    ) : (
-      <p class="news-soon">{t(lang, "news.soon")}</p>
-    )}
-    <p class="news-msg" data-news-msg role="status" hidden></p>
-    <div class="news-social">
-      <a class="pill tg" href={SITE.telegram} target="_blank" rel="noopener">
-        <SocialIcon name="telegram" />
-        {t(lang, "nav.telegram")}
+<section class="news" data-news data-on={on ? "1" : undefined} data-lang={lang} data-ok={t(lang, "news.success")} data-err={t(lang, "news.error")} data-soon={t(lang, "news.soon")}>
+  <h2>{t(lang, "news.title")}</h2>
+  <p class="news-lead">{t(lang, "news.lead")}</p>
+  <form class="news-form" data-news-form novalidate>
+    <label class="visually-hidden" for={`news-email-${lang}`}>{t(lang, "news.email")}</label>
+    <input id={`news-email-${lang}`} type="email" name="email" required autocomplete="email" placeholder="you@example.com" />
+    <button type="submit">{t(lang, "news.subscribe")}</button>
+  </form>
+  <p class="news-msg" data-news-msg role="status" hidden></p>
+  <div class="news-social">
+    <a class="pill tg" href={SITE.telegram} target="_blank" rel="noopener">
+      <SocialIcon name="telegram" />
+      {t(lang, "nav.telegram")}
+    </a>
+    {SITE.social.instagram && (
+      <a class="pill ig" href={SITE.social.instagram} target="_blank" rel="noopener">
+        <SocialIcon name="instagram" />
+        {t(lang, "news.instagram")}
       </a>
-      {SITE.social.instagram && (
-        <a class="pill ig" href={SITE.social.instagram} target="_blank" rel="noopener">
-          <SocialIcon name="instagram" />
-          {t(lang, "news.instagram")}
-        </a>
-      )}
-    </div>
+    )}
   </div>
 </section>
 
@@ -47,7 +39,7 @@ const on = Boolean(SITE.supabaseUrl && SITE.supabaseAnonKey);
       const show = (ok: boolean) => { msg.hidden = false; msg.textContent = ok ? box.dataset.ok! : box.dataset.err!; msg.classList.toggle("bad", !ok); };
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return show(false);
       const sb = await getSupabase();
-      if (!sb) return show(false);
+      if (!sb) { msg.hidden = false; msg.textContent = box.dataset.soon!; msg.classList.remove("bad"); return; }
       const { error } = await sb.from("subscribers").insert({ email, lang: box.dataset.lang });
       // A duplicate email means they are already subscribed, which is fine.
       const ok = !error || error.code === "23505";
@@ -58,19 +50,22 @@ const on = Boolean(SITE.supabaseUrl && SITE.supabaseAnonKey);
 </script>
 
 <style>
-  .news { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; padding: 32px; border-radius: 20px; background: linear-gradient(135deg, var(--navy), #12406b); color: #fff; }
-  .news h2 { font-size: 1.6rem; }
-  .news-copy p { margin: 8px 0 0; opacity: .85; }
-  .news-actions { display: grid; gap: 14px; }
-  .news-form { display: flex; gap: 8px; flex-wrap: wrap; }
-  .news-form input { flex: 1 1 220px; min-width: 0; padding: 13px 14px; border-radius: 10px; border: 0; background: #fff; color: var(--ink); }
-  .news-form .btn { background: var(--teal); }
-  .news-form .btn:hover { background: #0b6d6e; }
-  .news-soon { margin: 0; opacity: .9; }
-  .news-msg { margin: 0; font-weight: 700; color: #7fe3d5; }
-  .news-msg.bad { color: #ffb4ab; }
-  .news-social { display: flex; flex-wrap: wrap; gap: 8px; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: rgb(255 255 255 / .12); color: #fff; text-decoration: none; font-weight: 700; font-size: .92rem; }
-  .pill:hover { background: rgb(255 255 255 / .2); }
-  @media (max-width: 760px) { .news { grid-template-columns: 1fr; padding: 24px; } }
+  .news { margin-top: 56px; padding: clamp(36px, 6vw, 64px) 20px; border-radius: 24px; text-align: center; color: #fff; background: linear-gradient(120deg, var(--navy) 0%, #12507a 45%, var(--teal) 100%); display: grid; justify-items: center; gap: 14px; box-shadow: 0 18px 40px rgb(12 43 76 / .18); }
+  .news h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); font-weight: 800; }
+  .news-lead { margin: 0; max-width: 52ch; opacity: .92; }
+  .news-form { margin-top: 10px; width: 100%; max-width: 640px; display: flex; gap: 12px; }
+  .news-form input { flex: 1; min-width: 0; height: 58px; padding: 0 26px; border-radius: 999px; border: 0; background: #fff; color: var(--ink); font-size: 1.05rem; box-shadow: 0 6px 18px rgb(0 0 0 / .12); }
+  .news-form input:focus { outline: 3px solid rgb(255 255 255 / .55); outline-offset: 2px; }
+  .news-form button { flex: none; height: 52px; align-self: center; padding: 0 28px; border-radius: 999px; border: 0; background: #fff; color: var(--navy); font-weight: 800; font-size: 1.02rem; cursor: pointer; box-shadow: 0 6px 18px rgb(0 0 0 / .12); transition: transform .15s, background .15s; }
+  .news-form button:hover { background: #e9fbfa; transform: translateY(-1px); }
+  .news-msg { margin: 0; font-weight: 700; color: #b9f3ea; }
+  .news-msg.bad { color: #ffd0ca; }
+  .news-social { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 6px; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; background: rgb(255 255 255 / .14); color: #fff; text-decoration: none; font-weight: 700; font-size: .95rem; }
+  .pill:hover { background: rgb(255 255 255 / .24); }
+  @media (max-width: 560px) {
+    .news-form { flex-direction: column; }
+    .news-form input { flex: none; width: 100%; }
+    .news-form button { width: 100%; height: 54px; }
+  }
 </style>
