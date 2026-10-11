@@ -19,13 +19,13 @@ Built with [Astro](https://astro.build) as a fast static site: every opportunity
 
 Pages: home, an opportunity browser with filters (country, level, category, funding, deadline, kept in the link), a guides section, a student account page, one page per category, one page per opportunity, About, Contact, Privacy, Terms, plus `sitemap.xml` (with hreflang for all languages) and `robots.txt`.
 
-## Going live (free hosting, about $10/year for the domain)
+## Going live (free hosting on Vercel)
 
-1. **GitHub**: create a repository (for example `scholarhelp`) and push this folder to it.
-2. **Cloudflare Pages** (free): Workers & Pages → Create → Pages → Connect to Git → pick the repo.
-   Build command `npm run build`, output folder `dist`. Every commit now redeploys the site in about a minute.
-3. **Domain**: buy `scholarhelp.com` (Cloudflare Registrar sells .com at cost, about $10.50/year), then in the Pages project → Custom domains → add it.
-4. Update `url` in `src/site.config.mjs` and `repo`, `site_url` in `public/admin/config.yml`.
+The site is hosted on Vercel (project `website`) and linked to this GitHub repository.
+Every push to the `main` branch, including posts saved from the admin panel, builds and publishes the site automatically in a minute or two.
+
+1. **Domain**: buy `scholarhelp.com` (about $10/year), then in Vercel → project → Settings → Domains add it and follow the DNS steps.
+2. Update `url` in `src/site.config.mjs` and `site_url` in `public/admin/config.yml` to the new domain.
 
 ## Posting opportunities (admin panel)
 
