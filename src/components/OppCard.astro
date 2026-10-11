@@ -43,7 +43,6 @@ const isNew = Date.now() - +d.published < 7 * 86400000;
     <div class="card-deadline">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
       {d.deadline ? <time datetime={isoDate(d.deadline)}>{formatDate(d.deadline, lang)}</time> : <span>{t(lang, "opp.rolling")}</span>}
-      <span class="left" data-left hidden></span>
     </div>
     <a class="btn apply-now" href={href}>{t(lang, "card.applyNow")}
       <svg class="flip-rtl" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>

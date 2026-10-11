@@ -25,6 +25,8 @@ const strings = { closed: t(lang, "opp.closed"), today: t(lang, "opp.today"), ma
   document.querySelectorAll("[data-left]").forEach(function (el) {
     var host = el.closest("[data-deadline]");
     window.__shLabel(el, host ? host.getAttribute("data-deadline") : "");
-    if (host && host.classList.contains("card") && window.__shDays(host.getAttribute("data-deadline")) < 0) host.classList.add("is-closed");
+  });
+  document.querySelectorAll(".card[data-deadline]").forEach(function (card) {
+    if (window.__shDays(card.getAttribute("data-deadline")) < 0) card.classList.add("is-closed");
   });
 </script>
