@@ -5,8 +5,9 @@ backend:
   branch: main
   # base_url: https://your-auth-worker.workers.dev  # optional, for "Sign in with GitHub" (see README)
 
-site_url: https://scholarhelp.com
-display_url: https://scholarhelp.com
+# Change both to https://scholarhelp.com once the domain is connected.
+site_url: https://website-rho-ten-93.vercel.app
+display_url: https://website-rho-ten-93.vercel.app
 logo_url: /brand-icon.png
 media_folder: public/uploads
 public_folder: /uploads
@@ -51,10 +52,10 @@ collections:
       - { name: summary, label: Short summary, widget: text, i18n: true, hint: "One or two sentences in your own words. Shown on cards and in Google results (about 150 characters)." }
       - { name: image, label: "Picture (university or organization logo)", widget: image, i18n: duplicate, required: false, hint: "Optional. Without a picture the card shows the country flag." }
       - { name: host, label: Offered by, widget: string, i18n: true, required: false }
+      - { name: hostUrl, label: "Organisation official website (homepage)", widget: string, i18n: duplicate, required: false, hint: "Always fill this in. The Offered by name links here, e.g. https://www.ox.ac.uk/" }
       - { name: officialUrl, label: "Official announcement page", widget: string, i18n: duplicate, required: false, hint: "The Opportunity name links here. Leave empty to use the Apply link." }
       - { name: cardTitle, label: "Short headline for the card picture", widget: string, i18n: true, required: false }
       - { name: deadlineNote, label: "Second deadline / deadline note", widget: string, i18n: true, required: false, hint: "e.g. U.S. applicants: 15 March 2027, 11:55 PM Pacific Time" }
-      - { name: hostUrl, label: "Organisation official website (homepage)", widget: string, i18n: duplicate, required: false, hint: "The Offered by name links here, e.g. https://www.ox.ac.uk/" }
       - { name: country, label: Host country, widget: string, i18n: true }
       - { name: countryCode, label: Country flag code, widget: string, i18n: duplicate, required: false, hint: "Two letters: gb, us, de, fr, tr, jp, kr, sa, ae, qa, cn, my... Use eu for Europe. Leave empty for worldwide." }
       - { name: location, label: "Location (city, country)", widget: string, i18n: true, required: false }
@@ -78,12 +79,12 @@ collections:
           - { label: Partially funded, value: partial }
           - { label: Travel grant, value: travel }
       - { name: deadline, label: Deadline, widget: datetime, i18n: duplicate, required: false, time_format: false, format: "YYYY-MM-DD", hint: "Leave empty if applications are open all year." }
-      - { name: link, label: Official link, widget: string, i18n: duplicate, hint: "The official page where students apply. Must start with https://" }
+      - { name: link, label: Official link, widget: string, i18n: duplicate, hint: "Where students apply (the orange Apply here button). Must start with https://" }
       - { name: published, label: Date posted, widget: datetime, i18n: duplicate, time_format: false, format: "YYYY-MM-DD", default: "{{now}}" }
       - { name: featured, label: Featured, widget: boolean, i18n: duplicate, default: false, required: false }
       - { name: sample, label: Sample listing (shows a warning), widget: boolean, i18n: duplicate, default: false, required: false }
       - { name: draft, label: Draft (hidden from the site), widget: boolean, i18n: duplicate, default: false, required: false }
-      - { name: body, label: Full description, widget: markdown, i18n: true, hint: "Use headings: About, Financial benefits, Eligibility criteria, How to apply. Write in your own words." }
+      - { name: body, label: Full description, widget: markdown, i18n: true, hint: "Use ## headings in this order: About, Host institution / country, Financial benefits, Eligibility criteria, Required documents, How to apply, Selection process and timeline, Tips for a strong application. Only facts from the official site, in your own words." }
 
   - name: guides
     label: Guides
