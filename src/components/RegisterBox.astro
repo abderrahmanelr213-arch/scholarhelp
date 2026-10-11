@@ -25,8 +25,20 @@ const { lang } = Astro.props;
       <input id={`reg-name-${lang}`} name="name" type="text" required autocomplete="name" maxlength="80" placeholder={t(lang, "reg.name")} />
       <label class="visually-hidden" for={`reg-email-${lang}`}>{t(lang, "reg.email")}</label>
       <input id={`reg-email-${lang}`} name="email" type="email" required autocomplete="email" placeholder={t(lang, "reg.email")} />
-      <label class="visually-hidden" for={`reg-phone-${lang}`}>{t(lang, "reg.phone")}</label>
-      <input id={`reg-phone-${lang}`} name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30" placeholder={t(lang, "reg.phone")} />
+      <div class="reg-phone" dir="ltr" data-phone>
+        <button class="reg-cc" type="button" data-cc-btn aria-haspopup="listbox" aria-expanded="false" aria-label={t(lang, "reg.country")}>
+          <img data-cc-flag src="/flags/un.svg" alt="" width="24" height="18" hidden />
+          <svg data-cc-globe width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>
+          <span data-cc-code>+</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <label class="visually-hidden" for={`reg-phone-${lang}`}>{t(lang, "reg.phone")}</label>
+        <input id={`reg-phone-${lang}`} name="phone" type="tel" required autocomplete="tel-national" inputmode="tel" maxlength="20" placeholder={t(lang, "reg.phone")} />
+        <div class="reg-cc-list" data-cc-panel dir={lang === "en" ? "ltr" : "rtl"} hidden>
+          <input type="search" data-cc-search placeholder={t(lang, "reg.search")} aria-label={t(lang, "reg.search")} dir="auto" />
+          <ul role="listbox" data-cc-items></ul>
+        </div>
+      </div>
       <button class="btn reg-submit" type="submit">{t(lang, "reg.submit")}</button>
     </form>
     <p class="reg-msg" data-reg-msg role="status" hidden></p>
@@ -39,6 +51,7 @@ const { lang } = Astro.props;
 
 <script>
   import { getSupabase } from "../lib/client/supabase";
+  import { DIAL } from "../lib/dial-codes";
   const MAX_PER_VISIT = 3, FIRST_DELAY = 20e3, AGAIN_AFTER = 120e3;
   // localStorage remembers a registration for good; sessionStorage counts pop-ups in this visit.
   const read = (s: Storage, k: string) => { try { return JSON.parse(s.getItem(k) || "{}"); } catch { return {}; } };
@@ -107,17 +120,84 @@ const { lang } = Astro.props;
     box.querySelectorAll("[data-reg-close]").forEach((b) => b.addEventListener("click", close));
     addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen()) close(); });
 
+    // Country code picker: flag + dialing code, names in the page language, searchable.
+    const phone = box.querySelector<HTMLElement>("[data-phone]")!;
+    const ccBtn = phone.querySelector<HTMLButtonElement>("[data-cc-btn]")!;
+    const panel = phone.querySelector<HTMLElement>("[data-cc-panel]")!;
+    const search = phone.querySelector<HTMLInputElement>("[data-cc-search]")!;
+    const list = phone.querySelector<HTMLElement>("[data-cc-items]")!;
+    const lang = box.dataset.lang || "en";
+    let names: Intl.DisplayNames | null = null;
+    try { names = new Intl.DisplayNames([lang, "en"], { type: "region" }); } catch {}
+    const countries = DIAL.split(",").map((p) => { const [iso, code] = p.split(":"); return { iso, code, name: names?.of(iso) || iso }; })
+      .sort((a, b) => a.name.localeCompare(b.name, lang));
+    let cc = "";
+    const pick = (iso: string) => {
+      const c = countries.find((x) => x.iso === iso); if (!c) return;
+      cc = c.code;
+      const flag = phone.querySelector<HTMLImageElement>("[data-cc-flag]")!;
+      flag.src = `/flags/${iso.toLowerCase()}.svg`; flag.alt = c.name; flag.hidden = false;
+      phone.querySelector<SVGElement>("[data-cc-globe]")!.style.display = "none";
+      phone.querySelector("[data-cc-code]")!.textContent = "+" + c.code;
+    };
+    // Guess the visitor's country from their time zone, then their browser language.
+    const TZ: Record<string, string> = { Algiers: "DZ", Kabul: "AF", Cairo: "EG", Casablanca: "MA", Tunis: "TN", Tripoli: "LY", Khartoum: "SD", Riyadh: "SA", Baghdad: "IQ", Amman: "JO", Beirut: "LB", Damascus: "SY", Dubai: "AE", Muscat: "OM", Qatar: "QA", Kuwait: "KW", Bahrain: "BH", Aden: "YE", Gaza: "PS", Hebron: "PS", Nouakchott: "MR", Karachi: "PK", Tehran: "IR", Istanbul: "TR", Kolkata: "IN", Calcutta: "IN", Dhaka: "BD", Jakarta: "ID", Kuala_Lumpur: "MY", Lagos: "NG", Nairobi: "KE", Accra: "GH", Addis_Ababa: "ET", Mogadishu: "SO", Dakar: "SN", Tashkent: "UZ", Dushanbe: "TJ", London: "GB", Paris: "FR", Berlin: "DE", Madrid: "ES", Rome: "IT" };
+    const guess = () => {
+      try { const z = Intl.DateTimeFormat().resolvedOptions().timeZone.split("/").pop()!; if (TZ[z]) return TZ[z]; } catch {}
+      for (const l of navigator.languages || []) { const r = l.split("-")[1]; if (r && r.length === 2 && countries.some((c) => c.iso === r.toUpperCase())) return r.toUpperCase(); }
+      return lang === "ps" ? "AF" : "";
+    };
+    const g = guess(); if (g) pick(g);
+    const render = (q: string) => {
+      const n = q.trim().toLowerCase().replace(/^\+/, "");
+      list.innerHTML = "";
+      countries.filter((c) => !n || c.name.toLowerCase().includes(n) || c.code.startsWith(n) || c.iso.toLowerCase() === n).forEach((c) => {
+        const li = document.createElement("li");
+        li.setAttribute("role", "option"); li.tabIndex = 0; li.dataset.iso = c.iso;
+        li.innerHTML = `<img src="/flags/${c.iso.toLowerCase()}.svg" alt="" width="22" height="16" loading="lazy"><span dir="auto"></span><b>+${c.code}</b>`;
+        li.querySelector("span")!.textContent = c.name;
+        list.append(li);
+      });
+    };
+    const togglePanel = (show: boolean) => {
+      panel.hidden = !show; ccBtn.setAttribute("aria-expanded", String(show));
+      if (show) { search.value = ""; render(""); search.focus(); }
+    };
+    ccBtn.addEventListener("click", () => togglePanel(panel.hidden));
+    search.addEventListener("input", () => render(search.value));
+    const choose = (e: Event) => {
+      const li = (e.target as HTMLElement).closest<HTMLElement>("li[data-iso]"); if (!li) return;
+      pick(li.dataset.iso!); togglePanel(false); phone.querySelector<HTMLInputElement>("input[name=phone]")!.focus();
+    };
+    list.addEventListener("click", choose);
+    list.addEventListener("keydown", (e) => { if (e.key === "Enter") choose(e); });
+    search.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); (list.firstElementChild as HTMLElement)?.click(); } });
+    document.addEventListener("click", (e) => { if (!panel.hidden && !phone.contains(e.target as Node)) togglePanel(false); });
+    // Typing a number that starts with + picks the country automatically.
+    phone.querySelector<HTMLInputElement>("input[name=phone]")!.addEventListener("input", (e) => {
+      const v = (e.target as HTMLInputElement).value.replace(/[^\d+]/g, "");
+      if (!v.startsWith("+")) return;
+      const d = v.slice(1);
+      const hit = [...countries].sort((a, b) => b.code.length - a.code.length).find((c) => d.startsWith(c.code));
+      if (hit && hit.code !== cc) pick(hit.iso);
+    });
+
     const form = box.querySelector<HTMLFormElement>("[data-reg-form]")!;
     const msg = box.querySelector<HTMLElement>("[data-reg-msg]")!;
     const show = (text: string, ok: boolean) => { msg.hidden = false; msg.textContent = text; msg.classList.toggle("bad", !ok); };
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const val = (n: string) => (form.elements.namedItem(n) as HTMLInputElement).value.trim();
-      const name = val("name"), email = val("email").toLowerCase(), phone = val("phone").replace(/[^\d+]/g, "");
-      if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return show(box.dataset.err!, false);
-      const btn = form.querySelector("button")!; btn.disabled = true;
+      const name = val("name"), email = val("email").toLowerCase();
+      // Store the full international number, e.g. +213555123456.
+      let local = val("phone").replace(/[^\d+]/g, "");
+      if (local.startsWith("+")) local = local.slice(1).startsWith(cc) ? local.slice(1 + cc.length) : "";
+      local = local.replace(/\D/g, "").replace(/^0+/, "");
+      const fullPhone = cc && local.length >= 6 && local.length <= 14 ? `+${cc}${local}` : "";
+      if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !fullPhone) return show(box.dataset.err!, false);
+      const btn = form.querySelector<HTMLButtonElement>(".reg-submit")!; btn.disabled = true;
       const sb = await getSupabase();
-      const row = { name, email, lang: box.dataset.lang, ...(phone ? { phone } : {}) };
+      const row = { name, email, phone: fullPhone, lang: box.dataset.lang };
       const { error } = sb ? await sb.from("subscribers").insert(row) : { error: { code: "off" } as any };
       btn.disabled = false;
       // A duplicate email means they are already registered, which is fine.
@@ -146,8 +226,19 @@ const { lang } = Astro.props;
   .reg form { display: grid; gap: 10px; }
   .reg form[hidden] { display: none; }
   .reg input { width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--ink); font: inherit; font-size: 1rem; text-align: start; }
-  /* Browsers force phone fields left-to-right; keep the hint on the right in Arabic and Pashto until a number is typed. */
-  :global(html[dir="rtl"]) .reg input[type="tel"]:placeholder-shown { direction: rtl; }
+  .reg-phone { display: flex; flex-wrap: wrap; gap: 8px; }
+  .reg-phone input[type="tel"] { flex: 1; min-width: 0; text-align: left; }
+  .reg-cc { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+  .reg-cc img { border-radius: 3px; box-shadow: 0 0 0 1px rgb(12 43 76 / .12); object-fit: cover; }
+  .reg-cc:focus-visible { outline: 2px solid var(--teal); }
+  .reg-cc-list { flex: 0 0 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 16px 40px rgb(6 24 44 / .25); padding: 8px; display: grid; gap: 6px; }
+  .reg-cc-list[hidden] { display: none; }
+  .reg-cc-list ul { list-style: none; margin: 0; padding: 0; max-height: 200px; overflow: auto; text-align: start; }
+  .reg-cc-list :global(li) { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: .95rem; }
+  .reg-cc-list :global(li:hover), .reg-cc-list :global(li:focus) { background: var(--brand-soft); outline: none; }
+  .reg-cc-list :global(li img) { flex: none; border-radius: 2px; object-fit: cover; }
+  .reg-cc-list :global(li span) { flex: 1; min-width: 0; }
+  .reg-cc-list :global(li b) { color: var(--muted); font-variant-numeric: tabular-nums; }
   .reg input:focus { outline: 2px solid var(--teal); outline-offset: 0; border-color: var(--teal); }
   .reg-submit { width: 100%; padding: 14px; font-size: 1.05rem; background: #d92d20; }
   .reg-submit:hover { background: #b42318; }
