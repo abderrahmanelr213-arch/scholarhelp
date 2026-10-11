@@ -3,6 +3,7 @@ title: MBZUAI Master's and PhD Scholarships 2027 in Abu Dhabi (Fully Funded)
 category: scholarships
 summary: Study a master's or PhD in artificial intelligence at MBZUAI in Abu Dhabi with free tuition, a monthly stipend, health insurance and a yearly flight home.
 host: Mohamed bin Zayed University of Artificial Intelligence (MBZUAI)
+hostUrl: https://mbzuai.ac.ae/
 country: United Arab Emirates
 countryCode: "ae"
 eligible: STEM graduates of all nationalities

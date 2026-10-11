@@ -3,6 +3,7 @@ title: Ernst Mach Grant Worldwide 2027/28 for Research Stays in Austria
 category: exchange
 summary: An Austrian grant for PhD students and young postdocs from any country to spend a research stay at an Austrian university in 2027/28.
 host: OeAD (Austria's Agency for Education and Internationalisation)
+hostUrl: https://oead.at/en/
 country: Austria
 countryCode: "at"
 eligible: Young researchers from any country except Austria, aged 35 or under

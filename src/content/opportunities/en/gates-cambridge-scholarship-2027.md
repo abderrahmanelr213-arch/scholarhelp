@@ -3,6 +3,7 @@ title: Gates Cambridge Scholarship 2027 in the UK (Fully Funded)
 category: scholarships
 summary: Full-cost scholarships for students from outside the UK to do a PhD or a one-year postgraduate course at the University of Cambridge, starting in 2027.
 host: Gates Cambridge Trust, University of Cambridge
+hostUrl: https://www.gatescambridge.org/
 country: United Kingdom
 countryCode: "gb"
 eligible: Citizens of any country outside the United Kingdom

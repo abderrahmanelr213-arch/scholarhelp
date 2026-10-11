@@ -3,6 +3,7 @@ title: OIST PhD Program 2027 in Okinawa, Japan (Fully Funded)
 category: scholarships
 summary: A fully funded five-year PhD in science at OIST in Japan, open to all nationalities, with full tuition, a yearly stipend, subsidized housing and relocation costs.
 host: Okinawa Institute of Science and Technology Graduate University (OIST)
+hostUrl: https://www.oist.jp/
 country: Japan
 countryCode: "jp"
 eligible: Bachelor's or master's graduates of any nationality

@@ -3,6 +3,7 @@ title: Japan Foundation Japanese Studies Fellowship 2027 in Japan (Fully Funded)
 category: exchange
 summary: A Japan Foundation fellowship that brings PhD candidates and researchers in Japan-related humanities and social sciences to Japan for 21 days to 12 months, with airfare and a stipend.
 host: The Japan Foundation
+hostUrl: https://www.jpf.go.jp/e/
 country: Japan
 countryCode: "jp"
 eligible: Citizens or permanent residents of any country with diplomatic ties to Japan

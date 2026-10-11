@@ -3,6 +3,7 @@ title: ETH Zurich Excellence Scholarship 2027 in Switzerland (Fully Funded)
 category: scholarships
 summary: ETH Zurich's Excellence Scholarship and Opportunity Programme gives top master's students a living stipend plus a full tuition waiver. Apply 1 to 30 November 2026.
 host: ETH Zurich
+hostUrl: https://ethz.ch/en.html
 country: Switzerland
 countryCode: "ch"
 eligible: Excellent bachelor's graduates of any nationality (top 10% of their class)

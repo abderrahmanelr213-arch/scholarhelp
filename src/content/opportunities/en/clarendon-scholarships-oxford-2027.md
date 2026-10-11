@@ -3,6 +3,7 @@ title: Clarendon Scholarships 2027 at the University of Oxford (Fully Funded)
 category: scholarships
 summary: Oxford's flagship graduate scholarship pays course fees and a living grant for master's and DPhil students of any nationality, with no separate application.
 host: Clarendon Fund, University of Oxford
+hostUrl: https://www.ox.ac.uk/
 country: United Kingdom
 countryCode: "gb"
 eligible: Applicants of any nationality to an Oxford graduate course

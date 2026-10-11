@@ -3,6 +3,7 @@ title: Yenching Academy 2027 at Peking University (Fully Funded)
 category: scholarships
 summary: A fully funded master's in China Studies at Peking University for future leaders from any country, covering tuition, housing, a monthly stipend and a round-trip flight.
 host: Yenching Academy, Peking University
+hostUrl: https://yenchingacademy.pku.edu.cn/
 country: China
 countryCode: "cn"
 eligible: Bachelor's graduates (or final-year students) of any nationality

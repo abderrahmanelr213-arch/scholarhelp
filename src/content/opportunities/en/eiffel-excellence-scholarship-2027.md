@@ -3,6 +3,7 @@ title: Eiffel Excellence Scholarship 2027 in France (Fully Funded)
 category: scholarships
 summary: The French government's Eiffel scholarship gives international master's and PhD students a monthly allowance to study in France. Universities submit files by 6 January 2027.
 host: French Ministry for Europe and Foreign Affairs, Campus France
+hostUrl: https://www.campusfrance.org/en
 country: France
 countryCode: "fr"
 eligible: International students (non-French) applying through a French university

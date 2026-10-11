@@ -3,6 +3,7 @@ title: Slovakia National Scholarship Programme 2027 for Exchange Stays (Partiall
 category: exchange
 summary: Spend a semester or research stay at a Slovak university in spring 2027 with a monthly stipend and a travel grant. Open to citizens of any country except Slovakia.
 host: Government of the Slovak Republic, administered by SAIA
+hostUrl: https://www.saia.sk/en/
 country: Slovakia
 countryCode: "sk"
 eligible: Citizens of any country except Slovakia, enrolled at a university outside Slovakia

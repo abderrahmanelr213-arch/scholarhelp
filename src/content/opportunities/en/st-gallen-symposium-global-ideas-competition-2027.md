@@ -3,6 +3,7 @@ title: St. Gallen Symposium Global Ideas Competition 2027 in Switzerland (Fully 
 category: conferences
 summary: Write a short solution brief and video to win an expenses-paid seat as a Leader of Tomorrow at the 56th St. Gallen Symposium in Switzerland, plus a share of CHF 20,000.
 host: St. Gallen Symposium
+hostUrl: https://symposium.org/
 country: Switzerland
 countryCode: "ch"
 eligible: Master's and PhD students worldwide born in 1997 or later

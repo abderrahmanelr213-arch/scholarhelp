@@ -3,6 +3,7 @@ title: Erasmus Mundus Master in Law and Economics (EMLE) 2027 Scholarship (Fully
 category: scholarships
 summary: Study law and economics at several European universities with an Erasmus Mundus scholarship. Non-European applicants must apply by 31 December 2026.
 host: European Master in Law and Economics (EMLE) consortium
+hostUrl: https://www.emle.org/
 country: Europe
 countryCode: "eu"
 eligible: Graduates of any nationality with a 240 ECTS (or equivalent) degree, ideally in law or economics

@@ -3,6 +3,7 @@ title: Heidelberg Laureate Forum 2027 for Young Researchers in Germany (Partiall
 category: conferences
 summary: Spend a week in Heidelberg with top laureates in math and computer science. Hotel and meals are paid, and travel grants are available for those who need them.
 host: Heidelberg Laureate Forum Foundation
+hostUrl: https://www.heidelberg-laureate-forum.org/
 country: Germany
 countryCode: "de"
 eligible: Bachelor's, master's, PhD students and postdocs in mathematics or computer science, worldwide

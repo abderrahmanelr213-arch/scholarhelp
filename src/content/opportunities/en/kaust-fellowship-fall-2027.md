@@ -3,6 +3,7 @@ title: KAUST Fellowship for MS and PhD, Fall 2027 (Fully Funded)
 category: scholarships
 summary: Every admitted MS and PhD student at KAUST in Saudi Arabia gets a fellowship that covers full tuition, housing, health insurance, relocation and a living stipend.
 host: King Abdullah University of Science and Technology (KAUST)
+hostUrl: https://www.kaust.edu.sa/
 country: Saudi Arabia
 countryCode: "sa"
 eligible: Students of all nationalities with a strong STEM degree (GPA 3.0/4.0 or higher)

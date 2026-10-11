@@ -10,6 +10,8 @@ const opportunities = defineCollection({
     /** Optional picture for the card: the university or organization logo. Without it the card shows the country flag. */
     image: z.string().optional().nullable(),
     host: z.string().optional(),
+    // Official homepage of the organisation offering it (the "Offered by" name links here).
+    hostUrl: z.string().url().optional(),
     country: z.string(),
     /** Two-letter country code for the flag (gb, de, tr...). "eu" for Europe, empty for worldwide. */
     countryCode: z.string().optional().nullable(),
