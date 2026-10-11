@@ -14,7 +14,7 @@ export const SITE = {
   // Student accounts and email subscriptions (Supabase, free plan). Paste the Project URL and the
   // "anon public" key from Supabase → Project Settings → API. Empty = sign in shows "coming soon"
   // and saved opportunities stay in the visitor's browser only.
-  supabaseUrl: "",
+  supabaseUrl: "https://akowmqhgwtswhytrmbek.supabase.co",
   supabaseAnonKey: "",
   // Turn on after enabling the Google provider in Supabase → Authentication → Providers.
   googleSignIn: false,
