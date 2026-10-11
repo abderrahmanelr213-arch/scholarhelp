@@ -196,6 +196,7 @@ const shares = [
   .banner { position: relative; margin-top: 18px; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: radial-gradient(circle at 80% 15%, rgb(15 141 142 / .14), transparent 60%), linear-gradient(180deg, #fff, #eef6f7); border: 1px solid var(--line); display: grid; grid-template-rows: 1fr auto auto; justify-items: center; align-items: center; padding: 22px 22px 54px; text-align: center; }
   :global(.banner-lm) { position: absolute; bottom: 48px; inset-inline-end: 4%; width: 26%; height: calc(100% - 62px); color: var(--teal); opacity: .24; pointer-events: none; }
   :global(.banner-lm.wide) { width: 32%; opacity: .18; }
+  :global(.banner-lm.center) { inset-inline: 0; margin-inline: auto; width: 100%; opacity: .2; }
   .banner-art, .banner-title, :global(.banner-brand) { position: relative; z-index: 1; }
   .banner-art { display: grid; place-items: center; min-height: 0; }
   .banner-flag { width: clamp(110px, 24vw, 170px); height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; box-shadow: 0 6px 20px rgb(12 43 76 / .22); }
