@@ -35,6 +35,8 @@ Newest first. Every change is also in the GitHub commit history.
 - Opens after 20 seconds, at 40% scroll, and on any link or button click.
 - After "Maybe later", it comes back 30 seconds later, with no limit.
 - Stops for good after registering or joining the Telegram group.
+- Registered visitors are remembered for good (browser storage plus a 5-year cookie), so Apply opens straight away on any later visit.
+- "Already registered? Continue with your email" on a new phone or browser: email only, checked against the registration list once Supabase is connected.
 - Saves to Supabase once the anon key is added.
 
 ### Search

@@ -10,7 +10,7 @@ import { t, type Lang } from "../i18n/ui";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 ---
-<div class="reg" data-reg data-lang={lang} data-ok={t(lang, "reg.ok")} data-err={t(lang, "reg.err")} data-fail={t(lang, "reg.fail")} hidden>
+<div class="reg" data-reg data-lang={lang} data-ok={t(lang, "reg.ok")} data-err={t(lang, "reg.err")} data-fail={t(lang, "reg.fail")} data-welcome={t(lang, "reg.welcome")} data-not-found={t(lang, "reg.notFound")} data-err-email={t(lang, "reg.errEmail")} hidden>
   <div class="reg-shade" data-reg-close></div>
   <div class="reg-card" role="dialog" aria-modal="true" aria-labelledby={`reg-title-${lang}`}>
     <button class="reg-close" type="button" data-reg-close aria-label={t(lang, "reg.close")}>
@@ -24,10 +24,10 @@ const { lang } = Astro.props;
     <p class="reg-lead">{t(lang, "reg.lead")}</p>
     <form data-reg-form novalidate>
       <label class="visually-hidden" for={`reg-name-${lang}`}>{t(lang, "reg.name")}</label>
-      <input id={`reg-name-${lang}`} name="name" type="text" required autocomplete="name" maxlength="80" placeholder={t(lang, "reg.name")} />
+      <input data-full id={`reg-name-${lang}`} name="name" type="text" required autocomplete="name" maxlength="80" placeholder={t(lang, "reg.name")} />
       <label class="visually-hidden" for={`reg-email-${lang}`}>{t(lang, "reg.email")}</label>
       <input id={`reg-email-${lang}`} name="email" type="email" required autocomplete="email" placeholder={t(lang, "reg.email")} />
-      <div class="reg-phone" dir="ltr" data-phone>
+      <div class="reg-phone" dir="ltr" data-phone data-full>
         <button class="reg-cc" type="button" data-cc-btn aria-haspopup="listbox" aria-expanded="false" aria-label={t(lang, "reg.country")}>
           <img data-cc-flag src="/flags/un.svg" alt="" width="24" height="18" hidden />
           <svg data-cc-globe width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>
@@ -41,7 +41,8 @@ const { lang } = Astro.props;
           <ul role="listbox" data-cc-items></ul>
         </div>
       </div>
-      <button class="btn reg-submit" type="submit">{t(lang, "reg.submit")}</button>
+      <button class="btn reg-submit" type="submit" data-label-reg={t(lang, "reg.submit")} data-label-back={t(lang, "reg.backGo")}>{t(lang, "reg.submit")}</button>
+      <button class="reg-switch" type="button" data-reg-switch data-to-back={t(lang, "reg.already")} data-to-reg={t(lang, "reg.newHere")}>{t(lang, "reg.already")}</button>
     </form>
     <p class="reg-msg" data-reg-msg role="status" hidden></p>
     <a class="btn reg-go" data-reg-go href="#" target="_blank" rel="noopener nofollow" hidden>{t(lang, "reg.go")} ↗</a>
@@ -62,8 +63,14 @@ const { lang } = Astro.props;
   const read = (s: Storage, k: string) => { try { return JSON.parse(s.getItem(k) || "{}"); } catch { return {}; } };
   const write = (s: Storage, k: string, v: object) => { try { s.setItem(k, JSON.stringify({ ...read(s, k), ...v })); } catch {} };
   // done: the pop-ups stop (registered or joined Telegram). registered: the form was filled in, which unlocks official links.
-  const done = () => !!read(localStorage, "sh-reg").done;
-  const registered = () => { const r = read(localStorage, "sh-reg"); return !!r.done && r.via !== "telegram"; };
+  // A registration is remembered for good: in localStorage and in a 5-year cookie as a backup.
+  const hasCookie = () => /(?:^|; )sh_reg=1/.test(document.cookie);
+  const remember = () => {
+    write(localStorage, "sh-reg", { done: Date.now(), via: "form" });
+    document.cookie = "sh_reg=1; max-age=157680000; path=/; SameSite=Lax";
+  };
+  const done = () => hasCookie() || !!read(localStorage, "sh-reg").done;
+  const registered = () => { if (hasCookie()) return true; const r = read(localStorage, "sh-reg"); return !!r.done && r.via !== "telegram"; };
   const visit = () => read(sessionStorage, "sh-reg-visit") as { shown?: number; closed?: number };
 
   const box = document.querySelector<HTMLElement>("[data-reg]");
@@ -222,10 +229,50 @@ const { lang } = Astro.props;
     const form = box.querySelector<HTMLFormElement>("[data-reg-form]")!;
     const msg = box.querySelector<HTMLElement>("[data-reg-msg]")!;
     const show = (text: string, ok: boolean) => { msg.hidden = false; msg.textContent = text; msg.classList.toggle("bad", !ok); };
+    // "Already registered?": unlock with just the email (new phone or browser).
+    let returning = false;
+    const sw = box.querySelector<HTMLButtonElement>("[data-reg-switch]")!;
+    const submitBtn = form.querySelector<HTMLButtonElement>(".reg-submit")!;
+    sw.addEventListener("click", () => {
+      returning = !returning;
+      form.querySelectorAll<HTMLElement>("[data-full]").forEach((el) => (el.hidden = returning));
+      submitBtn.textContent = returning ? submitBtn.dataset.labelBack! : submitBtn.dataset.labelReg!;
+      sw.textContent = returning ? sw.dataset.toReg! : sw.dataset.toBack!;
+      msg.hidden = true;
+      form.querySelector<HTMLInputElement>("input[name=email]")!.focus();
+    });
+    const unlocked = (first: string) => {
+      remember();
+      clearTimeout(timer);
+      form.hidden = true;
+      gateLine.hidden = true;
+      show(first ? box.dataset.ok!.replace("{name}", first) : box.dataset.welcome!, true);
+      const target = pending as HTMLAnchorElement | null;
+      if (gated && target?.href) {
+        // Browsers block new tabs opened without a tap, so the official link becomes a button to tap.
+        pending = null; gated = false;
+        const go = box.querySelector<HTMLAnchorElement>("[data-reg-go]")!;
+        go.href = target.href; go.hidden = false;
+        go.addEventListener("click", () => { box.hidden = true; document.documentElement.classList.remove("reg-open"); }, { once: true });
+        return;
+      }
+      setTimeout(() => { box.hidden = true; document.documentElement.classList.remove("reg-open"); proceed(); }, pending ? 1800 : 3500);
+    };
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const val = (n: string) => (form.elements.namedItem(n) as HTMLInputElement).value.trim();
       const name = val("name"), email = val("email").toLowerCase();
+      if (returning) {
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return show(box.dataset.errEmail!, false);
+        submitBtn.disabled = true;
+        const sb = await getSupabase();
+        // Check the list once Supabase is connected; until then, trust the visitor.
+        const { data, error } = sb ? await sb.rpc("is_subscribed", { p_email: email }) : { data: true, error: null };
+        submitBtn.disabled = false;
+        if (error) return show(box.dataset.fail!, false);
+        if (!data) return show(box.dataset.notFound!, false);
+        return unlocked("");
+      }
       // Store the full international number, e.g. +213555123456.
       let local = val("phone").replace(/[^\d+]/g, "");
       if (local.startsWith("+")) local = local.slice(1).startsWith(cc) ? local.slice(1 + cc.length) : "";
@@ -240,21 +287,7 @@ const { lang } = Astro.props;
       btn.disabled = false;
       // A duplicate email means they are already registered, which is fine.
       if (error && error.code !== "23505") return show(box.dataset.fail!, false);
-      write(localStorage, "sh-reg", { done: Date.now(), via: "form" });
-      clearTimeout(timer);
-      form.hidden = true;
-      gateLine.hidden = true;
-      show(box.dataset.ok!.replace("{name}", name.split(" ")[0]), true);
-      const target = pending as HTMLAnchorElement | null;
-      if (gated && target?.href) {
-        // Browsers block new tabs opened without a tap, so the official link becomes a button to tap.
-        pending = null; gated = false;
-        const go = box.querySelector<HTMLAnchorElement>("[data-reg-go]")!;
-        go.href = target.href; go.hidden = false;
-        go.addEventListener("click", () => { box.hidden = true; document.documentElement.classList.remove("reg-open"); }, { once: true });
-        return;
-      }
-      setTimeout(() => { box.hidden = true; document.documentElement.classList.remove("reg-open"); proceed(); }, pending ? 1800 : 3500);
+      unlocked(name.split(" ")[0]);
     });
   }
 </script>
@@ -296,6 +329,8 @@ const { lang } = Astro.props;
   .reg-go { justify-self: center; background: #e8590c; }
   .reg-go:hover { background: #c94a06; }
   .reg-msg.bad { color: #b42318; }
+  .reg [data-full][hidden] { display: none; }
+  .reg-switch { justify-self: center; border: 0; background: none; padding: 2px 6px; color: var(--brand); font: inherit; font-size: .95rem; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .reg-later { justify-self: center; border: 0; background: none; padding: 4px 8px; color: var(--muted); font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; text-decoration: underline; }
   .reg-tg { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 11px 14px; border-radius: 12px; background: #229ed9; color: #fff; font-weight: 800; text-decoration: none; transition: background .15s; }
   .reg-tg:hover { background: #1b87bb; }

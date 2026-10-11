@@ -21,6 +21,7 @@ Rules Abdou set for ScholarHelp. Follow them for every new listing, page and des
 - The only ways out to the official site are the orange **Apply here** button and the two official links in the Quick overview.
 - The registration pop-up (name, email, phone with country code) keeps coming back until the visitor registers or joins the Telegram group.
 - The official links (**Apply here** and the two Quick overview links) only open after the visitor fills in the registration form. Joining Telegram stops the pop-ups but does not unlock them.
+- A visitor who registered once is never asked again on that phone or browser (saved in the browser and a 5-year cookie). On a new device they tap **Already registered? Continue with your email** and only type their email.
 
 ## Look and feel
 

@@ -65,3 +65,9 @@ alter table public.subscribers enable row level security;
 -- Visitors can add their email but can never read the list.
 drop policy if exists "Anyone can subscribe" on public.subscribers;
 create policy "Anyone can subscribe" on public.subscribers for insert to anon, authenticated with check (true);
+-- Lets a returning visitor confirm they registered before (answers yes/no only; the list itself stays private).
+create or replace function public.is_subscribed(p_email text) returns boolean
+language sql security definer set search_path = public stable as $$
+  select exists (select 1 from public.subscribers where email = lower(trim(p_email)));
+$$;
+grant execute on function public.is_subscribed(text) to anon, authenticated;
