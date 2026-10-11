@@ -1,5 +1,7 @@
 ---
 import FundingBadge from "./FundingBadge.astro";
+import Logo from "./Logo.astro";
+import { SITE } from "../site.config.mjs";
 import { t, lp, type Lang } from "../i18n/ui";
 import { isoDate, formatDate, type Opp } from "../lib/opps";
 interface Props { opp: Opp; lang: Lang }
@@ -10,16 +12,20 @@ const titleMain = fundMatch ? fundMatch[1] : d.title;
 const text = [d.title, d.host, d.country, opp.countryKey, d.summary, d.eligible, ...d.levels].join(" ").toLowerCase();
 const href = lp(lang, `/opportunities/${opp.slug}/`);
 const flag = d.countryCode ? `/flags/${d.countryCode.toLowerCase()}.svg` : "";
+const host = new URL(SITE.url).host.toUpperCase();
 const isNew = Date.now() - +d.published < 7 * 86400000;
 ---
 <article class="card" data-slug={opp.slug} data-cat={d.category} data-levels={d.levels.join(",")} data-funding={d.funding}
   data-country={opp.countryKey} data-deadline={isoDate(d.deadline)} data-published={isoDate(d.published)} data-text={text} data-new={isNew ? "1" : undefined}>
-  <a class="thumb" href={href} tabindex="-1" aria-hidden="true">
+  <a class={`thumb promo ${d.category}`} href={href}>
     {d.image
-      ? <img src={d.image} alt="" loading="lazy" />
-      : flag
-        ? <span class="thumb-flag"><img src={flag} alt="" loading="lazy" width="96" height="72" /><span>{d.country}</span></span>
-        : <span class="thumb-flag"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg><span>{t(lang, "card.worldwide")}</span></span>}
+      ? <img class="promo-img" src={d.image} alt="" loading="lazy" />
+      : <Logo variant="icon" animate={false} class="promo-logo" />}
+    <h3 class="promo-title" dir="auto">{titleMain}</h3>
+    {flag
+      ? <img class="promo-flag" src={flag} alt={d.country} loading="lazy" width="36" height="27" />
+      : <span class="promo-flag globe" aria-hidden="true">🌐</span>}
+    <span class="promo-site">{host}</span>
   </a>
   <span class="new-badge" data-new-badge hidden>{t(lang, "card.new")}</span>
   <button class="save" type="button" data-save={opp.slug} data-title={d.title} data-href={href} aria-pressed="false" aria-label={t(lang, "card.save")} title={t(lang, "card.save")}>
@@ -30,10 +36,9 @@ const isNew = Date.now() - +d.published < 7 * 86400000;
       <span class={`badge ${d.category}`}>{t(lang, `cat.${d.category}.short` as any)}</span>
       <FundingBadge lang={lang} funding={d.funding} />
     </div>
-    <h3><a href={href}>{titleMain}</a></h3>
     <div class="card-meta">
       {flag ? <img class="mini-flag" src={flag} alt="" width="20" height="15" /> : null}
-      <span class="clip">{d.country}{d.host ? ` · ${d.host}` : ""}</span>
+      <span class="clip" dir="auto">{d.country}{d.host ? ` · ${d.host}` : ""}</span>
     </div>
     <div class="card-deadline">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
