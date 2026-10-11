@@ -144,7 +144,6 @@ const shares = [
             {d.host && <div><dt>{t(lang, "opp.host")}</dt><dd>{d.host}</dd></div>}
             <div><dt>{t(lang, "opp.funding")}</dt><dd>{t(lang, `funding.${d.funding}` as any)}</dd></div>
           </dl>
-          <a class="btn" href={d.link} target="_blank" rel="noopener nofollow">{t(lang, "opp.apply")} ↗</a>
         </div>
         {latest.length > 0 && (
           <div class="latest">
@@ -223,7 +222,6 @@ const shares = [
   .side { position: sticky; top: 84px; display: grid; gap: 18px; }
   .label { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
   html[dir="rtl"] .label { text-transform: none; letter-spacing: 0; }
-  .facts-box .btn { font-size: .95rem; padding-inline: 14px; }
   .facts-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; gap: 14px; box-shadow: var(--shadow); }
   .fact.deadline { display: grid; gap: 4px; justify-items: start; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
   .fact.deadline strong { font-size: 1.15rem; color: var(--danger); }
