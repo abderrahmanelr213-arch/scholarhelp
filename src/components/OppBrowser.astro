@@ -11,12 +11,13 @@ const countries = [...new Map(opps.map((o) => [o.countryKey, { key: o.countryKey
   .sort((a, b) => a.label.localeCompare(b.label));
 const id = (n: string) => `${n}-${lang}`;
 ---
-<div class="browser" data-browser data-results={t(lang, "list.results")} data-fixed-cat={category ?? ""}>
+<div class="browser" data-browser data-results={t(lang, "list.results")} data-dym={t(lang, "list.didYouMean")} data-fixed-cat={category ?? ""}>
   <div class="browser-top">
     <div class="search-wrap">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <label class="visually-hidden" for={id("q")}>{t(lang, "home.search")}</label>
-      <input id={id("q")} type="search" placeholder={t(lang, "home.search")} data-f="q" />
+      <input id={id("q")} type="search" placeholder={t(lang, "home.search")} data-f="q" autocomplete="off" role="combobox" aria-expanded="false" aria-controls={id("suggest")} />
+      <ul class="suggest" id={id("suggest")} role="listbox" data-suggest hidden></ul>
     </div>
     <label class="sort">
       <span>{t(lang, "browse.sort")}</span>
@@ -71,6 +72,7 @@ const id = (n: string) => `${n}-${lang}`;
 
     <div class="results">
       <p class="result-count" data-count aria-live="polite"></p>
+      <p class="dym" data-dym-line hidden></p>
       <div class="cards" data-cards>
         {opps.map((o) => <OppCard opp={o} lang={lang} />)}
       </div>
@@ -81,12 +83,60 @@ const id = (n: string) => `${n}-${lang}`;
 
 <script>
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  // Typo-tolerant search: "hensen" finds "Hansen", "scolarship" finds "scholarship".
+  // Text is normalised (case, accents, Arabic letter variants) and each query word may be
+  // a few letters off a word in the listing.
+  const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "")
+    .replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/ـ/g, "").replace(/[ك]/g, "ک");
+  const words = (s: string) => norm(s).split(/[^\p{L}\p{N}]+/u).filter((w) => w.length > 1);
+  const lev = (a: string, b: string, max: number) => {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+      const cur = [i]; let best = i;
+      for (let j = 1; j <= b.length; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        if (cur[j] < best) best = cur[j];
+      }
+      if (best > max) return max + 1;
+      prev = cur;
+    }
+    return prev[b.length];
+  };
+  const allowed = (w: string) => (w.length <= 3 ? 0 : w.length <= 5 ? 1 : 2);
+  // How a query word matches a listing: 0 exact (substring), 1 close (typo), or -1 no match. Also returns the word it matched.
+  const matchWord = (q: string, text: string, list: string[]): [number, string] => {
+    if (text.includes(q)) return [0, q];
+    const max = allowed(q); if (!max) return [-1, ""];
+    let best = max + 1, hit = "";
+    for (const w of list) {
+      // Compare with the whole word and with its beginning, so half-typed words still match.
+      const d = Math.min(lev(q, w, max), w.length > q.length ? lev(q, w.slice(0, q.length), max) : max + 1);
+      if (d < best) { best = d; hit = w; if (d === 1 && max === 1) break; }
+    }
+    return best <= max ? [1, hit] : [-1, ""];
+  };
   const days = (iso: string) => (iso ? Math.round((+new Date(iso + "T00:00:00") - +today()) / 86400000) : null);
 
   document.querySelectorAll<HTMLElement>("[data-browser]").forEach((root) => {
     const $ = <T extends Element>(s: string) => root.querySelector<T>(s)!;
     const $$ = <T extends Element>(s: string) => [...root.querySelectorAll<T>(s)];
     const cards = $$<HTMLElement>(".card");
+    const index = new Map(cards.map((c) => { const t = norm(c.dataset.text || ""); return [c, { text: t, list: [...new Set(words(t))] }]; }));
+    // Score a card against the query: null = no match, otherwise the number of typo words (lower is better).
+    let fixes = new Map<string, string>();
+    const score = (c: HTMLElement, qs: string[]) => {
+      const ix = index.get(c)!; let fuzzy = 0;
+      for (const q of qs) {
+        const [m, w] = matchWord(q, ix.text, ix.list);
+        if (m < 0) return null;
+        if (m === 1) { fuzzy++; fixes.set(q, w); }
+      }
+      return fuzzy;
+    };
+    const suggest = $<HTMLElement>("[data-suggest]");
+    const qInput = $<HTMLInputElement>('[data-f="q"]');
+    const dymLine = $<HTMLElement>("[data-dym-line]");
     const grid = $<HTMLElement>("[data-cards]");
     const panel = $<HTMLElement>("[data-panel]");
     const toggle = $<HTMLButtonElement>("[data-toggle-filters]");
@@ -120,6 +170,9 @@ const id = (n: string) => `${n}-${lang}`;
     function apply() {
       const f = read();
       let shown = 0;
+      const qs = words(f.q);
+      fixes = new Map();
+      const scores = new Map<HTMLElement, number>();
       for (const c of cards) {
         const d = days(c.dataset.deadline || "");
         const levels = (c.dataset.levels || "").split(",").filter(Boolean);
@@ -130,12 +183,13 @@ const id = (n: string) => `${n}-${lang}`;
           (!f.funding.length || f.funding.includes(c.dataset.funding!)) &&
           (f.closed || d === null || d >= 0) &&
           (!f.within || (f.within === "rolling" ? d === null : d !== null && d >= 0 && d <= +f.within)) &&
-          (!f.q || (c.dataset.text || "").includes(f.q));
+          (!qs.length || (() => { const s = score(c, qs); if (s === null) return false; scores.set(c, s); return true; })());
         c.hidden = !ok;
         if (ok) shown++;
       }
       // Sort: open with soonest deadline first, rolling after, closed last; or newest first.
       const key = (c: HTMLElement) => {
+        if (qs.length) { const s = scores.get(c); if (s !== undefined && s > 0) return "3" + s; }
         if (f.sort === "new") return String(99999999 - +(c.dataset.published || "0").replaceAll("-", ""));
         const d = days(c.dataset.deadline || "");
         return d === null ? "1" : d < 0 ? "2" + String(100000 + d).padStart(6, "0") : "0" + String(d).padStart(6, "0");
@@ -144,6 +198,15 @@ const id = (n: string) => `${n}-${lang}`;
 
       $<HTMLElement>("[data-count]").textContent = `${shown} ${word}`;
       $<HTMLElement>("[data-empty]").hidden = shown > 0;
+      // "Did you mean" when the matches came from corrected words.
+      const fixed = qs.map((q) => fixes.get(q) || q).join(" ");
+      if (qs.length && fixes.size && fixed !== qs.join(" ") && shown) {
+        dymLine.hidden = false;
+        dymLine.innerHTML = "";
+        const b = document.createElement("button"); b.type = "button"; b.textContent = fixed;
+        b.addEventListener("click", () => { qInput.value = fixed; apply(); });
+        dymLine.append(`${root.dataset.dym}: `, b, "?");
+      } else dymLine.hidden = true;
       showBtn.textContent = showTpl.replace("{n}", String(shown));
       const active = f.cat.length + f.level.length + f.funding.length + (f.country ? 1 : 0) + (f.within ? 1 : 0) + (f.closed ? 1 : 0);
       const badge = $<HTMLElement>("[data-active-count]");
@@ -161,6 +224,28 @@ const id = (n: string) => `${n}-${lang}`;
       history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash);
     }
 
+    // Live suggestions under the search box (best matches first).
+    const renderSuggest = () => {
+      const qs = words(qInput.value);
+      suggest.innerHTML = "";
+      if (!qs.length || document.activeElement !== qInput) { suggest.hidden = true; qInput.setAttribute("aria-expanded", "false"); return; }
+      const ranked = cards.map((c) => [c, score(c, qs)] as const).filter(([, s]) => s !== null).sort((a, b) => (a[1]! - b[1]!)).slice(0, 5);
+      for (const [c] of ranked) {
+        const a = c.querySelector<HTMLAnchorElement>("a.thumb")!;
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = a.href; link.setAttribute("role", "option");
+        const img = c.querySelector<HTMLImageElement>(".promo-flag");
+        if (img) { const i = document.createElement("img"); i.src = img.src; i.alt = ""; i.width = 22; i.height = 16; link.append(i); }
+        const span = document.createElement("span"); span.dir = "auto"; span.textContent = c.querySelector(".promo-title")?.textContent || ""; link.append(span);
+        li.append(link); suggest.append(li);
+      }
+      suggest.hidden = !ranked.length; qInput.setAttribute("aria-expanded", String(!!ranked.length));
+    };
+    qInput.addEventListener("input", renderSuggest);
+    qInput.addEventListener("focus", renderSuggest);
+    qInput.addEventListener("keydown", (e) => { if (e.key === "Escape") { suggest.hidden = true; } if (e.key === "Enter") { e.preventDefault(); suggest.hidden = true; } });
+    document.addEventListener("click", (e) => { if (!root.querySelector(".search-wrap")!.contains(e.target as Node)) suggest.hidden = true; });
     root.addEventListener("input", apply);
     root.addEventListener("change", apply);
     $<HTMLButtonElement>("[data-reset]").addEventListener("click", () => {
@@ -181,6 +266,14 @@ const id = (n: string) => `${n}-${lang}`;
   .browser-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
   .search-wrap { flex: 1 1 320px; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); }
   .search-wrap:focus-within { border-color: var(--teal); box-shadow: 0 0 0 3px var(--brand-soft); }
+  .search-wrap { position: relative; }
+  .suggest { position: absolute; z-index: 20; top: calc(100% + 6px); inset-inline: 0; margin: 0; padding: 6px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 34px rgb(12 43 76 / .18); }
+  .suggest[hidden] { display: none; }
+  .suggest :global(a) { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; color: var(--ink); font-weight: 600; text-decoration: none; }
+  .suggest :global(a:hover), .suggest :global(a:focus) { background: var(--brand-soft); outline: none; }
+  .suggest :global(img) { flex: none; border-radius: 2px; object-fit: cover; }
+  .dym { margin: -4px 0 12px; color: var(--muted); }
+  .dym :global(button) { border: 0; background: none; padding: 0; font: inherit; font-weight: 800; color: var(--brand); text-decoration: underline; cursor: pointer; }
   .search-wrap input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; padding: 13px 0; color: var(--ink); }
   .sort { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: .9rem; font-weight: 600; }
   .filters-panel select { width: 100%; }

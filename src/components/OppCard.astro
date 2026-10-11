@@ -9,7 +9,10 @@ const { opp, lang } = Astro.props;
 const d = opp.entry.data;
 const fundMatch = d.title.match(/^(.*?)\s*(\((?:fully|partially) funded\))\s*$/i);
 const titleMain = d.cardTitle || (fundMatch ? fundMatch[1] : d.title);
-const text = [d.title, d.host, d.country, opp.countryKey, d.summary, d.eligible, ...d.levels].join(" ").toLowerCase();
+// Search text also holds the country and category in the page language, so Arabic and Pashto searches work.
+let localCountry = "";
+try { if (d.countryCode && d.countryCode.length === 2) localCountry = new Intl.DisplayNames([lang], { type: "region" }).of(d.countryCode.toUpperCase()) || ""; } catch {}
+const text = [d.title, d.host, d.country, opp.countryKey, localCountry, t(lang, `cat.${d.category}` as any), d.summary, d.eligible, ...d.levels].join(" ").toLowerCase();
 const href = lp(lang, `/opportunities/${opp.slug}/`);
 const flag = d.countryCode ? `/flags/${d.countryCode.toLowerCase()}.svg` : "";
 const host = new URL(SITE.url).host.toUpperCase();
