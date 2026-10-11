@@ -60,6 +60,8 @@ button, input, select { font: inherit; color: inherit; }
 .badge.conferences { color: var(--conf); background: var(--conf-soft); }
 .badge.exchange { color: var(--exch); background: var(--exch-soft); }
 .badge.funding { color: var(--muted); background: var(--surface-2); }
+.badge.funding.full { color: #fff; background: #d92d20; }
+.fund-tag.full { color: #d92d20; }
 .left { font-size: .8rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; color: var(--muted); background: var(--surface-2); white-space: nowrap; }
 .left.soon { color: var(--gold); background: var(--gold-soft); }
 .left.closed { color: var(--danger); background: var(--danger-soft); }

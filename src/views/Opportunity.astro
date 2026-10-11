@@ -17,7 +17,7 @@ const path = `/opportunities/${opp.slug}/`;
 const url = new URL(lp(lang, path), SITE.url).href;
 const catName = t(lang, `cat.${d.category}` as any);
 const related = opps.filter((o) => o.slug !== opp.slug && o.entry.data.category === d.category).slice(0, 3);
-const title = d.deadline ? `${d.title} ${d.deadline.getUTCFullYear()}` : d.title;
+const title = d.deadline && !/\b20\d\d\b/.test(d.title) ? `${d.title} ${d.deadline.getUTCFullYear()}` : d.title;
 const shareText = encodeURIComponent(`${d.title} | ${SITE.name}`);
 const jsonLd = [
   {
@@ -66,7 +66,7 @@ const shares = [
 
     <div class="layout">
       <article class="main">
-        <h1>{d.title}</h1>
+        <h1>{shortName}{shortName !== d.title && <> <span class={`fund-tag ${d.funding}`}>{d.title.slice(shortName.length).trim()}</span></>}</h1>
         <p class="byline">
           {t(lang, "opp.by")} <strong>{t(lang, "opp.team")}</strong> · <time datetime={isoDate(d.published)}>{formatDate(d.published, lang)}</time>
           <span class={`badge ${d.category}`}>{t(lang, `cat.${d.category}.short` as any)}</span>

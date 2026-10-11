@@ -4,6 +4,9 @@ import { isoDate, formatDate, type Opp } from "../lib/opps";
 interface Props { opp: Opp; lang: Lang }
 const { opp, lang } = Astro.props;
 const d = opp.entry.data;
+const fundMatch = d.title.match(/^(.*?)\s*(\((?:fully|partially) funded\))\s*$/i);
+const titleMain = fundMatch ? fundMatch[1] : d.title;
+const fundTag = fundMatch ? fundMatch[2] : "";
 const text = [d.title, d.host, d.country, opp.countryKey, d.summary, d.eligible, ...d.levels].join(" ").toLowerCase();
 const href = lp(lang, `/opportunities/${opp.slug}/`);
 const flag = d.countryCode ? `/flags/${d.countryCode.toLowerCase()}.svg` : "";
@@ -25,9 +28,9 @@ const isNew = Date.now() - +d.published < 7 * 86400000;
   <div class="card-body">
     <div class="card-top">
       <span class={`badge ${d.category}`}>{t(lang, `cat.${d.category}.short` as any)}</span>
-      <span class="badge funding">{t(lang, `funding.${d.funding}` as any)}</span>
+      <span class={`badge funding ${d.funding}`}>{t(lang, `funding.${d.funding}` as any)}</span>
     </div>
-    <h3><a href={href}>{d.title}</a></h3>
+    <h3><a href={href}>{titleMain}{fundTag && <> <span class={`fund-tag ${d.funding}`}>{fundTag}</span></>}</a></h3>
     <div class="card-meta">
       {flag ? <img class="mini-flag" src={flag} alt="" width="20" height="15" /> : null}
       <span class="clip">{d.country}{d.host ? ` · ${d.host}` : ""}</span>

@@ -1,5 +1,6 @@
 ---
 import SocialIcon from "../components/SocialIcon.astro";
+import RegisterBox from "../components/RegisterBox.astro";
 import "../styles/global.css";
 import { SITE, LOCALES, CATEGORIES } from "../site.config.mjs";
 import { t, lp, DIR, LANG_NAMES, OG_LOCALE, type Lang } from "../i18n/ui";
@@ -81,7 +82,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
           </ul>
         </details>
         <a class="auth-link" href={lp(lang, "/account/")} data-auth-out>{t(lang, "nav.login")}</a>
-        <a class="btn auth-btn register" href={lp(lang, "/account/") + "#signup"} data-auth-out>{t(lang, "nav.register")}</a>
+        <a class="btn auth-btn register" href={lp(lang, "/account/") + "#signup"} data-auth-out data-reg-trigger>{t(lang, "nav.register")}</a>
         <a class="btn outline auth-btn" href={lp(lang, "/account/")} data-auth-in hidden>{t(lang, "nav.account")}</a>
         <details class="menu">
           <summary aria-label={t(lang, "nav.menu")}>
@@ -131,6 +132,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
       <p>© {year} {SITE.name}. {t(lang, "footer.rights")}</p>
     </div>
   </footer>
+  {!path.startsWith("/account") && <RegisterBox lang={lang} />}
   <script>
     import { initSaveButtons } from "../lib/client/saved";
     import { currentUser } from "../lib/client/supabase";

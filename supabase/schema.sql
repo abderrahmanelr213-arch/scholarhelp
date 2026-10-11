@@ -1,4 +1,4 @@
--- ScholarHelp database. Run once in Supabase → SQL Editor → New query → Run.
+-- ScholarHelp database. Run in Supabase → SQL Editor → New query → Run. Safe to run again after updates.
 
 -- Student profiles and email alert preferences.
 create table if not exists public.profiles (
@@ -12,8 +12,11 @@ create table if not exists public.profiles (
   created_at timestamptz default now()
 );
 alter table public.profiles enable row level security;
+drop policy if exists "Students read their profile" on public.profiles;
 create policy "Students read their profile" on public.profiles for select using (auth.uid() = id);
+drop policy if exists "Students create their profile" on public.profiles;
 create policy "Students create their profile" on public.profiles for insert with check (auth.uid() = id);
+drop policy if exists "Students update their profile" on public.profiles;
 create policy "Students update their profile" on public.profiles for update using (auth.uid() = id);
 
 -- Create a profile automatically when someone signs up.
@@ -39,9 +42,13 @@ create table if not exists public.saved (
   primary key (user_id, slug)
 );
 alter table public.saved enable row level security;
+drop policy if exists "Students read their saved" on public.saved;
 create policy "Students read their saved" on public.saved for select using (auth.uid() = user_id);
+drop policy if exists "Students add saved" on public.saved;
 create policy "Students add saved" on public.saved for insert with check (auth.uid() = user_id);
+drop policy if exists "Students update saved" on public.saved;
 create policy "Students update saved" on public.saved for update using (auth.uid() = user_id);
+drop policy if exists "Students remove saved" on public.saved;
 create policy "Students remove saved" on public.saved for delete using (auth.uid() = user_id);
 
 -- Email news subscribers (from the subscribe box; no account needed).
@@ -50,6 +57,9 @@ create table if not exists public.subscribers (
   lang text default 'en',
   created_at timestamptz default now()
 );
+-- Name from the simple registration box.
+alter table public.subscribers add column if not exists name text;
 alter table public.subscribers enable row level security;
 -- Visitors can add their email but can never read the list.
+drop policy if exists "Anyone can subscribe" on public.subscribers;
 create policy "Anyone can subscribe" on public.subscribers for insert to anon, authenticated with check (true);
