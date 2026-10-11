@@ -107,7 +107,11 @@ const shares = [
         <section class="overview" data-deadline={isoDate(d.deadline)}>
           <h2>{t(lang, "opp.overview")}</h2>
           <ul>
-            {overview.map(([k, v]) => (<li><strong>{k}:</strong> {v}</li>))}
+            {overview.map(([k, v]) => (
+              <li><strong>{k}:</strong> {k === t(lang, "opp.location") && flag
+                ? <span class="loc"><img src={flag} alt="" width="24" height="18" />{v}</span>
+                : v}</li>
+            ))}
             <li class="dl"><strong>{t(lang, "opp.deadline")}: {d.deadline ? <time datetime={isoDate(d.deadline)}>{formatDate(d.deadline, lang)}</time> : t(lang, "opp.rolling")}</strong> <span class="left" data-left hidden></span></li>
           </ul>
         </section>
@@ -207,6 +211,8 @@ const shares = [
   .overview h2 { font-size: 1.35rem; color: var(--navy); margin: 0 0 10px; }
   .overview ul { margin: 0; padding-inline-start: 20px; display: grid; gap: 8px; line-height: 1.6; }
   .overview .dl { color: var(--danger); }
+  .loc { display: inline-flex; align-items: center; gap: 7px; vertical-align: bottom; }
+  .loc img { width: 24px; height: 18px; object-fit: cover; border-radius: 3px; box-shadow: 0 0 0 1px rgb(0 0 0 / .1); }
   .overview .dl .left { margin-inline-start: 6px; }
   .prose { margin-top: 8px; }
   .prose :global(h2) { color: var(--navy); }
