@@ -8,7 +8,7 @@ interface Props { opp: Opp; lang: Lang }
 const { opp, lang } = Astro.props;
 const d = opp.entry.data;
 const fundMatch = d.title.match(/^(.*?)\s*(\((?:fully|partially) funded\))\s*$/i);
-const titleMain = fundMatch ? fundMatch[1] : d.title;
+const titleMain = d.cardTitle || (fundMatch ? fundMatch[1] : d.title);
 const text = [d.title, d.host, d.country, opp.countryKey, d.summary, d.eligible, ...d.levels].join(" ").toLowerCase();
 const href = lp(lang, `/opportunities/${opp.slug}/`);
 const flag = d.countryCode ? `/flags/${d.countryCode.toLowerCase()}.svg` : "";

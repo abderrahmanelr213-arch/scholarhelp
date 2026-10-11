@@ -51,6 +51,9 @@ collections:
       - { name: summary, label: Short summary, widget: text, i18n: true, hint: "One or two sentences in your own words. Shown on cards and in Google results (about 150 characters)." }
       - { name: image, label: "Picture (university or organization logo)", widget: image, i18n: duplicate, required: false, hint: "Optional. Without a picture the card shows the country flag." }
       - { name: host, label: Offered by, widget: string, i18n: true, required: false }
+      - { name: officialUrl, label: "Official announcement page", widget: string, i18n: duplicate, required: false, hint: "The Opportunity name links here. Leave empty to use the Apply link." }
+      - { name: cardTitle, label: "Short headline for the card picture", widget: string, i18n: true, required: false }
+      - { name: deadlineNote, label: "Second deadline / deadline note", widget: string, i18n: true, required: false, hint: "e.g. U.S. applicants: 15 March 2027, 11:55 PM Pacific Time" }
       - { name: hostUrl, label: "Organisation official website (homepage)", widget: string, i18n: duplicate, required: false, hint: "The Offered by name links here, e.g. https://www.ox.ac.uk/" }
       - { name: country, label: Host country, widget: string, i18n: true }
       - { name: countryCode, label: Country flag code, widget: string, i18n: duplicate, required: false, hint: "Two letters: gb, us, de, fr, tr, jp, kr, sa, ae, qa, cn, my... Use eu for Europe. Leave empty for worldwide." }

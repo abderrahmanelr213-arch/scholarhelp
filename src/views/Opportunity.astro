@@ -42,7 +42,7 @@ const shortName = d.title.replace(/\s*\((fully|partially) funded\)\s*$/i, "");
 const overview: [string, string | undefined, string?][] = [
   [t(lang, "opp.host"), d.host, d.hostUrl],
   [t(lang, "opp.location"), d.location || d.country],
-  [t(lang, "opp.name"), shortName, d.link],
+  [t(lang, "opp.name"), shortName, d.officialUrl || d.link],
   [t(lang, "opp.category"), catName],
   [t(lang, "opp.levels"), d.levels.map((l) => t(lang, `level.${l}` as any)).join(", ")],
   [t(lang, "opp.duration"), d.duration],
@@ -83,7 +83,7 @@ const shares = [
               : flag ? <img class="banner-flag" src={flag} alt={d.country} width="160" height="120" />
               : <svg class="banner-globe" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>}
           </div>
-          <p class="banner-title">{shortName}</p>
+          <p class="banner-title">{d.cardTitle || shortName}</p>
           <Logo variant="word" class="banner-brand" />
           <span class="banner-deadline">
             {t(lang, "opp.deadline")}: {d.deadline ? formatDate(d.deadline, lang) : t(lang, "opp.rolling")}
@@ -126,6 +126,7 @@ const shares = [
                 : v}</li>
             ))}
             <li class="dl"><strong>{t(lang, "opp.deadline")}: {d.deadline ? <time datetime={isoDate(d.deadline)}>{formatDate(d.deadline, lang)}</time> : t(lang, "opp.rolling")}</strong> <span class="closing" data-closing hidden></span></li>
+            {d.deadlineNote && <li class="dl">{d.deadlineNote}</li>}
           </ul>
         </section>
 

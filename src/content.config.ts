@@ -12,6 +12,12 @@ const opportunities = defineCollection({
     host: z.string().optional(),
     // Official homepage of the organisation offering it (the "Offered by" name links here).
     hostUrl: z.string().url().optional(),
+    /** Official announcement page (the "Opportunity" name links here). Defaults to `link`. */
+    officialUrl: z.string().url().optional(),
+    /** Short headline for the card picture, e.g. "Hansen Leadership Institute 2027". Defaults to the title. */
+    cardTitle: z.string().optional(),
+    /** Extra deadline line shown under the main deadline, e.g. a second deadline for another group. */
+    deadlineNote: z.string().optional(),
     country: z.string(),
     /** Two-letter country code for the flag (gb, de, tr...). "eu" for Europe, empty for worldwide. */
     countryCode: z.string().optional().nullable(),
