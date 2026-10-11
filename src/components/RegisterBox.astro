@@ -5,6 +5,7 @@
 // for the browser tabs (exit intent). Once someone registers it never shows again.
 // Saved to the Supabase `subscribers` table; no password, no email is sent.
 import { SITE } from "../site.config.mjs";
+import SocialIcon from "./SocialIcon.astro";
 import { t, type Lang } from "../i18n/ui";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -42,10 +43,11 @@ const { lang } = Astro.props;
       <button class="btn reg-submit" type="submit">{t(lang, "reg.submit")}</button>
     </form>
     <p class="reg-msg" data-reg-msg role="status" hidden></p>
-    <div class="reg-foot">
-      <button class="reg-later" type="button" data-reg-close>{t(lang, "reg.later")}</button>
-      <a class="reg-tg" href={SITE.telegram} target="_blank" rel="noopener">Telegram ↗</a>
-    </div>
+    <a class="reg-tg" href={SITE.telegram} target="_blank" rel="noopener">
+      <SocialIcon name="telegram" size={26} />
+      <span>{t(lang, "reg.tg")}</span>
+    </a>
+    <button class="reg-later" type="button" data-reg-close>{t(lang, "reg.later")}</button>
   </div>
 </div>
 
@@ -75,11 +77,20 @@ const { lang } = Astro.props;
       document.documentElement.classList.add("reg-open");
       if (innerWidth > 720) box.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
     };
+    // A link the visitor clicked before the pop-up appeared; they continue to it afterwards.
+    let pending: HTMLAnchorElement | null = null;
+    const proceed = () => {
+      const a = pending; pending = null;
+      if (!a) return;
+      if (a.target === "_blank") window.open(a.href, "_blank", "noopener");
+      else location.href = a.href;
+    };
     const close = () => {
       box.hidden = true;
       document.documentElement.classList.remove("reg-open");
       write(sessionStorage, "sh-reg-visit", { closed: Date.now() });
       schedule(AGAIN_AFTER);
+      proceed();
     };
     // Plan the next automatic pop-up.
     const schedule = (delay: number) => {
@@ -117,6 +128,17 @@ const { lang } = Astro.props;
       if (done()) return;
       e.preventDefault(); open(false);
     }));
+    // Clicking an opportunity (its card, Apply Now or the "Apply here" button) shows the pop-up first.
+    document.addEventListener("click", (e) => {
+      if (done() || e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[href]");
+      if (!a || box.contains(a)) return;
+      const toOpp = a.origin === location.origin && /\/opportunities\/[^/]+\/?$/.test(a.pathname);
+      if (!toOpp && !a.classList.contains("apply-big")) return;
+      e.preventDefault();
+      pending = a;
+      open(false);
+    }, true);
     box.querySelectorAll("[data-reg-close]").forEach((b) => b.addEventListener("click", close));
     addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen()) close(); });
 
@@ -206,7 +228,7 @@ const { lang } = Astro.props;
       clearTimeout(timer);
       form.hidden = true;
       show(box.dataset.ok!.replace("{name}", name.split(" ")[0]), true);
-      setTimeout(() => { box.hidden = true; document.documentElement.classList.remove("reg-open"); }, 3500);
+      setTimeout(() => { box.hidden = true; document.documentElement.classList.remove("reg-open"); proceed(); }, pending ? 1800 : 3500);
     });
   }
 </script>
@@ -244,9 +266,10 @@ const { lang } = Astro.props;
   .reg-submit:hover { background: #b42318; }
   .reg-msg { margin: 0; font-weight: 700; color: var(--brand); }
   .reg-msg.bad { color: #b42318; }
-  .reg-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 2px; }
-  .reg-later { border: 0; background: none; padding: 6px 0; color: var(--muted); font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; text-decoration: underline; }
-  .reg-tg { font-size: .9rem; font-weight: 700; color: #229ed9; text-decoration: none; }
+  .reg-later { justify-self: center; border: 0; background: none; padding: 4px 8px; color: var(--muted); font: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; text-decoration: underline; }
+  .reg-tg { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 11px 14px; border-radius: 12px; background: #229ed9; color: #fff; font-weight: 800; text-decoration: none; transition: background .15s; }
+  .reg-tg:hover { background: #1b87bb; }
+  .reg-tg :global(.social-icon) { box-shadow: 0 0 0 2px #fff; border-radius: 50%; }
   :global(html.reg-open) { overflow: hidden; }
   /* Phones: a sheet that slides up from the bottom. */
   @media (max-width: 720px) {
