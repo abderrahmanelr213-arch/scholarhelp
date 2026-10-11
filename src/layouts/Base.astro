@@ -1,6 +1,7 @@
 ---
 import SocialIcon from "../components/SocialIcon.astro";
 import RegisterBox from "../components/RegisterBox.astro";
+import Logo from "../components/Logo.astro";
 import "../styles/global.css";
 import { SITE, LOCALES, CATEGORIES } from "../site.config.mjs";
 import { t, lp, DIR, LANG_NAMES, OG_LOCALE, type Lang } from "../i18n/ui";
@@ -61,8 +62,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   <header class="site-header">
     <div class="container bar">
       <a class="brand" href={lp(lang, "/")} aria-label={SITE.name}>
-        <img class="brand-icon" src="/brand-icon.png" alt="" width="46" height="40" />
-        <img class="brand-word" src="/brand-wordmark.png" alt={SITE.name} width="138" height="24" />
+        <Logo variant="row" class="brand-logo" />
       </a>
       <nav class="nav" aria-label="Main">
         <a href={lp(lang, "/opportunities/")} aria-current={path === "/opportunities/" ? "page" : undefined}>{t(lang, "nav.opportunities")}</a>
@@ -108,7 +108,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   <footer class="site-footer">
     <div class="container foot-grid">
       <div class="foot-brand">
-        <a href={lp(lang, "/")} aria-label={SITE.name}><img src="/brand-logo.png" alt={SITE.name} width="160" height="108" /></a>
+        <a class="foot-logo" href={lp(lang, "/")} aria-label={SITE.name}><Logo variant="stacked" animate={false} /></a>
         <p>{t(lang, "site.tagline")}</p>
         <div class="socials">
           <a class="social tg" href={SITE.telegram} target="_blank" rel="noopener" aria-label="Telegram"><SocialIcon name="telegram" /><span>Telegram</span></a>
@@ -182,8 +182,9 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   .site-header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
   .bar { display: flex; align-items: center; gap: 20px; min-height: 64px; }
   .brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; flex: none; }
-  .brand-icon { height: 40px; width: auto; }
-  .brand-word { height: 24px; width: auto; }
+  .brand :global(.i) { height: 44px; width: auto; }
+  .brand :global(.w) { height: 25px; width: auto; }
+  .foot-logo { display: block; width: 160px; }
   .nav { display: flex; gap: 4px; }
   .nav a { position: relative; white-space: nowrap; padding: 8px 12px; border-radius: 8px; text-decoration: none; color: var(--navy); font-weight: 700; font-size: 1rem; }
   .nav a::after { content: ""; position: absolute; inset-inline: 12px; bottom: 2px; height: 2.5px; border-radius: 2px; background: var(--teal); transform: scaleX(0); transition: transform .15s; }
@@ -223,7 +224,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     .menu { display: block; }
   }
   @media (max-width: 560px) {
-    .brand-word { display: none; }
+    .brand :global(.w) { display: none; }
     .auth-link { display: none; }
     .lang summary span { display: none; }
   }

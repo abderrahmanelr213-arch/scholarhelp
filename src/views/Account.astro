@@ -1,4 +1,5 @@
 ---
+import Logo from "../components/Logo.astro";
 import Base from "../layouts/Base.astro";
 import { SITE, CATEGORIES } from "../site.config.mjs";
 import { t, lp, type Lang } from "../i18n/ui";
@@ -15,7 +16,7 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
     {!enabled && <p class="notice">{t(lang, "account.soon")}</p>}
 
     <section class="auth-box" data-view="auth" hidden>
-      <img src="/brand-icon.png" alt="" width="69" height="60" />
+      <Logo variant="icon" class="acct-logo" />
       <div class="tabs" role="tablist">
         <button type="button" role="tab" data-tab="signin" aria-selected="true">{t(lang, "account.signin")}</button>
         <button type="button" role="tab" data-tab="signup" aria-selected="false">{t(lang, "account.signup")}</button>
@@ -190,7 +191,7 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
   .account { padding-bottom: 24px; }
   .notice { margin: 20px 0 0; padding: 14px 16px; border-radius: 12px; background: var(--brand-soft); color: var(--navy); font-weight: 600; }
   .auth-box { max-width: 440px; margin: 32px auto 0; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 28px; display: grid; gap: 16px; box-shadow: var(--shadow); }
-  .auth-box > img { justify-self: center; height: 56px; width: auto; }
+  .auth-box > :global(.acct-logo) { justify-self: center; height: 60px; width: auto; }
   .tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-2); border-radius: 12px; padding: 4px; }
   .tabs button { border: 0; background: transparent; padding: 10px; border-radius: 9px; font-weight: 700; cursor: pointer; color: var(--muted); }
   .tabs button[aria-selected="true"] { background: var(--surface); color: var(--navy); box-shadow: 0 1px 3px rgb(12 43 76 / .12); }
