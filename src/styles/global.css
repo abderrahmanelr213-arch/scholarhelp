@@ -83,17 +83,20 @@ button, input, select { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) { .closing::before { animation: none; } }
 .thumb { display: grid; place-items: center; height: 150px; background: var(--surface-2); border-bottom: 1px solid var(--line); padding: 16px; }
 /* Announcement-style picture: logo, the opportunity name, the flag and our address. */
-.thumb.promo { position: relative; height: auto; min-height: 210px; place-items: center; align-content: center; gap: 8px; padding: 22px 50px 42px; background: #fff; text-align: center; border-top: 5px solid var(--navy); }
-.thumb.promo::after { content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 30px; background: var(--teal); }
+.thumb.promo { position: relative; height: auto; min-height: 210px; place-items: center; align-content: center; gap: 8px; padding: 22px 46px 46px; background: #fff; text-align: center; border-top: 5px solid var(--navy); }
 .thumb.promo.conferences { border-top-color: #5b3fa0; }
 .thumb.promo.exchange { border-top-color: #1f5fa8; }
 .promo-logo { height: 24px; width: auto; }
 .promo-img { max-height: 40px; max-width: 60%; object-fit: contain; }
-.card .promo-title { margin: 0; font-size: 1.5rem; font-weight: 900; line-height: 1.2; letter-spacing: -.01em; color: #06182c; text-wrap: balance; }
-.thumb.promo:hover .promo-title { color: var(--brand); }
+.card .promo-title { margin: 0; font-size: 1.68rem; font-weight: 900; line-height: 1.2; letter-spacing: -.01em; color: #06182c; text-wrap: balance; }
+.thumb.promo:hover .promo-title { color: #06182c; }
+.thumb.promo:hover { background: #fbfdfd; }
 .promo-flag { width: 30px; height: 22px; object-fit: cover; border-radius: 4px; box-shadow: 0 1px 4px rgb(12 43 76 / .25); }
 .promo-flag.globe { width: auto; height: auto; box-shadow: none; font-size: 1.4rem; line-height: 1; }
-.promo-site { position: absolute; z-index: 1; inset-inline: 0; bottom: 0; height: 30px; display: grid; place-items: center; color: #fff; font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
+/* Site address at the foot of the card picture: a hairline, then the address between two short teal strokes. */
+.promo-site { position: absolute; z-index: 1; inset-inline: 16px; bottom: 0; height: 36px; display: flex; align-items: center; justify-content: center; gap: 10px; border-top: 1px solid var(--line); color: var(--navy); font-size: .9rem; font-weight: 700; letter-spacing: .02em; }
+.promo-site::before, .promo-site::after { content: ""; width: 18px; height: 2px; border-radius: 2px; background: var(--teal); }
+.promo-site i { font-style: normal; color: var(--teal); }
 .thumb > img { max-height: 118px; max-width: 85%; object-fit: contain; }
 .thumb-flag { display: grid; justify-items: center; gap: 10px; color: var(--navy); font-weight: 800; font-size: 1rem; text-align: center; }
 .thumb-flag img { width: 96px; height: 72px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgb(12 43 76 / .18); }

@@ -15,7 +15,8 @@ try { if (d.countryCode && d.countryCode.length === 2) localCountry = new Intl.D
 const text = [d.title, d.host, d.country, opp.countryKey, localCountry, t(lang, `cat.${d.category}` as any), d.summary, d.eligible, ...d.levels].join(" ").toLowerCase();
 const href = lp(lang, `/opportunities/${opp.slug}/`);
 const flag = d.countryCode ? `/flags/${d.countryCode.toLowerCase()}.svg` : "";
-const host = new URL(SITE.url).host.toUpperCase();
+const host = new URL(SITE.url).host.replace(/^www\./, "").toLowerCase();
+const dot = host.lastIndexOf(".");
 const isNew = Date.now() - +d.published < 7 * 86400000;
 ---
 <article class="card" data-slug={opp.slug} data-cat={d.category} data-levels={d.levels.join(",")} data-funding={d.funding}
@@ -28,7 +29,7 @@ const isNew = Date.now() - +d.published < 7 * 86400000;
     {flag
       ? <img class="promo-flag" src={flag} alt={d.country} loading="lazy" width="36" height="27" />
       : <span class="promo-flag globe" aria-hidden="true">🌐</span>}
-    <span class="promo-site">{host}</span>
+    <span class="promo-site" dir="ltr"><span>{host.slice(0, dot)}<i>{host.slice(dot)}</i></span></span>
   </a>
   <span class="new-badge" data-new-badge hidden>{t(lang, "card.new")}</span>
   <button class="save" type="button" data-save={opp.slug} data-title={d.title} data-href={href} aria-pressed="false" aria-label={t(lang, "card.save")} title={t(lang, "card.save")}>
