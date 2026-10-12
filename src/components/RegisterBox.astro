@@ -145,6 +145,7 @@ const { lang } = Astro.props;
       if (done()) return;
       e.preventDefault(); open(false);
     }));
+    // The header Sign in / Register / Account buttons ([data-reg-skip]) go straight to the account page.
     // Any click on a link or button shows the pop-up first, until the visitor registers.
     // Closing it is always possible, and the click then goes ahead as normal.
     // Official apply links ([data-gate]) only open after the visitor has registered.
@@ -152,7 +153,7 @@ const { lang } = Astro.props;
       if (replaying || isOpen() || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
       const el = (e.target as HTMLElement).closest<HTMLElement>("a[href], button");
       // Buttons inside the chat assistant don't count; the opportunity links it shows still do.
-      if (!el || box.contains(el) || el.matches("[data-reg-trigger], [data-chat] button")) return;
+      if (!el || box.contains(el) || el.matches("[data-reg-trigger], [data-reg-skip], [data-chat] button")) return;
       const gate = el.matches("[data-gate]") && !registered();
       if (!gate && done()) return;
       e.preventDefault();

@@ -87,9 +87,9 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
             ))}
           </ul>
         </details>
-        <a class="auth-link" href={lp(lang, "/account/")} data-auth-out>{t(lang, "nav.login")}</a>
-        <a class="btn auth-btn register" href={lp(lang, "/account/") + "#signup"} data-auth-out data-reg-trigger>{t(lang, "nav.register")}</a>
-        <a class="btn outline auth-btn" href={lp(lang, "/account/")} data-auth-in hidden>{t(lang, "nav.account")}</a>
+        <a class="auth-link" href={lp(lang, "/account/")} data-auth-out data-reg-skip>{t(lang, "nav.login")}</a>
+        <a class="btn auth-btn register" href={lp(lang, "/account/") + "#signup"} data-auth-out data-reg-skip>{t(lang, "nav.register")}</a>
+        <a class="btn outline auth-btn" href={lp(lang, "/account/")} data-auth-in data-reg-skip hidden>{t(lang, "nav.account")}</a>
         <details class="menu">
           <summary aria-label={t(lang, "nav.menu")}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
