@@ -57,7 +57,10 @@ const msgs = Object.fromEntries(msgKeys.map((k) => [k, t(lang, `account.${k}` as
     <section class="dash" data-view="dash" hidden>
       <header class="dash-head">
         <h1><span>{t(lang, "account.welcome")}</span> <span data-username></span></h1>
-        <button class="btn outline" type="button" data-logout>{t(lang, "account.logout")}</button>
+        <div class="dash-actions">
+          <a class="btn admin-link" href="/dashboard/" data-admin-link hidden>Admin dashboard</a>
+          <button class="btn outline" type="button" data-logout>{t(lang, "account.logout")}</button>
+        </div>
       </header>
       <div class="dash-grid">
         <section class="panel">
@@ -221,6 +224,8 @@ const msgs = Object.fromEntries(msgKeys.map((k) => [k, t(lang, `account.${k}` as
     const user = session.user;
     root.querySelector<HTMLElement>("[data-username]")!.textContent = user.user_metadata?.full_name || user.email || "";
     renderSaved();
+    // Admins get a button to the admin dashboard (the database decides who is an admin).
+    sb.rpc("is_admin").then(({ data }) => { if (data) root.querySelector<HTMLElement>("[data-admin-link]")!.hidden = false; });
 
     const prefs = form("prefs");
     const { data: profile } = await sb.from("profiles").select("categories,levels,newsletter").eq("id", user.id).maybeSingle();
@@ -267,6 +272,8 @@ const msgs = Object.fromEntries(msgKeys.map((k) => [k, t(lang, `account.${k}` as
   .msg { margin: 0; font-weight: 600; color: var(--brand); }
   .msg.bad { color: var(--danger); }
   .dash { padding-top: 20px; display: grid; gap: 20px; }
+  .dash-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .admin-link { background: #d92d20; }
   .dash-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
   .dash-head h1 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); color: var(--navy); }
   .dash-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
