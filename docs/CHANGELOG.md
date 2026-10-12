@@ -2,6 +2,14 @@
 
 Newest first. Every change is also in the GitHub commit history.
 
+## 2026-10-12
+
+### Chat assistant
+- A "Help" chat bubble in the bottom corner of every page, in English, Arabic and Pashto.
+- It finds open opportunities by country, study level, category, funding and deadline, and answers common questions (fees, how to apply, motivation and recommendation letters, visas, language tests, who can apply, registering, contact).
+- It runs in the visitor's browser from the site's own listings: no AI service, no API key, no monthly cost. New listings appear in it automatically.
+- Opportunity links in the chat still show the registration pop-up; the chat's own buttons don't.
+
 ## 2026-10-11
 
 ### Listings

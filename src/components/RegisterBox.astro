@@ -150,7 +150,8 @@ const { lang } = Astro.props;
     document.addEventListener("click", (e) => {
       if (replaying || isOpen() || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
       const el = (e.target as HTMLElement).closest<HTMLElement>("a[href], button");
-      if (!el || box.contains(el) || el.matches("[data-reg-trigger]")) return;
+      // Buttons inside the chat assistant don't count; the opportunity links it shows still do.
+      if (!el || box.contains(el) || el.matches("[data-reg-trigger], [data-chat] button")) return;
       const gate = el.matches("[data-gate]") && !registered();
       if (!gate && done()) return;
       e.preventDefault();

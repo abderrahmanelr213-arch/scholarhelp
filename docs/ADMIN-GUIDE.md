@@ -85,6 +85,10 @@ Closed opportunities do not need to be deleted. After the deadline the site show
 Arabic and Pashto pages already work. Without a translation they show the English text with a note.
 To translate a listing, open it and switch on **Arabic** or **Pashto** at the top of the editor, then fill in the text fields.
 
+## Chat assistant answers
+
+The chat bubble finds new listings by itself, so there is nothing to do when you add one. Its written answers (fees, how to apply, contact and so on) are in `src/i18n/chat.ts`, in English, Arabic and Pashto. Edit the sentence in all three languages, commit, and the site rebuilds.
+
 ## 6. Give a helper access later
 
 1. On GitHub open the repository → **Settings → Collaborators → Add people** and invite the helper's GitHub account.
