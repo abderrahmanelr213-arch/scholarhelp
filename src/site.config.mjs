@@ -18,7 +18,7 @@ export const SITE = {
   // "anon public" key from Supabase → Project Settings → API. Empty = sign in shows "coming soon"
   // and saved opportunities stay in the visitor's browser only.
   supabaseUrl: "https://akowmqhgwtswhytrmbek.supabase.co",
-  supabaseAnonKey: "",
+  supabaseAnonKey: "sb_publishable_l93JzxERlXWLZPSKz5sNrQ_8qwd3ftD",
   // Turn on after enabling the Google provider in Supabase → Authentication → Providers.
   googleSignIn: false,
   // Paste your Google AdSense publisher id (ca-pub-...) when you are approved. Empty = no ads anywhere.

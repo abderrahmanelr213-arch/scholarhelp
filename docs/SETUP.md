@@ -18,8 +18,8 @@ Every push to `main`, including saves from the admin panel, builds and publishes
 | Vercel hosting linked to GitHub | Done |
 | Vercel Deployment Protection | **On on purpose** (site not public yet) |
 | Supabase project URL in `src/site.config.mjs` | Done |
-| Supabase anon public key | **Waiting for Abdou** |
-| Run `supabase/schema.sql` in Supabase SQL Editor | **Waiting for Abdou** (run it again after each update; it is safe to re-run) |
+| Supabase public key in `src/site.config.mjs` | Done (2026-10-12) |
+| Database tables from `supabase/schema.sql` | Done (2026-10-12). Run it again after each update; it is safe to re-run |
 | Supabase Site URL | **Waiting for Abdou** |
 | Facebook, YouTube, TikTok links | **Waiting for Abdou** |
 | Domain `scholarhelp.com` | Not bought yet |
@@ -29,6 +29,8 @@ Every push to `main`, including saves from the admin panel, builds and publishes
 1. Supabase → **SQL Editor** → paste all of `supabase/schema.sql` → **Run**.
 2. **Authentication → URL Configuration:** Site URL `https://website-rho-ten-93.vercel.app` (later `https://scholarhelp.com`), and add `https://website-rho-ten-93.vercel.app/**` to the redirect URLs.
 3. **Project Settings → API:** copy the **anon public** key and send it (only that one; never the service_role or secret key). It goes in `supabaseAnonKey` in `src/site.config.mjs`.
+
+**See the sign-ups:** Supabase → **Table Editor** → `subscribers` (pop-up registrations and newsletter) and **Authentication → Users** (student accounts).
 
 Registrations are saved in the `subscribers` table (name, email, phone with country code, language). Export them as CSV from **Table Editor**.
 

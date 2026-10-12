@@ -113,6 +113,12 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
     root.querySelector<HTMLElement>("[data-saved-empty]")!.hidden = items.length > 0;
   }
 
+  // A signed-in student counts as registered: the registration pop-up stops and the apply links open.
+  function rememberRegistered() {
+    try { localStorage.setItem("sh-reg", JSON.stringify({ done: Date.now(), via: "account" })); } catch {}
+    document.cookie = "sh_reg=1; max-age=157680000; path=/; SameSite=Lax";
+  }
+
   async function main() {
     if (!accountsEnabled) {
       // No accounts yet: show what this browser has saved.
@@ -142,6 +148,9 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
         options: { emailRedirectTo: redirectTo, data: { full_name: String(f.get("name")), newsletter: f.get("newsletter") === "on", lang: root.dataset.lang } },
       });
       if (error) return say(msgs.error, true);
+      // Also add them to the registration list, so they skip the pop-up on any device.
+      await sb.from("subscribers").insert({ email: String(f.get("email")).trim().toLowerCase(), name: String(f.get("name")), lang: root.dataset.lang });
+      rememberRegistered();
       if (data.session) location.reload(); else say(msgs.check);
     });
     form("recover").addEventListener("submit", async (e) => {
@@ -163,6 +172,7 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
     if (!session) return view("auth");
 
     view("dash");
+    rememberRegistered();
     const user = session.user;
     root.querySelector<HTMLElement>("[data-username]")!.textContent = user.user_metadata?.full_name || user.email || "";
     renderSaved();

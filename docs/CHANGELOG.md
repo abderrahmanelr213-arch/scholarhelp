@@ -4,6 +4,14 @@ Newest first. Every change is also in the GitHub commit history.
 
 ## 2026-10-12
 
+- Supabase connected: registrations (name, email, phone, language) are saved in the `subscribers` table, and student accounts (sign up, sign in, saved opportunities, alert preferences) work.
+- "Already registered?" checks the email against the registration list.
+- Creating an account also counts as registering, so the pop-up stops and the apply links open.
+- Privacy policy and the pop-up say we store name, email and phone and keep them private.
+- Follow us: Instagram set; Linktree tried and removed at Abdou's request.
+
+## 2026-10-12
+
 ### Chat assistant
 - A "Help" chat bubble in the bottom corner of every page, in English, Arabic and Pashto.
 - It finds open opportunities by country, study level, category, funding and deadline, and answers common questions (fees, how to apply, motivation and recommendation letters, visas, language tests, who can apply, registering, contact).

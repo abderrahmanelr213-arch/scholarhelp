@@ -35,7 +35,7 @@ const on = Boolean(SITE.supabaseUrl && SITE.supabaseAnonKey);
     const msg = box.querySelector<HTMLElement>("[data-news-msg]")!;
     form?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
+      const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim().toLowerCase();
       const show = (ok: boolean) => { msg.hidden = false; msg.textContent = ok ? box.dataset.ok! : box.dataset.err!; msg.classList.toggle("bad", !ok); };
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return show(false);
       const sb = await getSupabase();
