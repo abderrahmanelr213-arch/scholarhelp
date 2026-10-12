@@ -7,7 +7,8 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const enabled = Boolean(SITE.supabaseUrl && SITE.supabaseAnonKey);
 const levels = ["Bachelor", "Master", "PhD", "Postdoc"];
-const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEmail"), reset: t(lang, "account.resetSent"), saved: t(lang, "account.prefsSaved") };
+const msgKeys = ["error", "checkEmail", "resetSent", "prefsSaved", "badLogin", "notConfirmed", "resend", "resent", "tooMany", "typeEmail", "exists", "weakPw", "pwSaved", "goSignup", "goSignin"] as const;
+const msgs = Object.fromEntries(msgKeys.map((k) => [k, t(lang, `account.${k}` as any)]));
 ---
 <Base lang={lang} title={t(lang, "account.title")} description={t(lang, "site.description")} path="/account/" noindex>
   <div class="container account" data-account data-enabled={enabled ? "1" : ""} data-lang={lang} data-msgs={JSON.stringify(msgs)} data-redirect={new URL(lp(lang, "/account/"), SITE.url).pathname}>
@@ -35,8 +36,9 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
         <button class="btn" type="submit">{t(lang, "account.signup")}</button>
       </form>
       <form class="form" data-form="recover" hidden>
+        <h2 class="recover-title">{t(lang, "account.newPwTitle")}</h2>
         <label>{t(lang, "account.password")}<input name="password" type="password" required minlength="8" autocomplete="new-password" /><small>{t(lang, "account.pwHint")}</small></label>
-        <button class="btn" type="submit">{t(lang, "account.prefsSave")}</button>
+        <button class="btn" type="submit">{t(lang, "account.savePw")}</button>
       </form>
       {SITE.googleSignIn && (
         <>
@@ -48,6 +50,7 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
         </>
       )}
       <p class="msg" data-msg role="status" hidden></p>
+      <button class="linkish msg-action" type="button" data-msg-action hidden></button>
     </section>
 
     <section class="dash" data-view="dash" hidden>
@@ -89,13 +92,22 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
   const msgs = JSON.parse(root.dataset.msgs || "{}");
   const view = (name: "auth" | "dash") => root.querySelectorAll<HTMLElement>("[data-view]").forEach((v) => (v.hidden = v.dataset.view !== name));
   const msg = root.querySelector<HTMLElement>("[data-msg]")!;
-  const say = (text: string, bad = false) => { msg.hidden = false; msg.textContent = text; msg.classList.toggle("bad", bad); };
+  const action = root.querySelector<HTMLButtonElement>("[data-msg-action]")!;
+  let actionFn: (() => void) | null = null;
+  action.addEventListener("click", () => actionFn?.());
+  const say = (text: string, bad = false, act?: [string, () => void]) => {
+    msg.hidden = false; msg.textContent = text; msg.classList.toggle("bad", bad);
+    action.hidden = !act; action.textContent = act?.[0] ?? ""; actionFn = act?.[1] ?? null;
+  };
+  // A password-reset link lands here with "type=recovery" in the address; remember it before Supabase cleans the URL.
+  const recovering = /type=recovery/.test(location.hash + location.search);
   const form = (n: string) => root.querySelector<HTMLFormElement>(`[data-form="${n}"]`)!;
 
   function tab(name: "signin" | "signup" | "recover") {
     root.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
     ["signin", "signup", "recover"].forEach((n) => (form(n).hidden = n !== name));
-    msg.hidden = true;
+    root.querySelector<HTMLElement>(".tabs")!.hidden = name === "recover";
+    msg.hidden = true; action.hidden = true;
   }
   root.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach((b) => b.addEventListener("click", () => tab(b.dataset.tab as any)));
   // The sign-in form shows at once; only someone who already has a saved session waits for their dashboard.
@@ -133,45 +145,68 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
     const sb = (await getSupabase())!;
     const redirectTo = location.origin + root.dataset.redirect;
 
-    sb.auth.onAuthStateChange((event) => { if (event === "PASSWORD_RECOVERY") { view("auth"); tab("recover"); } });
+    const explain = (e: { code?: string; status?: number }) =>
+      /rate_limit/.test(e.code || "") || e.status === 429 ? msgs.tooMany
+        : e.code === "weak_password" ? msgs.weakPw
+        : msgs.error;
+    async function resend(email: string) {
+      const { error } = await sb!.auth.resend({ type: "signup", email, options: { emailRedirectTo: redirectTo } });
+      say(error ? explain(error) : msgs.resent, !!error);
+    }
+    const showRecover = () => { view("auth"); tab("recover"); };
+    sb.auth.onAuthStateChange((event) => { if (event === "PASSWORD_RECOVERY") showRecover(); });
 
     form("signin").addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = new FormData(form("signin"));
-      const { error } = await sb.auth.signInWithPassword({ email: String(f.get("email")), password: String(f.get("password")) });
-      if (error) return say(msgs.error, true);
+      const email = String(f.get("email")).trim();
+      const { error } = await sb.auth.signInWithPassword({ email, password: String(f.get("password")) });
+      if (error) {
+        if (error.code === "email_not_confirmed") return say(msgs.notConfirmed, true, [msgs.resend, () => resend(email)]);
+        if (error.code === "invalid_credentials") return say(msgs.badLogin, true, [msgs.goSignup, () => tab("signup")]);
+        return say(explain(error), true);
+      }
       location.reload();
     });
     form("signup").addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = new FormData(form("signup"));
+      const email = String(f.get("email")).trim();
       const { data, error } = await sb.auth.signUp({
-        email: String(f.get("email")), password: String(f.get("password")),
+        email, password: String(f.get("password")),
         options: { emailRedirectTo: redirectTo, data: { full_name: String(f.get("name")), newsletter: f.get("newsletter") === "on", lang: root.dataset.lang } },
       });
-      if (error) return say(msgs.error, true);
+      if (error) {
+        if (error.code === "user_already_exists") return say(msgs.exists, true, [msgs.goSignin, () => tab("signin")]);
+        return say(explain(error), true);
+      }
+      // Supabase answers an already-confirmed email with an empty identity list instead of an error.
+      if (data.user && data.user.identities?.length === 0) return say(msgs.exists, true, [msgs.goSignin, () => tab("signin")]);
       // Also add them to the registration list, so they skip the pop-up on any device.
       await sb.from("subscribers").insert({ email: String(f.get("email")).trim().toLowerCase(), name: String(f.get("name")), lang: root.dataset.lang });
       rememberRegistered();
-      if (data.session) location.reload(); else say(msgs.check);
+      if (data.session) location.reload(); else say(msgs.checkEmail, false, [msgs.resend, () => resend(email)]);
     });
     form("recover").addEventListener("submit", async (e) => {
       e.preventDefault();
       const { error } = await sb.auth.updateUser({ password: String(new FormData(form("recover")).get("password")) });
-      if (error) return say(msgs.error, true);
-      location.reload();
+      if (error) return say(explain(error), true);
+      say(msgs.pwSaved);
+      setTimeout(() => location.replace(location.pathname), 1200);
     });
     root.querySelector("[data-forgot]")!.addEventListener("click", async () => {
-      const email = (form("signin").elements.namedItem("email") as HTMLInputElement).value.trim();
-      if (!email) return (form("signin").elements.namedItem("email") as HTMLInputElement).focus();
+      const input = form("signin").elements.namedItem("email") as HTMLInputElement;
+      const email = input.value.trim();
+      if (!email || !input.checkValidity()) { input.focus(); return say(msgs.typeEmail, true); }
       const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
-      say(error ? msgs.error : msgs.reset, !!error);
+      say(error ? explain(error) : msgs.resetSent, !!error);
     });
     root.querySelector("[data-google]")?.addEventListener("click", () => sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo } }));
     root.querySelector("[data-logout]")!.addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
 
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return view("auth");
+    if (recovering) return showRecover();
 
     view("dash");
     rememberRegistered();
@@ -193,7 +228,7 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
         categories: f.getAll("categories"), levels: f.getAll("levels"), newsletter: f.get("newsletter") === "on",
       });
       const m = root.querySelector<HTMLElement>("[data-prefs-msg]")!;
-      m.hidden = false; m.textContent = error ? msgs.error : msgs.saved; m.classList.toggle("bad", !!error);
+      m.hidden = false; m.textContent = error ? msgs.error : msgs.prefsSaved; m.classList.toggle("bad", !!error);
     });
   }
   main();
@@ -208,6 +243,8 @@ const msgs = { error: t(lang, "account.error"), check: t(lang, "account.checkEma
   .tabs button { border: 0; background: transparent; padding: 10px; border-radius: 9px; font-weight: 700; cursor: pointer; color: var(--muted); }
   .tabs button[aria-selected="true"] { background: var(--surface); color: var(--navy); box-shadow: 0 1px 3px rgb(12 43 76 / .12); }
   .form { display: grid; gap: 14px; }
+  .recover-title { margin: 0; font-size: 1.2rem; color: var(--navy); text-align: center; }
+  .linkish.msg-action { justify-self: center; text-decoration: underline; }
   .form label:not(.check) { display: grid; gap: 6px; font-weight: 600; font-size: .92rem; color: var(--navy); }
   .form input:not([type=checkbox]) { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font-weight: 400; }
   .form input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px var(--brand-soft); }
