@@ -167,7 +167,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     })();
 
     import { initSaveButtons } from "../lib/client/saved";
-    import { currentUser } from "../lib/client/supabase";
+    import { currentUser, getSupabase } from "../lib/client/supabase";
     // Close the open dropdown when clicking elsewhere.
     document.addEventListener("click", (e) => {
       document.querySelectorAll("details[open]").forEach((d) => { if (!d.contains(e.target as Node)) d.removeAttribute("open"); });
@@ -176,6 +176,11 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     currentUser().then((u) => {
       document.querySelectorAll<HTMLElement>("[data-auth-in]").forEach((el) => (el.hidden = !u));
       document.querySelectorAll<HTMLElement>("[data-auth-out]").forEach((el) => (el.hidden = !!u));
+      // Signed-in admins: the header account button opens the admin dashboard.
+      if (u) getSupabase().then((sb) => sb?.rpc("is_admin")).then((r) => {
+        if (!r?.data) return;
+        document.querySelectorAll<HTMLAnchorElement>("a[data-auth-in]").forEach((a) => { a.href = "/dashboard/"; a.textContent = "Admin"; a.classList.add("is-admin"); });
+      });
     });
   </script>
 </body>
@@ -214,6 +219,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   .lang a:hover, .lang a[aria-current] { background: var(--surface-2); }
   .auth-link { font-weight: 700; color: var(--ink); text-decoration: none; padding: 8px 6px; white-space: nowrap; }
   .auth-btn { padding: 9px 16px; font-size: .92rem; white-space: nowrap; }
+  :global(.auth-btn.is-admin) { background: #d92d20; border-color: #d92d20; color: #fff; }
   .register { background: #d92d20; border-color: #d92d20; color: #fff; }
   .register:hover { background: #b42318; border-color: #b42318; }
   .social { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 700; font-size: .9rem; }

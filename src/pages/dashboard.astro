@@ -4,6 +4,9 @@
 import Logo from "../components/Logo.astro";
 import { SITE } from "../site.config.mjs";
 import "../styles/global.css";
+import { getOpps, getGuides, isoDate } from "../lib/opps";
+const opps = await getOpps("en");
+const guides = await getGuides("en");
 const projectRef = new URL(SITE.supabaseUrl || "https://x.supabase.co").host.split(".")[0];
 ---
 <!doctype html>
@@ -22,7 +25,7 @@ const projectRef = new URL(SITE.supabaseUrl || "https://x.supabase.co").host.spl
   <div class="dash" data-dash data-ref={projectRef}>
     <header class="top">
       <a href="/" class="brand"><Logo variant="icon" animate={false} class="top-logo" /><span>Admin</span></a>
-      <div class="who" data-who hidden><span data-email></span><button type="button" class="ghost" data-signout>Sign out</button></div>
+      <div class="who" data-who hidden><span data-email></span><a class="ghost" href="/account/?student">Student view</a><button type="button" class="ghost" data-signout>Sign out</button></div>
     </header>
 
     <section class="card login" data-view="login" hidden>
@@ -50,9 +53,10 @@ const projectRef = new URL(SITE.supabaseUrl || "https://x.supabase.co").host.spl
     <main data-view="app" hidden>
       <nav class="tabs" role="tablist">
         <button type="button" data-tab="overview" aria-selected="true">Overview</button>
+        <button type="button" data-tab="edit" aria-selected="false">Edit content</button>
         <button type="button" data-tab="regs" aria-selected="false">Registrations</button>
         <button type="button" data-tab="accounts" aria-selected="false">Accounts</button>
-        <button type="button" data-tab="content" aria-selected="false">Content and settings</button>
+        <button type="button" data-tab="content" aria-selected="false">Settings</button>
       </nav>
 
       <section data-panel="overview">
@@ -92,9 +96,42 @@ const projectRef = new URL(SITE.supabaseUrl || "https://x.supabase.co").host.spl
         <p class="muted small" data-count="accounts"></p>
       </section>
 
+      <section data-panel="edit" hidden>
+        <div class="edit-top">
+          <a class="btn big" href="/admin/#/collections/opportunities/new" target="_blank" rel="noopener">+ Add a new opportunity</a>
+          <a class="btn big outline-btn" href="/admin/#/collections/guides/new" target="_blank" rel="noopener">+ Add a new guide</a>
+        </div>
+        <p class="card note"><b>How editing works:</b> each Edit button opens the content editor in a new tab. The first time, choose <b>Sign In with Token</b> and paste your GitHub key (<a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">create one here</a>: repository <i>scholarhelp</i>, Contents <i>Read and write</i>). After you press <b>Save</b>, the change is live on the site in a few minutes.</p>
+        <h2 class="sec">Opportunities ({opps.length})</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Opportunity</th><th>Deadline</th><th></th></tr></thead>
+          <tbody>
+            {opps.map((o) => (
+              <tr>
+                <td><a href={`/opportunities/${o.slug}/`} target="_blank" rel="noopener" class="plain">{o.entry.data.title}</a></td>
+                <td class="nowrap">{o.entry.data.deadline ? isoDate(o.entry.data.deadline) : "Rolling"}</td>
+                <td class="act"><a class="ghost" href={`/admin/#/collections/opportunities/entries/${o.slug}`} target="_blank" rel="noopener">Edit</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table></div>
+        <h2 class="sec">Guides ({guides.length})</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Guide</th><th></th></tr></thead>
+          <tbody>
+            {guides.map((g) => (
+              <tr>
+                <td><a href={`/guides/${g.slug}/`} target="_blank" rel="noopener" class="plain">{g.entry.data.title}</a></td>
+                <td class="act"><a class="ghost" href={`/admin/#/collections/guides/entries/${g.slug}`} target="_blank" rel="noopener">Edit</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table></div>
+      </section>
+
       <section data-panel="content" hidden>
         <div class="links">
-          <a class="card link" href="/admin/" target="_blank" rel="noopener"><b>Opportunities and guides</b><span>Add, edit, translate or remove listings. Signs in with your GitHub key.</span></a>
+          <a class="card link" href="/admin/" target="_blank" rel="noopener"><b>Content editor</b><span>Opportunities and guides, with translations. Signs in with your GitHub key.</span></a>
           <a class="card link" data-supa="editor" target="_blank" rel="noopener"><b>Database (Supabase)</b><span>All tables, export, and the admins list.</span></a>
           <a class="card link" data-supa="auth/users" target="_blank" rel="noopener"><b>Accounts and passwords</b><span>Delete accounts, resend confirmation emails.</span></a>
           <a class="card link" data-supa="auth/url-configuration" target="_blank" rel="noopener"><b>Email links</b><span>Site URL and redirect URLs for confirmation emails.</span></a>
@@ -312,6 +349,14 @@ const projectRef = new URL(SITE.supabaseUrl || "https://x.supabase.co").host.spl
   .dash .link { display: grid; gap: 6px; text-decoration: none; color: var(--navy); transition: border-color .15s, transform .15s; }
   .dash .link:hover { border-color: var(--teal); transform: translateY(-2px); }
   .dash .link span { color: var(--muted); font-size: .9rem; }
+  .dash .edit-top { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .dash .btn.big { padding: 14px 20px; font-size: 1rem; text-decoration: none; }
+  .dash .outline-btn { background: #fff; color: var(--navy); border: 1.5px solid var(--navy); }
+  .dash .note { display: block; font-size: .92rem; line-height: 1.55; margin: 0 0 16px; }
+  .dash .note a { color: var(--teal); font-weight: 700; }
+  .dash .sec { margin: 18px 0 10px; }
+  .dash a.ghost { display: inline-block; text-decoration: none; }
+  .dash td a.plain { color: var(--navy); font-weight: 600; white-space: normal; }
   @media (max-width: 760px) { .dash .stats { grid-template-columns: 1fr 1fr; } .dash .grid2 { grid-template-columns: 1fr; } .dash .bar { flex-direction: column; } }
 </style>
 </body>

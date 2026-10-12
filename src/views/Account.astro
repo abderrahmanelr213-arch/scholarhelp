@@ -224,8 +224,13 @@ const msgs = Object.fromEntries(msgKeys.map((k) => [k, t(lang, `account.${k}` as
     const user = session.user;
     root.querySelector<HTMLElement>("[data-username]")!.textContent = user.user_metadata?.full_name || user.email || "";
     renderSaved();
-    // Admins get a button to the admin dashboard (the database decides who is an admin).
-    sb.rpc("is_admin").then(({ data }) => { if (data) root.querySelector<HTMLElement>("[data-admin-link]")!.hidden = false; });
+    // Admins go straight to the admin dashboard (the database decides who is an admin).
+    // "?student" keeps them here to see the student view; the red button leads back.
+    sb.rpc("is_admin").then(({ data }) => {
+      if (!data) return;
+      if (!new URLSearchParams(location.search).has("student")) return location.replace("/dashboard/");
+      root.querySelector<HTMLElement>("[data-admin-link]")!.hidden = false;
+    });
 
     const prefs = form("prefs");
     const { data: profile } = await sb.from("profiles").select("categories,levels,newsletter").eq("id", user.id).maybeSingle();
