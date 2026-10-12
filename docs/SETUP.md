@@ -34,7 +34,7 @@ Registrations are saved in the `subscribers` table (name, email, phone with coun
 
 ## Social links
 
-Instagram (`scholarhelpu`) and Linktree (`linktr.ee/scholarhelp_DZ`) are set. Paste the Facebook, YouTube and TikTok links into `social` in `src/site.config.mjs`. Empty links show as greyed-out icons.
+Instagram (`scholarhelpu`) is set. Paste the Facebook, YouTube and TikTok links into `social` in `src/site.config.mjs`. Empty links show as greyed-out icons.
 
 ## Going public
 
