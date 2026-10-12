@@ -23,15 +23,17 @@ const config = {
   instagram: SITE.social.instagram,
   email: SITE.email,
 };
+// Friendly robot head: the icon people expect for an assistant.
+const bot = `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="4.2" r="2" fill="currentColor"/><path d="M16 6v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="2.5" y="14" width="3" height="7" rx="1.5" fill="currentColor"/><rect x="26.5" y="14" width="3" height="7" rx="1.5" fill="currentColor"/><rect x="5.5" y="9" width="21" height="18" rx="7" fill="currentColor"/><rect x="9" y="13" width="14" height="9" rx="4.5" class="bot-face"/><circle cx="13" cy="17.5" r="1.7" fill="currentColor"/><circle cx="19" cy="17.5" r="1.7" fill="currentColor"/></svg>`;
 ---
 <div class="chat" data-chat data-config={JSON.stringify(config)}>
   <button class="chat-launch" type="button" data-chat-toggle aria-expanded="false" aria-controls="chat-panel" aria-label={s.open}>
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01" stroke-width="3"/></svg>
+    <span class="bot-avatar"><Fragment set:html={bot} /><i class="bot-online"></i></span>
     <span class="chat-launch-label">{s.launcher}</span>
   </button>
   <section class="chat-panel" id="chat-panel" role="dialog" aria-label={s.title} hidden>
     <header class="chat-head">
-      <img src="/brand-icon.png" alt="" width="40" height="40" />
+      <span class="bot-avatar head-avatar"><Fragment set:html={bot} /><i class="bot-online"></i></span>
       <div>
         <h2>{s.title}</h2>
         <p>{s.subtitle}</p>
@@ -230,13 +232,13 @@ const config = {
 
     const start = () => { if (!msgs.length) push({ text: s.greet, chips: startChips() }); };
     let opened = false;
-    async function setOpen(show: boolean) {
+    async function setOpen(show: boolean, byKeyboard = false) {
       panel.hidden = !show;
       launch.hidden = show;
       root!.querySelectorAll("[data-chat-toggle]").forEach((b) => b.setAttribute("aria-expanded", String(show)));
       document.documentElement.classList.toggle("chat-open", show);
       try { sessionStorage.setItem(KEY + "-open", show ? "1" : ""); } catch {}
-      if (!show) { launch.focus({ preventScroll: true }); return; }
+      if (!show) { if (byKeyboard) launch.focus({ preventScroll: true }); return; }
       if (!opened) {
         opened = true;
         try { await load(); } catch { /* offline: chips still show; answers wait for the data */ }
@@ -247,7 +249,7 @@ const config = {
       if (innerWidth > 720) input.focus({ preventScroll: true });
     }
 
-    root.querySelectorAll("[data-chat-toggle]").forEach((b) => b.addEventListener("click", () => setOpen(panel.hidden)));
+    root.querySelectorAll("[data-chat-toggle]").forEach((b) => b.addEventListener("click", (e) => setOpen(panel.hidden, (e as MouseEvent).detail === 0)));
     root.querySelector("[data-chat-restart]")!.addEventListener("click", () => {
       msgs = []; save(); log.innerHTML = ""; start(); input.focus({ preventScroll: true });
     });
@@ -265,7 +267,7 @@ const config = {
       const b = await load();
       exchange(q, reply(b.answer(q)));
     });
-    addEventListener("keydown", (e) => { if (e.key === "Escape" && !panel.hidden && !document.documentElement.classList.contains("reg-open")) setOpen(false); });
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && !panel.hidden && !document.documentElement.classList.contains("reg-open")) setOpen(false, true); });
     // Keep the chat open while the visitor moves between pages.
     try { if (sessionStorage.getItem(KEY + "-open") && innerWidth > 720) setOpen(true); } catch {}
   }
@@ -275,11 +277,21 @@ const config = {
   .chat { --chat-gap: 16px; }
   .chat-launch {
     position: fixed; z-index: 40; inset-inline-end: var(--chat-gap); bottom: calc(var(--chat-gap) + env(safe-area-inset-bottom, 0px));
-    display: inline-flex; align-items: center; gap: 8px; height: 56px; padding: 0 20px 0 16px; border: 0; border-radius: 999px;
-    background: var(--teal); color: #fff; font-weight: 800; font-size: 1rem; cursor: pointer;
-    box-shadow: 0 6px 20px rgb(12 43 76 / .28); transition: transform .15s, background .15s;
+    display: inline-flex; align-items: center; gap: 10px; height: 58px; padding-block: 0; padding-inline: 6px 22px; border: 0; border-radius: 999px;
+    background: linear-gradient(135deg, #14a5a6, #0c7a7b); color: #fff; font-weight: 800; font-size: 1.02rem; letter-spacing: .01em; cursor: pointer;
+    box-shadow: 0 10px 28px rgb(15 141 142 / .38), 0 2px 6px rgb(12 43 76 / .18); transition: transform .15s, box-shadow .15s;
   }
-  .chat-launch:hover { background: var(--brand); transform: translateY(-2px); }
+  .chat-launch:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgb(15 141 142 / .45), 0 2px 6px rgb(12 43 76 / .18); }
+  .chat-launch:focus { outline: none; }
+  .chat-launch:focus-visible { outline: 3px solid var(--navy); outline-offset: 3px; }
+  /* The robot sits in a white circle with a green "online" dot. */
+  .bot-avatar { position: relative; flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #fff; color: var(--brand); }
+  .bot-avatar :global(svg) { width: 30px; height: 30px; }
+  .bot-avatar :global(.bot-face) { fill: #fff; }
+  .bot-online { position: absolute; inset-inline-end: 1px; bottom: 1px; width: 12px; height: 12px; border-radius: 50%; background: #22c55e; border: 2px solid #fff; }
+  .head-avatar { width: 40px; height: 40px; }
+  .head-avatar :global(svg) { width: 27px; height: 27px; }
+  .head-avatar .bot-online { border-color: var(--navy); }
   .chat-launch[hidden] { display: none; }
   .chat-panel {
     position: fixed; z-index: 45; inset-inline-end: var(--chat-gap); bottom: calc(var(--chat-gap) + env(safe-area-inset-bottom, 0px));
@@ -288,7 +300,6 @@ const config = {
   }
   .chat-panel[hidden] { display: none; }
   .chat-head { display: flex; align-items: center; gap: 10px; padding: 12px 10px 12px 14px; background: var(--navy); color: #fff; }
-  .chat-head img { width: 40px; height: 40px; border-radius: 50%; background: #fff; padding: 3px; flex: none; }
   .chat-head div { flex: 1; min-width: 0; }
   .chat-head h2 { font-size: 1.02rem; font-weight: 800; color: #fff; }
   .chat-head p { margin: 0; font-size: .85rem; color: #d6e4ef; line-height: 1.3; }
@@ -322,7 +333,11 @@ const config = {
   :global(html[dir="rtl"]) .chat-form button svg { transform: scaleX(-1); }
   /* Phones: a round button without the label, and the chat fills the screen. */
   @media (max-width: 560px) {
-    .chat-launch { width: 56px; padding: 0; justify-content: center; }
+    .chat-launch { width: 62px; height: 62px; padding: 0; justify-content: center; }
+    .chat-launch .bot-avatar { width: 62px; height: 62px; background: transparent; color: #fff; }
+    .chat-launch .bot-avatar :global(svg) { width: 36px; height: 36px; }
+    .chat-launch .bot-avatar :global(.bot-face) { fill: #0c7a7b; }
+    .chat-launch .bot-online { inset-inline-end: 6px; bottom: 6px; border-color: #0f8d8e; }
     .chat-launch-label { display: none; }
     .chat-panel { inset: 0; width: auto; height: 100dvh; border-radius: 0; border: 0; }
     :global(html.chat-open) { overflow: hidden; }
