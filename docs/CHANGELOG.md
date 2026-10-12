@@ -59,3 +59,4 @@ Newest first. Every change is also in the GitHub commit history.
 - GitHub repository linked to Vercel, so every push publishes the site.
 - Admin panel pointed at the repository.
 - Supabase project URL set.
+- Linktree icon added to the "Follow us" rows.

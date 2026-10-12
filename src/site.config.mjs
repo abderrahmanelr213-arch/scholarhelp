@@ -10,6 +10,7 @@ export const SITE = {
   telegram: "https://t.me/Scholarhelp213",
   social: {
     instagram: "https://www.instagram.com/scholarhelpu",
+    linktree: "https://linktr.ee/scholarhelp_DZ",
     // Paste your links here when the accounts are ready. Empty = the icon shows but goes nowhere yet.
     facebook: "",
     youtube: "",
