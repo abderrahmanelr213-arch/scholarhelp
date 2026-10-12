@@ -23,8 +23,8 @@ const config = {
   instagram: SITE.social.instagram,
   email: SITE.email,
 };
-// Friendly robot head: the icon people expect for an assistant.
-const bot = `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="4.2" r="2" fill="currentColor"/><path d="M16 6v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="2.5" y="14" width="3" height="7" rx="1.5" fill="currentColor"/><rect x="26.5" y="14" width="3" height="7" rx="1.5" fill="currentColor"/><rect x="5.5" y="9" width="21" height="18" rx="7" fill="currentColor"/><rect x="9" y="13" width="14" height="9" rx="4.5" class="bot-face"/><circle cx="13" cy="17.5" r="1.7" fill="currentColor"/><circle cx="19" cy="17.5" r="1.7" fill="currentColor"/></svg>`;
+// The assistant's face: an illustrated support agent with a headset (Abdou's pick).
+const bot = `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><clipPath id="sh-av-clip"><circle cx="32" cy="32" r="32"/></clipPath></defs><g clip-path="url(#sh-av-clip)"><rect width="64" height="64" fill="#fff1da"/><path d="M18 30c0-12 6-19 14-19s14 7 14 19v18H18z" fill="#3b2416"/><path d="M8 66c2-13 12-19 24-19s22 6 24 19z" fill="#0f8d8e"/><rect x="28" y="38" width="8" height="9" rx="3" fill="#c98f6b"/><ellipse cx="32" cy="29" rx="10.5" ry="12.3" fill="#d9a27e"/><path d="M21.4 27c.6-8 5-12.5 10.6-12.5 6 0 10.4 4.5 10.8 12.2-3.4-1.4-7.8-4.2-10.2-7.6-2 3.6-6.6 6.6-11.2 7.9z" fill="#3b2416"/><path d="M18.6 29a13.4 13.4 0 0 1 26.8 0" stroke="#0c2b4c" stroke-width="2.4" fill="none"/><rect x="16.4" y="26.5" width="4.6" height="8" rx="2.2" fill="#0c2b4c"/><rect x="43" y="26.5" width="4.6" height="8" rx="2.2" fill="#0c2b4c"/><path d="M18.8 34.5c0 4 3 6.5 8 6.6" stroke="#0c2b4c" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="27.6" cy="41.1" r="1.6" fill="#0c2b4c"/><circle cx="27.8" cy="29.5" r="1.5" fill="#2b1d16"/><circle cx="36.2" cy="29.5" r="1.5" fill="#2b1d16"/><circle cx="25.8" cy="33.5" r="1.8" fill="#f08c8c" opacity=".5"/><circle cx="38.2" cy="33.5" r="1.8" fill="#f08c8c" opacity=".5"/><path d="M28.6 35.2q3.4 3 6.8 0" stroke="#8a3f26" stroke-width="1.5" fill="none" stroke-linecap="round"/></g></svg>`;
 ---
 <div class="chat" data-chat data-config={JSON.stringify(config)}>
   <button class="chat-launch" type="button" data-chat-toggle aria-expanded="false" aria-controls="chat-panel" aria-label={s.open}>
@@ -284,13 +284,11 @@ const bot = `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="4.2
   .chat-launch:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgb(15 141 142 / .45), 0 2px 6px rgb(12 43 76 / .18); }
   .chat-launch:focus { outline: none; }
   .chat-launch:focus-visible { outline: 3px solid var(--navy); outline-offset: 3px; }
-  /* The robot sits in a white circle with a green "online" dot. */
-  .bot-avatar { position: relative; flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #fff; color: var(--brand); }
-  .bot-avatar :global(svg) { width: 30px; height: 30px; }
-  .bot-avatar :global(.bot-face) { fill: #fff; }
+  /* The assistant's face in a white ring, with a green "online" dot. */
+  .bot-avatar { position: relative; flex: none; display: block; width: 46px; height: 46px; border-radius: 50%; background: #fff; padding: 2px; }
+  .bot-avatar :global(svg) { display: block; width: 100%; height: 100%; border-radius: 50%; }
   .bot-online { position: absolute; inset-inline-end: 1px; bottom: 1px; width: 12px; height: 12px; border-radius: 50%; background: #22c55e; border: 2px solid #fff; }
   .head-avatar { width: 40px; height: 40px; }
-  .head-avatar :global(svg) { width: 27px; height: 27px; }
   .head-avatar .bot-online { border-color: var(--navy); }
   .chat-launch[hidden] { display: none; }
   .chat-panel {
@@ -334,10 +332,8 @@ const bot = `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="4.2
   /* Phones: a round button without the label, and the chat fills the screen. */
   @media (max-width: 560px) {
     .chat-launch { width: 62px; height: 62px; padding: 0; justify-content: center; }
-    .chat-launch .bot-avatar { width: 62px; height: 62px; background: transparent; color: #fff; }
-    .chat-launch .bot-avatar :global(svg) { width: 36px; height: 36px; }
-    .chat-launch .bot-avatar :global(.bot-face) { fill: #0c7a7b; }
-    .chat-launch .bot-online { inset-inline-end: 6px; bottom: 6px; border-color: #0f8d8e; }
+    .chat-launch .bot-avatar { width: 56px; height: 56px; }
+    .chat-launch .bot-online { inset-inline-end: 0; bottom: 0; }
     .chat-launch-label { display: none; }
     .chat-panel { inset: 0; width: auto; height: 100dvh; border-radius: 0; border: 0; }
     :global(html.chat-open) { overflow: hidden; }
