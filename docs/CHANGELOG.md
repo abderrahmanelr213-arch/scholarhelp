@@ -5,6 +5,8 @@ Newest first. Every change is also in the GitHub commit history.
 ## 2026-10-11
 
 ### SEO
+- New `/llms.txt`: a plain-text list of every listing and guide for AI assistants (ChatGPT, Perplexity, Claude, Gemini). Rebuilt on every publish.
+- After launch, robots.txt names the AI search crawlers and lets them in, with the same rules as Google.
 - New `launched` switch in `src/site.config.mjs`. While it is `false`, robots.txt blocks search engines and every page has a noindex tag.
 - Arabic and Pashto pages that still show English text now point Google to the English page, and are left out of hreflang tags and the sitemap. Real translations are listed as before.
 
