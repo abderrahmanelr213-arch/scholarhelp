@@ -5,7 +5,7 @@
 | Thing | Where |
 | --- | --- |
 | Code | GitHub: <https://github.com/abderrahmanelr213-arch/scholarhelp> (branch `main`) |
-| Hosting | Vercel project `website` (team abdou-6f62): <https://website-rho-ten-93.vercel.app> |
+| Hosting | Vercel project `website` (team abdou-6f62): <https://www.scholarhelpu.com> (also <https://website-rho-ten-93.vercel.app>) |
 | Admin panel | `/admin/` on the site (see [ADMIN-GUIDE.md](ADMIN-GUIDE.md)) |
 | Database | Supabase project `akowmqhgwtswhytrmbek` (student accounts and registrations) |
 
@@ -16,18 +16,19 @@ Every push to `main`, including saves from the admin panel, builds and publishes
 | Step | Status |
 | --- | --- |
 | Vercel hosting linked to GitHub | Done |
-| Vercel Deployment Protection | **On on purpose** (site not public yet) |
+| Vercel Deployment Protection | **Abdou to turn off** (launch, 2026-10-12) |
 | Supabase project URL in `src/site.config.mjs` | Done |
 | Supabase public key in `src/site.config.mjs` | Done (2026-10-12) |
 | Database tables from `supabase/schema.sql` | Done (2026-10-12). Run it again after each update; it is safe to re-run |
-| Supabase Site URL | **Waiting for Abdou** |
+| Supabase Site URL and redirect URLs for the new domain | **Waiting for Abdou** |
 | Facebook, YouTube, TikTok links | **Waiting for Abdou** |
-| Domain `scholarhelp.com` | Not bought yet |
+| Domain `scholarhelpu.com` (www is the main address) | Done (2026-10-12) |
+| `launched: true` in `src/site.config.mjs` | Done (2026-10-12) |
 
 ## Supabase (registrations and accounts)
 
 1. Supabase → **SQL Editor** → paste all of `supabase/schema.sql` → **Run**.
-2. **Authentication → URL Configuration:** Site URL `https://website-rho-ten-93.vercel.app` (later `https://scholarhelp.com`), and add `https://website-rho-ten-93.vercel.app/**` to the redirect URLs.
+2. **Authentication → URL Configuration:** Site URL `https://www.scholarhelpu.com`, and add `https://www.scholarhelpu.com/**` and `https://scholarhelpu.com/**` to the redirect URLs.
 3. **Project Settings → API:** copy the **anon public** key and send it (only that one; never the service_role or secret key). It goes in `supabaseAnonKey` in `src/site.config.mjs`.
 
 **See the sign-ups:** Supabase → **Table Editor** → `subscribers` (pop-up registrations and newsletter) and **Authentication → Users** (student accounts).
@@ -38,14 +39,13 @@ Registrations are saved in the `subscribers` table (name, email, phone with coun
 
 Instagram (`scholarhelpu`) is set. Paste the Facebook, YouTube and TikTok links into `social` in `src/site.config.mjs`. Empty links show as greyed-out icons.
 
-## Going public
+## Going public (done 2026-10-12)
 
-1. Buy `scholarhelp.com` (about $10 a year).
-2. Vercel → project → **Settings → Domains** → add it and follow the DNS steps.
-3. Change `url` in `src/site.config.mjs`, and `site_url` and `display_url` in `public/admin/config.yml`, to `https://scholarhelp.com`.
-4. Update the Supabase Site URL to the new domain.
-5. Turn off Vercel Deployment Protection.
-6. Add the site to Google Search Console and Bing Webmaster Tools and submit `https://scholarhelp.com/sitemap.xml`.
+1. Domain `scholarhelpu.com` bought and added in Vercel (`scholarhelpu.com` redirects to `www.scholarhelpu.com`).
+2. `url` in `src/site.config.mjs` and `site_url`/`display_url` in `public/admin/config.yml` set to `https://www.scholarhelpu.com`, and `launched: true`.
+3. Abdou: turn off Vercel Deployment Protection.
+4. Abdou: Supabase Site URL `https://www.scholarhelpu.com`, redirect URLs `https://www.scholarhelpu.com/**` and `https://scholarhelpu.com/**`.
+5. Abdou: add the site to Google Search Console and Bing Webmaster Tools and submit `https://www.scholarhelpu.com/sitemap.xml`.
 
 ## Ads, later
 

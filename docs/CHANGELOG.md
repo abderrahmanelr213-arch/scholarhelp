@@ -4,6 +4,7 @@ Newest first. Every change is also in the GitHub commit history.
 
 ## 2026-10-12
 
+- **Launched** on <https://www.scholarhelpu.com>: canonicals, sitemap, llms.txt and social previews use the new domain; robots.txt and pages are open to search engines.
 - Admin dashboard at `/dashboard/`: registrations and accounts with search, edit, delete, CSV download and WhatsApp links, plus shortcuts to the content editor, Supabase, Vercel and GitHub. Only emails in the `admins` table can see the data.
 - Supabase connected: registrations (name, email, phone, language) are saved in the `subscribers` table, and student accounts (sign up, sign in, saved opportunities, alert preferences) work.
 - "Already registered?" checks the email against the registration list.
@@ -20,6 +21,12 @@ Newest first. Every change is also in the GitHub commit history.
 - Opportunity links in the chat still show the registration pop-up; the chat's own buttons don't.
 
 ## 2026-10-11
+
+### SEO
+- New `/llms.txt`: a plain-text list of every listing and guide for AI assistants (ChatGPT, Perplexity, Claude, Gemini). Rebuilt on every publish.
+- After launch, robots.txt names the AI search crawlers and lets them in, with the same rules as Google.
+- New `launched` switch in `src/site.config.mjs`. While it is `false`, robots.txt blocks search engines and every page has a noindex tag.
+- Arabic and Pashto pages that still show English text now point Google to the English page, and are left out of hreflang tags and the sitemap. Real translations are listed as before.
 
 ### Listings
 - 15 real, verified listings. Hansen Leadership Institute 2027 (USA) was added.

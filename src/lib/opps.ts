@@ -51,3 +51,10 @@ export async function getGuides(lang: Lang): Promise<Guide[]> {
     })
     .sort((a, b) => +b.entry.data.published - +a.entry.data.published);
 }
+
+/** Languages that have a real translation of a listing or guide (English always counts). */
+export async function translatedLangs(collection: "opportunities" | "guides", slug: string): Promise<Lang[]> {
+  const all = await getCollection(collection, (e) => !e.data.draft);
+  const ids = new Set(all.map((e) => e.id));
+  return (["en", "ar", "ps"] as Lang[]).filter((l) => l === "en" || ids.has(`${l}/${slug}`));
+}

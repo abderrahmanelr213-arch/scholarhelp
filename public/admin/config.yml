@@ -5,9 +5,8 @@ backend:
   branch: main
   # base_url: https://your-auth-worker.workers.dev  # optional, for "Sign in with GitHub" (see README)
 
-# Change both to https://scholarhelp.com once the domain is connected.
-site_url: https://website-rho-ten-93.vercel.app
-display_url: https://website-rho-ten-93.vercel.app
+site_url: https://www.scholarhelpu.com
+display_url: https://www.scholarhelpu.com
 logo_url: /brand-icon.png
 media_folder: public/uploads
 public_folder: /uploads

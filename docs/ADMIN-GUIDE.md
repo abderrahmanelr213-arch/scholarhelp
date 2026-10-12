@@ -12,7 +12,7 @@ To add another admin to the dashboard, the person creates an account on `/accoun
 The admin panel lets you add and edit opportunities and guides from the browser, without touching code.
 Every time you press **Save**, the change is saved to GitHub and the site rebuilds itself. It is live about a minute later.
 
-Admin address: <https://website-rho-ten-93.vercel.app/admin/>. After the domain is connected it becomes `https://scholarhelp.com/admin/`.
+Admin addresses: <https://www.scholarhelpu.com/admin/> (opportunities and guides) and <https://www.scholarhelpu.com/dashboard/> (registrations and accounts).
 
 ## 1. Create your admin key (one time)
 

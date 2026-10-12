@@ -2,7 +2,7 @@
 
 Fully funded scholarships, conferences and cultural exchange programs for students worldwide, in English, Arabic and Pashto.
 
-Live (private for now): <https://website-rho-ten-93.vercel.app> · Admin: `/admin/`
+Live: <https://www.scholarhelpu.com> · Admin: `/admin/` and `/dashboard/`
 
 ## Documentation
 
