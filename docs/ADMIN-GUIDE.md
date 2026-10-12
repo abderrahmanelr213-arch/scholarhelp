@@ -1,5 +1,14 @@
 # Admin guide
 
+There are two admin areas:
+
+| Address | For | Sign in with |
+| --- | --- | --- |
+| `/dashboard/` | Registrations and student accounts: see, search, edit, delete, download as CSV, WhatsApp links | Your ScholarHelp account (email and password). The email must be in the Supabase `admins` table |
+| `/admin/` | Opportunities and guides: add, edit, translate, remove | Your GitHub key (below) |
+
+To add another admin to the dashboard, the person creates an account on `/account/`, then in Supabase → **SQL Editor** run: `insert into public.admins (email) values ('their@email.com');`
+
 The admin panel lets you add and edit opportunities and guides from the browser, without touching code.
 Every time you press **Save**, the change is saved to GitHub and the site rebuilds itself. It is live about a minute later.
 

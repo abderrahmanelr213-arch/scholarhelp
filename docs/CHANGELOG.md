@@ -4,6 +4,7 @@ Newest first. Every change is also in the GitHub commit history.
 
 ## 2026-10-12
 
+- Admin dashboard at `/dashboard/`: registrations and accounts with search, edit, delete, CSV download and WhatsApp links, plus shortcuts to the content editor, Supabase, Vercel and GitHub. Only emails in the `admins` table can see the data.
 - Supabase connected: registrations (name, email, phone, language) are saved in the `subscribers` table, and student accounts (sign up, sign in, saved opportunities, alert preferences) work.
 - "Already registered?" checks the email against the registration list.
 - Creating an account also counts as registering, so the pop-up stops and the apply links open.

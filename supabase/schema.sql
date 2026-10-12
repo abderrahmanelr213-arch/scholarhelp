@@ -71,3 +71,26 @@ language sql security definer set search_path = public stable as $$
   select exists (select 1 from public.subscribers where email = lower(trim(p_email)));
 $$;
 grant execute on function public.is_subscribed(text) to anon, authenticated;
+
+-- Admins: emails listed here can open /dashboard/ and see, edit and delete registrations and accounts.
+-- Add an admin: insert into public.admins (email) values ('you@example.com');
+create table if not exists public.admins (email text primary key, created_at timestamptz default now());
+alter table public.admins enable row level security;
+create or replace function public.is_admin() returns boolean
+language sql security definer set search_path = public stable as $$
+  select exists (select 1 from public.admins where email = lower(coalesce(auth.jwt()->>'email', '')));
+$$;
+revoke execute on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;
+drop policy if exists "Admins read subscribers" on public.subscribers;
+create policy "Admins read subscribers" on public.subscribers for select to authenticated using (public.is_admin());
+drop policy if exists "Admins edit subscribers" on public.subscribers;
+create policy "Admins edit subscribers" on public.subscribers for update to authenticated using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "Admins remove subscribers" on public.subscribers;
+create policy "Admins remove subscribers" on public.subscribers for delete to authenticated using (public.is_admin());
+drop policy if exists "Admins read profiles" on public.profiles;
+create policy "Admins read profiles" on public.profiles for select to authenticated using (public.is_admin());
+drop policy if exists "Admins read saved" on public.saved;
+create policy "Admins read saved" on public.saved for select to authenticated using (public.is_admin());
+drop policy if exists "Admins see admins" on public.admins;
+create policy "Admins see admins" on public.admins for select to authenticated using (public.is_admin());

@@ -1,0 +1,318 @@
+---
+// Admin dashboard: registrations, student accounts and links to edit content.
+// Only emails listed in the Supabase "admins" table can see data (enforced by the database, not this page).
+import Logo from "../components/Logo.astro";
+import { SITE } from "../site.config.mjs";
+import "../styles/global.css";
+const projectRef = new URL(SITE.supabaseUrl || "https://x.supabase.co").host.split(".")[0];
+---
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin | {SITE.name}</title>
+  <link rel="icon" href="/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" />
+</head>
+<body class="dash-body">
+  <div class="dash" data-dash data-ref={projectRef}>
+    <header class="top">
+      <a href="/" class="brand"><Logo variant="icon" animate={false} class="top-logo" /><span>Admin</span></a>
+      <div class="who" data-who hidden><span data-email></span><button type="button" class="ghost" data-signout>Sign out</button></div>
+    </header>
+
+    <section class="card login" data-view="login" hidden>
+      <h1>Admin sign in</h1>
+      <p class="muted">Use the email and password of your ScholarHelp account.</p>
+      <form data-login>
+        <label>Email<input name="email" type="email" required autocomplete="email" /></label>
+        <label>Password<input name="password" type="password" required autocomplete="current-password" /></label>
+        <button class="btn" type="submit">Sign in</button>
+      </form>
+      <p class="msg" data-login-msg hidden></p>
+      <p class="muted small">No account yet? <a href="/account/#signup">Create one</a>, confirm your email, then come back here.</p>
+    </section>
+
+    <section class="card" data-view="denied" hidden>
+      <h1>This account is not an admin</h1>
+      <p class="muted">You are signed in as <b data-email></b>. Ask the site owner to add this email to the admins list.</p>
+    </section>
+
+    <section class="card" data-view="off" hidden>
+      <h1>Supabase is not connected</h1>
+      <p class="muted">Add the Supabase URL and public key in <code>src/site.config.mjs</code>.</p>
+    </section>
+
+    <main data-view="app" hidden>
+      <nav class="tabs" role="tablist">
+        <button type="button" data-tab="overview" aria-selected="true">Overview</button>
+        <button type="button" data-tab="regs" aria-selected="false">Registrations</button>
+        <button type="button" data-tab="accounts" aria-selected="false">Accounts</button>
+        <button type="button" data-tab="content" aria-selected="false">Content and settings</button>
+      </nav>
+
+      <section data-panel="overview">
+        <div class="stats">
+          <div class="stat"><b data-stat="regs">0</b><span>Registrations</span></div>
+          <div class="stat"><b data-stat="week">0</b><span>Last 7 days</span></div>
+          <div class="stat"><b data-stat="today">0</b><span>Today</span></div>
+          <div class="stat"><b data-stat="accounts">0</b><span>Student accounts</span></div>
+        </div>
+        <div class="grid2">
+          <div class="card"><h2>By language</h2><ul class="bars" data-langs></ul></div>
+          <div class="card"><h2>Latest registrations</h2><ul class="latest" data-latest></ul></div>
+        </div>
+      </section>
+
+      <section data-panel="regs" hidden>
+        <div class="bar">
+          <input type="search" placeholder="Search name, email or phone" data-search="regs" />
+          <button type="button" class="btn" data-csv="regs">Download CSV</button>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Email</th><th>Phone / WhatsApp</th><th>Lang</th><th>Date</th><th></th></tr></thead>
+          <tbody data-rows="regs"></tbody>
+        </table></div>
+        <p class="muted small" data-count="regs"></p>
+      </section>
+
+      <section data-panel="accounts" hidden>
+        <div class="bar">
+          <input type="search" placeholder="Search name or email" data-search="accounts" />
+          <button type="button" class="btn" data-csv="accounts">Download CSV</button>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Email</th><th>Lang</th><th>Email alerts</th><th>Joined</th></tr></thead>
+          <tbody data-rows="accounts"></tbody>
+        </table></div>
+        <p class="muted small" data-count="accounts"></p>
+      </section>
+
+      <section data-panel="content" hidden>
+        <div class="links">
+          <a class="card link" href="/admin/" target="_blank" rel="noopener"><b>Opportunities and guides</b><span>Add, edit, translate or remove listings. Signs in with your GitHub key.</span></a>
+          <a class="card link" data-supa="editor" target="_blank" rel="noopener"><b>Database (Supabase)</b><span>All tables, export, and the admins list.</span></a>
+          <a class="card link" data-supa="auth/users" target="_blank" rel="noopener"><b>Accounts and passwords</b><span>Delete accounts, resend confirmation emails.</span></a>
+          <a class="card link" data-supa="auth/url-configuration" target="_blank" rel="noopener"><b>Email links</b><span>Site URL and redirect URLs for confirmation emails.</span></a>
+          <a class="card link" href="https://vercel.com/abdou-6f62/website" target="_blank" rel="noopener"><b>Hosting (Vercel)</b><span>Deployments, domain, and site protection.</span></a>
+          <a class="card link" href="https://github.com/abderrahmanelr213-arch/scholarhelp" target="_blank" rel="noopener"><b>Code (GitHub)</b><span>Every change to the site, and settings like social links.</span></a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+  import { getSupabase } from "../lib/client/supabase";
+  type Row = Record<string, any>;
+  const root = document.querySelector<HTMLElement>("[data-dash]")!;
+  const $ = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+  const view = (v: string) => root.querySelectorAll<HTMLElement>("[data-view]").forEach((el) => (el.hidden = el.dataset.view !== v));
+  const fmt = (d: string) => new Date(d).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const LANG: Record<string, string> = { en: "English", ar: "Arabic", ps: "Pashto" };
+  const data: { regs: Row[]; accounts: Row[] } = { regs: [], accounts: [] };
+
+  root.querySelectorAll<HTMLAnchorElement>("[data-supa]").forEach((a) => (a.href = `https://supabase.com/dashboard/project/${root.dataset.ref}/${a.dataset.supa}`));
+
+  // Tabs
+  root.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach((b) => b.addEventListener("click", () => {
+    root.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+    root.querySelectorAll<HTMLElement>("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== b.dataset.tab));
+  }));
+
+  const cell = (text: string, cls = "") => { const td = document.createElement("td"); td.textContent = text; if (cls) td.className = cls; return td; };
+  const matches = (r: Row, q: string) => !q || Object.values(r).some((v) => String(v ?? "").toLowerCase().includes(q));
+
+  async function main() {
+    const sb = await getSupabase();
+    if (!sb) return view("off");
+
+    const login = $<HTMLFormElement>("[data-login]");
+    login.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = new FormData(login);
+      const { error } = await sb.auth.signInWithPassword({ email: String(f.get("email")).trim(), password: String(f.get("password")) });
+      const m = $("[data-login-msg]");
+      if (error) { m.hidden = false; m.textContent = /confirm/i.test(error.message) ? "Please confirm your email first (check your inbox)." : "Wrong email or password."; return; }
+      location.reload();
+    });
+    $("[data-signout]").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return view("login");
+    root.querySelectorAll<HTMLElement>("[data-email]").forEach((el) => (el.textContent = session.user.email || ""));
+    $("[data-who]").hidden = false;
+    // A signed-in admin never needs the visitor registration pop-up.
+    document.cookie = "sh_reg=1; max-age=157680000; path=/; SameSite=Lax";
+
+    const { data: isAdmin } = await sb.rpc("is_admin");
+    if (!isAdmin) return view("denied");
+    view("app");
+
+    async function load() {
+      const [regs, accounts] = await Promise.all([
+        sb!.from("subscribers").select("email,name,phone,lang,created_at").order("created_at", { ascending: false }).range(0, 9999),
+        sb!.from("profiles").select("id,email,full_name,lang,newsletter,created_at").order("created_at", { ascending: false }).range(0, 9999),
+      ]);
+      data.regs = regs.data ?? [];
+      data.accounts = accounts.data ?? [];
+      overview(); renderRegs(); renderAccounts();
+    }
+
+    function overview() {
+      const now = Date.now(), day = 864e5;
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      $("[data-stat=regs]").textContent = String(data.regs.length);
+      $("[data-stat=week]").textContent = String(data.regs.filter((r) => now - +new Date(r.created_at) < 7 * day).length);
+      $("[data-stat=today]").textContent = String(data.regs.filter((r) => +new Date(r.created_at) >= +today).length);
+      $("[data-stat=accounts]").textContent = String(data.accounts.length);
+      const counts: Record<string, number> = {};
+      data.regs.forEach((r) => (counts[r.lang || "en"] = (counts[r.lang || "en"] || 0) + 1));
+      const max = Math.max(1, ...Object.values(counts));
+      $("[data-langs]").replaceChildren(...Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => {
+        const li = document.createElement("li");
+        const label = document.createElement("span"); label.textContent = `${LANG[k] || k} · ${n}`;
+        const bar = document.createElement("i"); bar.style.width = `${(n / max) * 100}%`;
+        li.append(label, bar); return li;
+      }));
+      if (!data.regs.length) { const li = document.createElement("li"); li.className = "muted"; li.textContent = "No registrations yet."; $("[data-langs]").append(li); }
+      $("[data-latest]").replaceChildren(...data.regs.slice(0, 6).map((r) => {
+        const li = document.createElement("li");
+        const b = document.createElement("b"); b.textContent = r.name || r.email;
+        const s = document.createElement("span"); s.textContent = `${r.email} · ${fmt(r.created_at)}`;
+        li.append(b, s); return li;
+      }));
+      if (!data.regs.length) { const li = document.createElement("li"); li.className = "muted"; li.textContent = "Nothing yet."; $("[data-latest]").append(li); }
+    }
+
+    function renderRegs() {
+      const q = $<HTMLInputElement>("[data-search=regs]").value.trim().toLowerCase();
+      const rows = data.regs.filter((r) => matches(r, q));
+      $("[data-rows=regs]").replaceChildren(...rows.map((r) => {
+        const tr = document.createElement("tr");
+        const phone = document.createElement("td");
+        if (r.phone) { const a = document.createElement("a"); a.href = `https://wa.me/${String(r.phone).replace(/\D/g, "")}`; a.target = "_blank"; a.rel = "noopener"; a.textContent = r.phone; phone.append(a); }
+        const act = document.createElement("td"); act.className = "act";
+        const edit = document.createElement("button"); edit.type = "button"; edit.className = "ghost"; edit.textContent = "Edit";
+        const del = document.createElement("button"); del.type = "button"; del.className = "ghost danger"; del.textContent = "Delete";
+        edit.addEventListener("click", () => editRow(tr, r));
+        del.addEventListener("click", async () => {
+          if (!confirm(`Delete ${r.email}? This cannot be undone.`)) return;
+          const { error } = await sb!.from("subscribers").delete().eq("email", r.email);
+          if (error) return alert("Could not delete: " + error.message);
+          data.regs = data.regs.filter((x) => x !== r); overview(); renderRegs();
+        });
+        act.append(edit, del);
+        tr.append(cell(r.name || ""), cell(r.email), phone, cell(LANG[r.lang] || r.lang || ""), cell(fmt(r.created_at), "nowrap"), act);
+        return tr;
+      }));
+      $("[data-count=regs]").textContent = `${rows.length} of ${data.regs.length} registrations`;
+    }
+
+    function editRow(tr: HTMLTableRowElement, r: Row) {
+      const input = (v: string, w = "") => { const i = document.createElement("input"); i.value = v ?? ""; if (w) i.style.width = w; return i; };
+      const name = input(r.name), phone = input(r.phone), lang = document.createElement("select");
+      Object.entries(LANG).forEach(([k, v]) => { const o = new Option(v, k, false, k === r.lang); lang.append(o); });
+      const tds = tr.querySelectorAll("td");
+      tds[0].replaceChildren(name); tds[2].replaceChildren(phone); tds[3].replaceChildren(lang);
+      const save = document.createElement("button"); save.type = "button"; save.className = "btn small"; save.textContent = "Save";
+      const cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "ghost"; cancel.textContent = "Cancel";
+      tds[5].replaceChildren(save, cancel);
+      cancel.addEventListener("click", renderRegs);
+      save.addEventListener("click", async () => {
+        const patch = { name: name.value.trim() || null, phone: phone.value.trim() || null, lang: lang.value };
+        const { error } = await sb!.from("subscribers").update(patch).eq("email", r.email);
+        if (error) return alert("Could not save: " + error.message);
+        Object.assign(r, patch); overview(); renderRegs();
+      });
+    }
+
+    function renderAccounts() {
+      const q = $<HTMLInputElement>("[data-search=accounts]").value.trim().toLowerCase();
+      const rows = data.accounts.filter((r) => matches(r, q));
+      $("[data-rows=accounts]").replaceChildren(...rows.map((r) => {
+        const tr = document.createElement("tr");
+        tr.append(cell(r.full_name || ""), cell(r.email || ""), cell(LANG[r.lang] || r.lang || ""), cell(r.newsletter ? "Yes" : "No"), cell(fmt(r.created_at), "nowrap"));
+        return tr;
+      }));
+      $("[data-count=accounts]").textContent = `${rows.length} of ${data.accounts.length} accounts`;
+    }
+
+    $("[data-search=regs]").addEventListener("input", renderRegs);
+    $("[data-search=accounts]").addEventListener("input", renderAccounts);
+
+    // CSV downloads (opens in Excel or Google Sheets).
+    const csv = (rows: Row[], cols: [string, string][]) => {
+      const esc = (v: any) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      return "﻿" + [cols.map((c) => esc(c[1])).join(","), ...rows.map((r) => cols.map((c) => esc(r[c[0]])).join(","))].join("\r\n");
+    };
+    const download = (name: string, text: string) => {
+      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+      a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    };
+    const stamp = () => new Date().toISOString().slice(0, 10);
+    $("[data-csv=regs]").addEventListener("click", () => download(`scholarhelp-registrations-${stamp()}.csv`, csv(data.regs, [["name", "Name"], ["email", "Email"], ["phone", "Phone"], ["lang", "Language"], ["created_at", "Date"]])));
+    $("[data-csv=accounts]").addEventListener("click", () => download(`scholarhelp-accounts-${stamp()}.csv`, csv(data.accounts, [["full_name", "Name"], ["email", "Email"], ["lang", "Language"], ["newsletter", "Email alerts"], ["created_at", "Joined"]])));
+
+    load();
+  }
+  main();
+</script>
+
+<style is:global>
+  .dash-body { background: #f3f6f9; margin: 0; }
+  .dash { max-width: 1120px; margin: 0 auto; padding: 0 16px 48px; color: var(--navy); }
+  .dash .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 0; }
+  .dash .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; color: var(--navy); text-decoration: none; }
+  .dash .top-logo { height: 40px; width: auto; }
+  .dash .who { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: .92rem; min-width: 0; }
+  .dash .who span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dash .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgb(12 43 76 / .05); }
+  .dash .login, .dash [data-view=denied], .dash [data-view=off] { max-width: 420px; margin: 40px auto 0; }
+  .dash h1 { margin: 0 0 6px; font-size: 1.4rem; }
+  .dash h2 { margin: 0 0 12px; font-size: 1.05rem; }
+  .dash .muted { color: var(--muted); }
+  .dash .small { font-size: .88rem; }
+  .dash form { display: grid; gap: 12px; margin-top: 14px; }
+  .dash label { display: grid; gap: 6px; font-weight: 700; font-size: .92rem; }
+  .dash input, .dash select { font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--navy); min-width: 0; }
+  .dash .btn { border: 0; cursor: pointer; }
+  .dash .btn.small { padding: 6px 12px; font-size: .85rem; }
+  .dash .ghost { white-space: nowrap; border: 1px solid var(--line); background: #fff; color: var(--navy); border-radius: 8px; padding: 6px 10px; font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; }
+  .dash .ghost.danger { color: #c92a2a; }
+  .dash .msg { color: #c92a2a; font-weight: 700; margin: 10px 0 0; }
+  .dash .tabs { display: flex; gap: 6px; overflow-x: auto; padding: 4px; background: #fff; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 18px; }
+  .dash .tabs button { flex: none; border: 0; background: none; padding: 10px 14px; border-radius: 9px; font: inherit; font-weight: 700; color: var(--muted); cursor: pointer; }
+  .dash .tabs button[aria-selected=true] { background: var(--navy); color: #fff; }
+  .dash .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+  .dash .stat { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 4px; }
+  .dash .stat b { font-size: 1.9rem; color: var(--teal); }
+  .dash .stat span { font-weight: 700; font-size: .9rem; }
+  .dash .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .dash ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .dash .bars li { display: grid; gap: 4px; font-weight: 600; font-size: .92rem; }
+  .dash .bars i { display: block; height: 8px; border-radius: 4px; background: var(--teal); min-width: 4px; }
+  .dash .latest li { display: grid; font-size: .92rem; }
+  .dash .latest span { color: var(--muted); font-size: .85rem; overflow-wrap: anywhere; }
+  .dash .bar { display: flex; gap: 10px; margin-bottom: 12px; }
+  .dash .bar input { flex: 1; }
+  .dash .table-wrap { overflow-x: auto; background: #fff; border: 1px solid var(--line); border-radius: 14px; }
+  .dash table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .dash th, .dash td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .dash th { background: #f7f9fb; font-weight: 800; white-space: nowrap; }
+  .dash td a { color: var(--teal); font-weight: 700; white-space: nowrap; }
+  .dash .nowrap { white-space: nowrap; }
+  .dash .act { text-align: right; white-space: nowrap; }
+  .dash .act button + button { margin-left: 6px; }
+  .dash td input { padding: 6px 8px; width: 100%; }
+  .dash .links { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .dash .link { display: grid; gap: 6px; text-decoration: none; color: var(--navy); transition: border-color .15s, transform .15s; }
+  .dash .link:hover { border-color: var(--teal); transform: translateY(-2px); }
+  .dash .link span { color: var(--muted); font-size: .9rem; }
+  @media (max-width: 760px) { .dash .stats { grid-template-columns: 1fr 1fr; } .dash .grid2 { grid-template-columns: 1fr; } .dash .bar { flex-direction: column; } }
+</style>
+</body>
+</html>
