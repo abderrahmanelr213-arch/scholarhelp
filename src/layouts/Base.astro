@@ -1,6 +1,7 @@
 ---
 import SocialLinks from "../components/SocialLinks.astro";
 import RegisterBox from "../components/RegisterBox.astro";
+import ChatBot from "../components/ChatBot.astro";
 import Logo from "../components/Logo.astro";
 import "../styles/global.css";
 import { SITE, LOCALES, CATEGORIES } from "../site.config.mjs";
@@ -130,6 +131,7 @@ const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     </div>
   </footer>
   {!path.startsWith("/account") && <RegisterBox lang={lang} />}
+  <ChatBot lang={lang} />
   <script>
     // Language switcher hint: the label cycles through the languages,
     // until the visitor opens the switcher once.

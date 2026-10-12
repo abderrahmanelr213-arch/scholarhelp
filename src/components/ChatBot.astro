@@ -1,0 +1,331 @@
+---
+// The ScholarHelp assistant: a chat bubble in the corner of every page. It answers from the site's own
+// listings, guides and the written answers in src/i18n/chat.ts, so it is free to run.
+import { SITE, CATEGORIES } from "../site.config.mjs";
+import { t, lp, type Lang } from "../i18n/ui";
+import { chatStrings } from "../i18n/chat";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = chatStrings(lang);
+const labels = {
+  cat: Object.fromEntries(CATEGORIES.map((c: string) => [c, t(lang, `cat.${c}.short` as any)])),
+  level: Object.fromEntries(["Bachelor", "Master", "PhD", "Postdoc"].map((l) => [l, t(lang, `level.${l}` as any)])),
+  funding: { full: t(lang, "funding.full"), partial: t(lang, "funding.partial"), travel: t(lang, "funding.travel") },
+};
+const config = {
+  lang,
+  s,
+  labels,
+  data: `/chat-data/${lang}.json`,
+  browse: lp(lang, "/opportunities/"),
+  account: lp(lang, "/account/") + "#signup",
+  telegram: SITE.telegram,
+  instagram: SITE.social.instagram,
+  email: SITE.email,
+};
+---
+<div class="chat" data-chat data-config={JSON.stringify(config)}>
+  <button class="chat-launch" type="button" data-chat-toggle aria-expanded="false" aria-controls="chat-panel" aria-label={s.open}>
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01" stroke-width="3"/></svg>
+    <span class="chat-launch-label">{s.launcher}</span>
+  </button>
+  <section class="chat-panel" id="chat-panel" role="dialog" aria-label={s.title} hidden>
+    <header class="chat-head">
+      <img src="/brand-icon.png" alt="" width="40" height="40" />
+      <div>
+        <h2>{s.title}</h2>
+        <p>{s.subtitle}</p>
+      </div>
+      <button type="button" class="chat-icon-btn" data-chat-restart aria-label={s.restart} title={s.restart}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+      <button type="button" class="chat-icon-btn" data-chat-toggle aria-label={s.close} title={s.close}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+    <div class="chat-log" data-chat-log aria-live="polite"></div>
+    <form class="chat-form" data-chat-form>
+      <input type="text" name="q" autocomplete="off" enterkeyhint="send" maxlength="200" placeholder={s.placeholder} aria-label={s.placeholder} dir="auto" />
+      <button type="submit" aria-label={s.send}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l.1 6.5L15 12 3.5 13.9z"/></svg>
+      </button>
+    </form>
+  </section>
+</div>
+
+<script>
+  import { createBrain, type Answer, type ChatOpp, type ChatData, type Filters } from "../lib/client/chat-brain";
+
+  const root = document.querySelector<HTMLElement>("[data-chat]");
+  if (root) {
+    const cfg = JSON.parse(root.dataset.config!);
+    const s: Record<string, string> = cfg.s;
+    const panel = root.querySelector<HTMLElement>(".chat-panel")!;
+    const log = root.querySelector<HTMLElement>("[data-chat-log]")!;
+    const form = root.querySelector<HTMLFormElement>("[data-chat-form]")!;
+    const input = form.querySelector<HTMLInputElement>("input")!;
+    const launch = root.querySelector<HTMLButtonElement>(".chat-launch")!;
+    const KEY = "sh-chat";
+
+    // A chip is a button that runs a preset question. Its action: "faq:fees", "f:cat=scholarships&funding=full", "countries", "levels".
+    type Chip = { label: string; act: string; flag?: string };
+    type Msg = { me?: boolean; text: string; opps?: string[]; links?: { href: string; label: string; tg?: boolean }[]; chips?: Chip[] };
+    let msgs: Msg[] = [];
+    try { msgs = JSON.parse(sessionStorage.getItem(KEY) || "[]"); } catch {}
+    const save = () => { try { sessionStorage.setItem(KEY, JSON.stringify(msgs.slice(-40))); } catch {} };
+
+    let brain: ReturnType<typeof createBrain> | null = null;
+    let byUrl = new Map<string, ChatOpp>();
+    const load = async () => {
+      if (brain) return brain;
+      const data: ChatData = await fetch(cfg.data).then((r) => r.json());
+      byUrl = new Map(data.opps.map((o) => [o.u, o]));
+      brain = createBrain(data, cfg.lang);
+      return brain;
+    };
+
+    const fill = (str: string, vars: Record<string, string | number>) => str.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
+    const startChips = (): Chip[] => [
+      { label: s["chip.fullSch"], act: "f:cat=scholarships&funding=full" },
+      { label: s["chip.soon"], act: "f:soon=1" },
+      { label: s["chip.country"], act: "countries" },
+      { label: s["chip.level"], act: "levels" },
+      { label: s["chip.conf"], act: "f:cat=conferences" },
+      { label: s["chip.exch"], act: "f:cat=exchange" },
+      { label: s["chip.apply"], act: "faq:apply" },
+      { label: s["chip.fees"], act: "faq:fees" },
+      { label: s["chip.contact"], act: "faq:contact" },
+    ];
+    const moreChips = (): Chip[] => [
+      { label: s["chip.country"], act: "countries" },
+      { label: s["chip.level"], act: "levels" },
+      { label: s["chip.soon"], act: "f:soon=1" },
+      { label: s["chip.apply"], act: "faq:apply" },
+    ];
+    const tgLink = () => ({ href: cfg.telegram, label: s.telegram, tg: true });
+    const browseUrl = (f: Filters) => {
+      const q = new URLSearchParams();
+      if (f.cat) q.set("cat", f.cat);
+      if (f.level) q.set("level", f.level);
+      if (f.country) q.set("country", f.country);
+      if (f.funding) q.set("funding", f.funding);
+      if (f.soon) q.set("within", "90");
+      return cfg.browse + (q.toString() ? "?" + q : "");
+    };
+    const guideLinks = (slugs: string[]) => brain!.guides.filter((g) => slugs.includes(g.slug)).map((g) => ({ href: g.u, label: g.t }));
+
+    // Turn the brain's decision into a message.
+    function reply(a: Answer): Msg {
+      switch (a.kind) {
+        case "greet": return { text: s.greet, chips: startChips() };
+        case "thanks": return { text: s.thanks, chips: moreChips() };
+        case "fallback": return { text: s.fallback, chips: startChips(), links: [{ href: cfg.browse, label: s.browseAll }] };
+        case "countries":
+          return { text: s.pickCountry, chips: brain!.countries().map((c) => ({ label: `${c.label} (${c.n})`, act: "f:country=" + encodeURIComponent(c.key) + (c.code ? "&cc=" + c.code : ""), flag: c.code.toLowerCase() })) };
+        case "levels":
+          return { text: s.pickLevel, chips: Object.entries(cfg.labels.level as Record<string, string>).map(([k, v]) => ({ label: v, act: "f:level=" + k })) };
+        case "faq": {
+          const m: Msg = { text: fill(s["faq." + a.key], { email: cfg.email }), opps: a.opps?.slice(0, 4).map((o) => o.u), chips: moreChips() };
+          if (a.key === "apply") m.links = guideLinks(["how-to-find-fully-funded-scholarships", "how-to-write-a-motivation-letter"]);
+          if (a.key === "motivation") m.links = guideLinks(["how-to-write-a-motivation-letter"]);
+          if (a.key === "recommendation") m.links = guideLinks(["recommendation-letters"]);
+          if (a.key === "visa") m.links = guideLinks(["student-visa-checklist"]);
+          if (a.key === "register") m.links = [{ href: cfg.account, label: s.register }];
+          if (a.key === "contact") m.links = [tgLink(), { href: cfg.instagram, label: s.instagram }, { href: "mailto:" + cfg.email, label: s.email }];
+          if (a.key === "fees") m.chips = startChips().slice(0, 4);
+          return m;
+        }
+        case "results": {
+          if (!a.total) return { text: a.missingCountry ? fill(s.noneCountry, { country: a.missingCountry }) : s.none, links: [tgLink(), { href: cfg.browse, label: s.browseAll }], chips: moreChips() };
+          const f = a.filters;
+          const what = [f.funding && cfg.labels.funding[f.funding], f.cat && cfg.labels.cat[f.cat], f.level && cfg.labels.level[f.level], f.countryCode && brain!.countries().find((c) => c.code === f.countryCode)?.label, f.soon && s["chip.soon"]].filter(Boolean).join(" · ");
+          const m: Msg = { text: (a.closest ? s.closest : a.total === 1 ? s.found1 : fill(s.found, { n: a.total })) + (what ? "\n" + fill(s.matching, { what }) : ""), opps: a.opps.slice(0, 4).map((o) => o.u), chips: moreChips() };
+          if (a.total > 4) m.links = [{ href: browseUrl(f), label: fill(s.seeAll, { n: a.total }) }];
+          return m;
+        }
+      }
+    }
+
+    // Draw one message.
+    function render(m: Msg) {
+      const row = document.createElement("div");
+      row.className = "chat-msg " + (m.me ? "me" : "bot");
+      const bubble = document.createElement("div");
+      bubble.className = "chat-bubble";
+      bubble.dir = "auto";
+      bubble.textContent = m.text;
+      row.append(bubble);
+      for (const u of m.opps || []) {
+        const o = byUrl.get(u);
+        if (o) row.append(card(o));
+      }
+      if (m.links?.length) {
+        const box = document.createElement("div");
+        box.className = "chat-links";
+        for (const l of m.links) {
+          const a = document.createElement("a");
+          a.href = l.href; a.textContent = l.label;
+          if (/^https?:/.test(l.href)) { a.target = "_blank"; a.rel = "noopener"; }
+          if (l.tg) a.className = "tg";
+          box.append(a);
+        }
+        row.append(box);
+      }
+      log.append(row);
+      if (m.chips?.length) renderChips(m.chips);
+    }
+    function card(o: ChatOpp) {
+      const a = document.createElement("a");
+      a.className = "chat-card";
+      a.href = o.u;
+      const flag = o.cc ? `<img src="/flags/${o.cc}.svg" alt="" width="28" height="21" loading="lazy">` : `<span class="globe" aria-hidden="true">🌍</span>`;
+      const n = brain!.daysLeft(o.d);
+      const when = n === null ? s.rolling : n <= 30 ? fill(s.closesIn, { n }) : `${s.deadline}: ${new Date(o.d + "T00:00:00Z").toLocaleDateString(cfg.lang === "ar" ? "ar-EG" : cfg.lang === "ps" ? "ps-AF" : "en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}`;
+      a.innerHTML = `${flag}<span class="cc-body"><b dir="auto"></b><small><span class="cc-when${n !== null && n <= 30 ? " soon" : ""}"></span>${o.f === "full" ? ` · <span class="cc-full"></span>` : ""}</small></span>`;
+      a.querySelector("b")!.textContent = o.t;
+      a.querySelector(".cc-when")!.textContent = when;
+      const full = a.querySelector(".cc-full");
+      if (full) full.textContent = cfg.labels.funding.full;
+      return a;
+    }
+    // Only the latest set of chips stays on screen.
+    function renderChips(chips: Chip[]) {
+      log.querySelector(".chat-chips")?.remove();
+      const box = document.createElement("div");
+      box.className = "chat-chips";
+      for (const c of chips) {
+        const b = document.createElement("button");
+        b.type = "button"; b.dataset.act = c.act;
+        if (c.flag) { const img = document.createElement("img"); img.src = `/flags/${c.flag}.svg`; img.alt = ""; img.width = 20; img.height = 15; b.append(img); }
+        b.append(c.label);
+        box.append(b);
+      }
+      log.append(box);
+    }
+    const scroll = () => requestAnimationFrame(() => log.lastElementChild?.scrollIntoView({ block: "nearest" }));
+    const push = (m: Msg) => { msgs.push(m); save(); render(m); };
+    // Show the visitor's message, then the answer from the newest bot message onwards stays in view.
+    const exchange = (mine: string, ans: Msg) => {
+      push({ me: true, text: mine });
+      const row = log.lastElementChild as HTMLElement;
+      push(ans);
+      requestAnimationFrame(() => row.scrollIntoView({ block: "start", behavior: "smooth" }));
+    };
+
+    function runChip(act: string, label: string) {
+      const b = brain!;
+      if (act === "countries") return exchange(label, reply({ kind: "countries" }));
+      if (act === "levels") return exchange(label, reply({ kind: "levels" }));
+      if (act.startsWith("faq:")) {
+        const key = act.slice(4);
+        const opps = key === "eligibility" ? b.filter({ openAll: true }) : undefined;
+        return exchange(label, reply({ kind: "faq", key, opps }));
+      }
+      const p = new URLSearchParams(act.slice(2));
+      const f: Filters = { cat: p.get("cat") || undefined, level: p.get("level") || undefined, funding: p.get("funding") || undefined, soon: p.has("soon") || undefined, country: p.get("country") || undefined, countryCode: p.get("cc") || undefined };
+      let list = b.filter(f);
+      if (f.country && !f.countryCode) list = list.filter((o) => o.k === f.country);
+      exchange(label, reply({ kind: "results", filters: f, opps: list, total: list.length }));
+    }
+
+    const start = () => { if (!msgs.length) push({ text: s.greet, chips: startChips() }); };
+    let opened = false;
+    async function setOpen(show: boolean) {
+      panel.hidden = !show;
+      launch.hidden = show;
+      root!.querySelectorAll("[data-chat-toggle]").forEach((b) => b.setAttribute("aria-expanded", String(show)));
+      document.documentElement.classList.toggle("chat-open", show);
+      try { sessionStorage.setItem(KEY + "-open", show ? "1" : ""); } catch {}
+      if (!show) { launch.focus({ preventScroll: true }); return; }
+      if (!opened) {
+        opened = true;
+        try { await load(); } catch { /* offline: chips still show; answers wait for the data */ }
+        msgs.forEach(render);
+        start();
+      }
+      scroll();
+      if (innerWidth > 720) input.focus({ preventScroll: true });
+    }
+
+    root.querySelectorAll("[data-chat-toggle]").forEach((b) => b.addEventListener("click", () => setOpen(panel.hidden)));
+    root.querySelector("[data-chat-restart]")!.addEventListener("click", () => {
+      msgs = []; save(); log.innerHTML = ""; start(); input.focus({ preventScroll: true });
+    });
+    log.addEventListener("click", async (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>(".chat-chips button");
+      if (!b) return;
+      await load();
+      runChip(b.dataset.act!, b.textContent || "");
+    });
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = "";
+      const b = await load();
+      exchange(q, reply(b.answer(q)));
+    });
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && !panel.hidden && !document.documentElement.classList.contains("reg-open")) setOpen(false); });
+    // Keep the chat open while the visitor moves between pages.
+    try { if (sessionStorage.getItem(KEY + "-open") && innerWidth > 720) setOpen(true); } catch {}
+  }
+</script>
+
+<style>
+  .chat { --chat-gap: 16px; }
+  .chat-launch {
+    position: fixed; z-index: 40; inset-inline-end: var(--chat-gap); bottom: calc(var(--chat-gap) + env(safe-area-inset-bottom, 0px));
+    display: inline-flex; align-items: center; gap: 8px; height: 56px; padding: 0 20px 0 16px; border: 0; border-radius: 999px;
+    background: var(--teal); color: #fff; font-weight: 800; font-size: 1rem; cursor: pointer;
+    box-shadow: 0 6px 20px rgb(12 43 76 / .28); transition: transform .15s, background .15s;
+  }
+  .chat-launch:hover { background: var(--brand); transform: translateY(-2px); }
+  .chat-launch[hidden] { display: none; }
+  .chat-panel {
+    position: fixed; z-index: 45; inset-inline-end: var(--chat-gap); bottom: calc(var(--chat-gap) + env(safe-area-inset-bottom, 0px));
+    width: 390px; height: min(620px, calc(100dvh - 100px)); display: flex; flex-direction: column;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: 0 16px 50px rgb(12 43 76 / .28);
+  }
+  .chat-panel[hidden] { display: none; }
+  .chat-head { display: flex; align-items: center; gap: 10px; padding: 12px 10px 12px 14px; background: var(--navy); color: #fff; }
+  .chat-head img { width: 40px; height: 40px; border-radius: 50%; background: #fff; padding: 3px; flex: none; }
+  .chat-head div { flex: 1; min-width: 0; }
+  .chat-head h2 { font-size: 1.02rem; font-weight: 800; color: #fff; }
+  .chat-head p { margin: 0; font-size: .85rem; color: #d6e4ef; line-height: 1.3; }
+  .chat-icon-btn { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 10px; background: transparent; color: #fff; cursor: pointer; }
+  .chat-icon-btn:hover { background: rgb(255 255 255 / .14); }
+  .chat-log { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 14px 12px 6px; display: grid; align-content: start; gap: 12px; }
+  .chat-log :global(.chat-msg) { display: grid; gap: 8px; justify-items: start; }
+  .chat-log :global(.chat-msg.me) { justify-items: end; }
+  .chat-log :global(.chat-bubble) { max-width: 88%; padding: 10px 14px; border-radius: 16px; border-start-start-radius: 4px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); font-size: 1rem; line-height: 1.5; white-space: pre-line; }
+  .chat-log :global(.me .chat-bubble) { background: var(--teal); border-color: var(--teal); color: #fff; border-radius: 16px; border-start-end-radius: 4px; }
+  .chat-log :global(.chat-card) { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; text-decoration: none; color: var(--ink); box-shadow: var(--shadow); }
+  .chat-log :global(.chat-card:hover) { border-color: var(--teal); }
+  .chat-log :global(.chat-card img), .chat-log :global(.chat-card .globe) { flex: none; width: 28px; height: 21px; object-fit: cover; border-radius: 3px; font-size: 18px; line-height: 21px; text-align: center; }
+  .chat-log :global(.chat-card img) { box-shadow: 0 0 0 1px var(--line); }
+  .chat-log :global(.cc-body) { display: grid; gap: 2px; min-width: 0; }
+  .chat-log :global(.cc-body b) { font-size: .95rem; font-weight: 700; line-height: 1.35; color: var(--navy); }
+  .chat-log :global(.cc-body small) { font-size: .85rem; font-weight: 600; color: var(--muted); }
+  .chat-log :global(.cc-when.soon) { color: var(--danger); }
+  .chat-log :global(.cc-full) { color: #d92d20; font-weight: 700; }
+  .chat-log :global(.chat-links) { display: grid; gap: 6px; justify-items: start; }
+  .chat-log :global(.chat-links a) { font-weight: 700; color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+  .chat-log :global(.chat-links a.tg) { display: inline-flex; padding: 8px 14px; border-radius: 999px; background: #229ed9; color: #fff; text-decoration: none; }
+  .chat-log :global(.chat-chips) { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 6px; }
+  .chat-log :global(.chat-chips button) { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; border: 1.5px solid var(--teal); background: var(--surface); color: var(--navy); font-weight: 700; font-size: .92rem; cursor: pointer; }
+  .chat-log :global(.chat-chips button:hover) { background: var(--brand-soft); }
+  .chat-log :global(.chat-chips img) { border-radius: 2px; }
+  .chat-form { display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: 1px solid var(--line); }
+  .chat-form input { flex: 1; min-width: 0; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--bg); font-size: 16px; }
+  .chat-form input:focus { outline: none; border-color: var(--teal); }
+  .chat-form button { flex: none; display: grid; place-items: center; width: 46px; height: 46px; border: 0; border-radius: 50%; background: var(--teal); color: #fff; cursor: pointer; }
+  :global(html[dir="rtl"]) .chat-form button svg { transform: scaleX(-1); }
+  /* Phones: a round button without the label, and the chat fills the screen. */
+  @media (max-width: 560px) {
+    .chat-launch { width: 56px; padding: 0; justify-content: center; }
+    .chat-launch-label { display: none; }
+    .chat-panel { inset: 0; width: auto; height: 100dvh; border-radius: 0; border: 0; }
+    :global(html.chat-open) { overflow: hidden; }
+  }
+  @media print { .chat { display: none; } }
+</style>
