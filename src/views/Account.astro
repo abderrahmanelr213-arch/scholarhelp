@@ -32,6 +32,7 @@ const msgs = Object.fromEntries(msgKeys.map((k) => [k, t(lang, `account.${k}` as
         <label>{t(lang, "account.name")}<input name="name" type="text" required autocomplete="name" /></label>
         <label>{t(lang, "account.email")}<input name="email" type="email" required autocomplete="email" /></label>
         <label>{t(lang, "account.password")}<input name="password" type="password" required minlength="8" autocomplete="new-password" /><small>{t(lang, "account.pwHint")}</small></label>
+        <label>{t(lang, "account.password2")}<input name="password2" type="password" required minlength="8" autocomplete="new-password" /><small class="pw-err" data-pw-err hidden>{t(lang, "account.pwMismatch")}</small></label>
         <label class="check"><input name="newsletter" type="checkbox" checked /> {t(lang, "account.newsletter")}</label>
         <button class="btn" type="submit">{t(lang, "account.signup")}</button>
       </form>
@@ -113,6 +114,12 @@ const msgs = Object.fromEntries(msgKeys.map((k) => [k, t(lang, `account.${k}` as
   // The sign-in form shows at once; only someone who already has a saved session waits for their dashboard.
   try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) root.querySelector<HTMLElement>('[data-view="auth"]')!.hidden = true; } catch {}
   if (location.hash === "#signup") tab("signup");
+  // "Confirm password" must match before the account is created.
+  const pw1 = form("signup").elements.namedItem("password") as HTMLInputElement;
+  const pw2 = form("signup").elements.namedItem("password2") as HTMLInputElement;
+  const pwErr = root.querySelector<HTMLElement>("[data-pw-err]")!;
+  const checkPw = () => { pwErr.hidden = !pw2.value || pw1.value === pw2.value; };
+  pw1.addEventListener("input", checkPw); pw2.addEventListener("input", checkPw);
 
   async function renderSaved() {
     const list = root.querySelector<HTMLUListElement>("[data-saved]")!;
@@ -171,6 +178,7 @@ const msgs = Object.fromEntries(msgKeys.map((k) => [k, t(lang, `account.${k}` as
     form("signup").addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = new FormData(form("signup"));
+      if (f.get("password") !== f.get("password2")) { pwErr.hidden = false; return pw2.focus(); }
       const email = String(f.get("email")).trim();
       const { data, error } = await sb.auth.signUp({
         email, password: String(f.get("password")),
@@ -243,6 +251,7 @@ const msgs = Object.fromEntries(msgKeys.map((k) => [k, t(lang, `account.${k}` as
   .tabs button { border: 0; background: transparent; padding: 10px; border-radius: 9px; font-weight: 700; cursor: pointer; color: var(--muted); }
   .tabs button[aria-selected="true"] { background: var(--surface); color: var(--navy); box-shadow: 0 1px 3px rgb(12 43 76 / .12); }
   .form { display: grid; gap: 14px; }
+  .pw-err { color: #c92a2a; font-weight: 700; }
   .recover-title { margin: 0; font-size: 1.2rem; color: var(--navy); text-align: center; }
   .linkish.msg-action { justify-self: center; text-decoration: underline; }
   .form label:not(.check) { display: grid; gap: 6px; font-weight: 600; font-size: .92rem; color: var(--navy); }
