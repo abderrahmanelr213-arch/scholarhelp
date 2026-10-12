@@ -91,8 +91,9 @@ Closed opportunities do not need to be deleted. After the deadline the site show
 
 ## 5. Translations
 
-Arabic and Pashto pages already work. Without a translation they show the English text with a note.
-To translate a listing, open it and switch on **Arabic** or **Pashto** at the top of the editor, then fill in the text fields.
+You only need to write the English version. Claude adds the Arabic and Pashto versions of every new opportunity automatically, usually within a day, without asking you.
+Until that happens, the Arabic and Pashto pages show the English text with a note.
+If you want to write or fix a translation yourself, open the listing and switch on **Arabic** or **Pashto** at the top of the editor, then edit the text fields. Links, dates and the flag code are copied from English automatically.
 
 ## Chat assistant answers
 

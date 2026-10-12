@@ -4,6 +4,7 @@ Newest first. Every change is also in the GitHub commit history.
 
 ## 2026-10-12
 
+- All 15 opportunities now have Arabic and Pashto versions. `npm run build` warns about any listing missing a language, and a daily routine translates new listings automatically.
 - **Launched** on <https://www.scholarhelpu.com>: canonicals, sitemap, llms.txt and social previews use the new domain; robots.txt and pages are open to search engines.
 - Admin dashboard at `/dashboard/`: registrations and accounts with search, edit, delete, CSV download and WhatsApp links, plus shortcuts to the content editor, Supabase, Vercel and GitHub. Only emails in the `admins` table can see the data.
 - Supabase connected: registrations (name, email, phone, language) are saved in the `subscribers` table, and student accounts (sign up, sign in, saved opportunities, alert preferences) work.

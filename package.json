@@ -5,8 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/check-translations.mjs",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "check:translations": "node scripts/check-translations.mjs --strict"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",

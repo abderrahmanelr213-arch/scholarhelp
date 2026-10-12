@@ -42,3 +42,14 @@ Rules Abdou set for ScholarHelp. Follow them for every new listing, page and des
 ## Languages
 
 English (default), Arabic and Pashto. Arabic and Pashto pages read right to left. New interface text needs all three languages. Pashto text should be checked by a native speaker.
+
+### Translations (standing rule from Abdou, 12 October 2026)
+
+Every opportunity must exist in all three languages: `src/content/opportunities/en/<slug>.md`, `ar/<slug>.md` and `ps/<slug>.md`, with the same file name. Abdou is not asked again.
+
+- Whoever adds a listing (Claude, a routine or a helper) adds the Arabic and Pashto files in the same change.
+- Translate only the text: title, cardTitle, summary, host, country, location, duration, dates, fee, eligible, deadlineNote and the body.
+- Copy the shared fields exactly from English: category, image, hostUrl, officialUrl, countryCode, levels, funding, deadline, link, published, featured, draft. Official names, amounts, dates and URLs stay the same; put the official name in Latin letters in brackets after the translated name.
+- `npm run build` prints a `[translations]` warning for any listing that is missing a language or whose shared fields differ. `npm run check:translations` fails on the same problems.
+- Listings Abdou adds in the editor are saved in English only. A daily routine finds them and adds the Arabic and Pashto files. Until then the site shows the English text on the Arabic and Pashto pages.
+- Guides are translated when practical.
