@@ -7,6 +7,7 @@ hostUrl: https://www.gatescambridge.org/
 country: بریتانیا
 countryCode: "gb"
 eligible: له بریتانیا پرته د هر هېواد اتباع
+language: "انګلیسي: ستاسو د کېمبرج کورس یې ټاکي، اکثره IELTS Academic 7.5 یا TOEFL iBT 110؛ د Gates جلا ازموینه نشته؛ معمولاً د انګلیسي ژبې سند لرونکو ته معافیت ورکول کېږي"
 levels: [Master, PhD]
 funding: full
 deadline: 2026-12-08

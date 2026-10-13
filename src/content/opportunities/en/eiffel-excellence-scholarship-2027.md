@@ -7,6 +7,7 @@ hostUrl: https://www.campusfrance.org/en
 country: France
 countryCode: "fr"
 eligible: International students (non-French) applying through a French university
+language: "French or English depending on the programme; the host institution sets the level (some ask for French C1-C2); no fixed test score set by Eiffel"
 levels: [Master, PhD]
 funding: full
 deadline: 2027-01-06

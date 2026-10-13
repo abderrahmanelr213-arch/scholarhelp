@@ -7,6 +7,7 @@ hostUrl: https://www.saia.sk/en/
 country: Slovakia
 countryCode: "sk"
 eligible: Citizens of any country except Slovakia, enrolled at a university outside Slovakia
+language: "Depends on your Slovak host institution; no test score set by the scholarship. Application and documents must be in English or Slovak"
 levels: [Bachelor, Master, PhD, Postdoc]
 funding: partial
 deadline: 2026-10-31

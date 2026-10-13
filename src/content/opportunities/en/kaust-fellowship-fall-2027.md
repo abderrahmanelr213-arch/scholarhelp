@@ -7,6 +7,7 @@ hostUrl: https://www.kaust.edu.sa/
 country: Saudi Arabia
 countryCode: "sa"
 eligible: Students of all nationalities with a strong STEM degree (GPA 3.0/4.0 or higher)
+language: "English: IELTS 7.0 (6.5 per section), TOEFL iBT 5 (new scale), PTE 71 or Cambridge C1/C2 185 (waived for in-person degrees from the US, UK, Canada, Ireland, Australia, NZ)"
 levels: [Master, PhD]
 funding: full
 deadline: 2027-01-03

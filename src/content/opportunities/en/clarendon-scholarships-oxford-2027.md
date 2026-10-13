@@ -7,6 +7,7 @@ hostUrl: https://www.ox.ac.uk/
 country: United Kingdom
 countryCode: "gb"
 eligible: Applicants of any nationality to an Oxford graduate course
+language: "English: IELTS Academic 7.0 (6.5 in each part) or TOEFL iBT 100; some courses need 7.5 / 110. Waived after a recent degree taught in English"
 levels: [Master, PhD]
 funding: full
 deadline: 2026-12-02

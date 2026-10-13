@@ -15,6 +15,10 @@ Rules Abdou set for ScholarHelp. Follow them for every new listing, page and des
 - **Funding.** Only call something "Fully funded" when the official site confirms it. Otherwise use Partially funded or Travel grant.
 - **Two deadlines.** Put the main one in Deadline and the other in the deadline note.
 
+### Language requirement (standing rule from Abdou, 13 October 2026)
+
+Every opportunity states its language requirement in the `language` field, in all three languages, e.g. "English: IELTS Academic 6.5 or TOEFL iBT 90 (waived for English-taught degrees)" or "No language test needed". Take it from the official page and keep test names and scores exactly. It is shown in a yellow box under the summary and in the Quick overview. The build warns about any listing without it.
+
 ## Keeping visitors on the site
 
 - The card's **Apply Now** opens our own opportunity page, not the official site.

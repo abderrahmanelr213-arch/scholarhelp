@@ -11,6 +11,7 @@ location: University of San Diego, San Diego, United States
 duration: Three weeks
 dates: 29 June to 20 July 2027
 eligible: Ages 20 to 25 on 1 July 2027, with at least one year of university completed (or a 2025/2026 graduate)
+language: "English: no IELTS or TOEFL score required; your academic referee confirms your English level through a questionnaire sent with the recommendation"
 levels: [Bachelor, Master]
 funding: full
 deadline: 2027-01-15

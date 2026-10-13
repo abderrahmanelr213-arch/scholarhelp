@@ -7,6 +7,7 @@ hostUrl: https://www.campusfrance.org/en
 country: "فرانسه"
 countryCode: "fr"
 eligible: "نړیوال (غیر فرانسوي) محصلین چې د یوه فرانسوي پوهنتون له لارې غوښتنلیک ورکوي"
+language: "فرانسوي یا انګلیسي، د کورس پورې اړه لري؛ کوربه بنسټ کچه ټاکي (ځینې فرانسوي C1-C2 غواړي)؛ د ایفل بورس د ازموینې ټاکلې نمره نه ټاکي"
 levels: [Master, PhD]
 funding: full
 deadline: 2027-01-06

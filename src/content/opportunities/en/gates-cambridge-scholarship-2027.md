@@ -7,6 +7,7 @@ hostUrl: https://www.gatescambridge.org/
 country: United Kingdom
 countryCode: "gb"
 eligible: Citizens of any country outside the United Kingdom
+language: "English: set by your Cambridge course, often IELTS Academic 7.5 or TOEFL iBT 110; no separate Gates test; usually waived after a degree taught in English"
 levels: [Master, PhD]
 funding: full
 deadline: 2026-12-08

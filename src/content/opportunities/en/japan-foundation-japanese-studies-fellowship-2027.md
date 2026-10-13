@@ -7,6 +7,7 @@ hostUrl: https://www.jpf.go.jp/e/
 country: Japan
 countryCode: "jp"
 eligible: Citizens or permanent residents of any country with diplomatic ties to Japan
+language: "Japanese or English, good enough for research; no test score required (PhD candidates need a Japanese-language assessment form and Japanese speakers get priority)"
 levels: [PhD, Postdoc]
 funding: full
 deadline: 2026-12-01

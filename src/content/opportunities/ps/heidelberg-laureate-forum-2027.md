@@ -7,6 +7,7 @@ hostUrl: https://www.heidelberg-laureate-forum.org/
 country: "آلمان"
 countryCode: "de"
 eligible: "د ریاضي یا کمپیوټر ساینس د لیسانس، ماسټرۍ او دوکتورا زده کوونکي او د دوکتورا وروسته څېړونکي، له ټولې نړۍ څخه"
+language: "انګلیسي (د فورم رسمي ژبه)؛ د ژبې ازموینې یا سند ته اړتیا نشته"
 levels: [Bachelor, Master, PhD, Postdoc]
 funding: partial
 deadline: 2027-02-11

@@ -1,4 +1,5 @@
 // Warns about English listings that have no Arabic or Pashto version yet,
+// about listings without a language requirement,
 // and about translations whose shared fields (links, dates, codes) differ from English.
 // Runs before every build (npm "prebuild"). It only warns: a missing translation
 // falls back to English on the site, so the build never fails because of it.
@@ -32,6 +33,10 @@ for (const [collection, shared] of Object.entries(SHARED)) {
   for (const name of readdirSync(enDir).filter((f) => f.endsWith(".md"))) {
     const en = frontmatter(join(enDir, name));
     if (en.draft === "true") continue;
+    if (collection === "opportunities" && !en.language) {
+      problems++;
+      console.warn(`[translations] ${collection}/en/${name} has no "language" requirement (Abdou's rule: every page shows it)`);
+    }
     for (const lang of LANGS) {
       const file = join(base, lang, name);
       if (!existsSync(file)) {

@@ -7,6 +7,7 @@ hostUrl: https://symposium.org/
 country: "سويسرا"
 countryCode: "ch"
 eligible: "طلاب الماجستير والدكتوراه من جميع أنحاء العالم المولودون في عام 1997 أو بعده"
+language: "الإنجليزية: يجب كتابة المشاركات باللغة الإنجليزية؛ لا يُشترط اختبار لغة، ولا يتأثر غير الناطقين بها سلبًا"
 levels: [Master, PhD]
 funding: full
 deadline: 2027-02-01

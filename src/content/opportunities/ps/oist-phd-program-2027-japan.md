@@ -7,6 +7,7 @@ hostUrl: https://www.oist.jp/
 country: "جاپان"
 countryCode: "jp"
 eligible: "د هر هېواد د لیسانس یا ماسټرۍ فارغان"
+language: "انګلیسي: که مو سند په انګلیسي ژبه نه وي، د TOEFL iBT یا IELTS نمره؛ لږ تر لږه نمره نشته (یوازې دا ټاکي چې د انګلیسي کورسونو ته اړتیا لرئ که نه)"
 levels: [PhD]
 funding: full
 deadline: 2026-11-15

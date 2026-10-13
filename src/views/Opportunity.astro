@@ -51,6 +51,7 @@ const overview: [string, string | undefined, string?][] = [
   [t(lang, "opp.dates"), d.dates],
   [t(lang, "opp.funding"), t(lang, `funding.${d.funding}` as any)],
   [t(lang, "opp.eligible"), d.eligible],
+  [t(lang, "opp.language"), d.language],
 ].filter(([, v]) => v);
 const latest = opps.filter((o) => o.slug !== opp.slug && !related.includes(o)).slice(0, 4);
 const flag = d.countryCode ? `/flags/${d.countryCode.toLowerCase()}.svg` : "";
@@ -109,6 +110,7 @@ const shares = [
         </div>
 
         <p class="intro">{d.summary}</p>
+        {d.language && <p class="lang-req"><strong>{t(lang, "opp.language")}:</strong> {d.language}</p>}
         {!opp.translated && <p class="note">{t(lang, "opp.untranslated")}</p>}
         {d.sample && <p class="note warn">{t(lang, "opp.sample")}</p>}
 
@@ -215,6 +217,8 @@ const shares = [
   .intro { margin: 20px 0 0; font-size: 1.08rem; line-height: 1.75; }
   .note { margin: 16px 0 0; padding: 10px 14px; border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: .92rem; }
   .note.warn { background: var(--gold-soft); color: var(--gold); }
+  .lang-req { margin: 12px 0 0; padding: 10px 14px; border-radius: 10px; background: #fff7e6; border: 1px solid #f0c36d; color: #4a3200; line-height: 1.55; }
+  .lang-req strong { color: #7a4b00; }
   .overview { margin-top: 32px; padding: 18px 22px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--teal); }
   .overview h2 { font-size: 1.35rem; color: var(--navy); margin: 0 0 10px; }
   .overview ul { margin: 0; padding-inline-start: 20px; display: grid; gap: 8px; line-height: 1.6; }

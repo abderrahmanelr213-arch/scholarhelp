@@ -55,6 +55,7 @@ Click **Opportunities → New Opportunity** and fill in the form. Fields marked 
 | Location, Duration, Event or program dates | Fill in when the official site gives them |
 | Application fee | Only what the official site says (`None`, `USD 50`...). Leave empty if unknown |
 | Who can apply (*always*) | Short line, e.g. `Graduates of any nationality, 29 or younger` |
+| Language requirement (*always*) | From the official page, e.g. `English: IELTS Academic 6.5 or TOEFL iBT 90` or `No language test needed`. Shown in a yellow box on the page |
 | Study level (*always*) | Bachelor, Master, PhD, Postdoc or Any |
 | Funding (*always*) | Fully funded, Partially funded or Travel grant. Only choose Fully funded when the official site confirms tuition and living costs |
 | Deadline (*always* if there is one) | The main deadline. Leave empty only for rolling applications |

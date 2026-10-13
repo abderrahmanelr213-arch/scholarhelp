@@ -30,6 +30,8 @@ const opportunities = defineCollection({
     /** Application fee as stated officially, e.g. "None" or "USD 50". Optional. */
     fee: z.string().optional().nullable(),
     eligible: z.string().default("All nationalities"),
+    /** Language requirement as stated officially, e.g. "IELTS Academic 6.5 or TOEFL iBT 90" or "No test needed". Shown on every page. */
+    language: z.string().optional().nullable(),
     levels: z.array(z.string()).default([]),
     funding: z.enum(["full", "partial", "travel"]).default("full"),
     deadline: z.coerce.date().optional().nullable(),

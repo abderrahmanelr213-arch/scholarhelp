@@ -7,6 +7,7 @@ hostUrl: https://symposium.org/
 country: "سویس"
 countryCode: "ch"
 eligible: "د نړۍ له ګوټ ګوټ څخه د ماسټرۍ او دوکتورا زده کوونکي چې په 1997 کال یا وروسته زېږېدلي وي"
+language: "انګلیسي: ګډونونه باید په انګلیسي ولیکل شي؛ د ژبې ازموینه نه غوښتل کېږي او غیر اصلي ویونکي زیان نه ویني"
 levels: [Master, PhD]
 funding: full
 deadline: 2027-02-01

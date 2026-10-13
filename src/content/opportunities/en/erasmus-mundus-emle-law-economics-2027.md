@@ -7,6 +7,7 @@ hostUrl: https://www.emle.org/
 country: Europe
 countryCode: "eu"
 eligible: Graduates of any nationality with a 240 ECTS (or equivalent) degree, ideally in law or economics
+language: "English: IELTS Academic 7.0 (6.0 in each part) or TOEFL iBT 95, due after admission. Exempt with a degree from the UK, US, Canada, Ireland, Australia or New Zealand"
 levels: [Master]
 funding: full
 deadline: 2026-12-31

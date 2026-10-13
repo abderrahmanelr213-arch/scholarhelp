@@ -7,6 +7,7 @@ hostUrl: https://oead.at/en/
 country: اتریش
 countryCode: "at"
 eligible: له اتریش پرته د هر هېواد ځوان څېړونکي، چې عمر یې 35 کاله یا لږ وي
+language: "ستاسو د څېړنې په برخه کې کافي انګلیسي؛ د TOEFL یا بل ازموینې سند ته اړتیا نشته (ستاسو اتریشی لارښود تاییدوي چې پروژه په انګلیسي ترسره کېدای شي)"
 levels: [PhD, Postdoc]
 funding: partial
 deadline: 2026-12-01

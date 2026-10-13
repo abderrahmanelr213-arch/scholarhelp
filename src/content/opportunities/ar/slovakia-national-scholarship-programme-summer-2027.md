@@ -7,6 +7,7 @@ hostUrl: https://www.saia.sk/en/
 country: "سلوفاكيا"
 countryCode: "sk"
 eligible: "مواطنو جميع الدول باستثناء سلوفاكيا، المسجلون في جامعة خارج سلوفاكيا"
+language: "يعتمد على المؤسسة المضيفة في سلوفاكيا؛ لا تشترط المنحة درجة اختبار محددة. يجب تقديم الطلب والوثائق باللغة الإنجليزية أو السلوفاكية"
 levels: [Bachelor, Master, PhD, Postdoc]
 funding: partial
 deadline: 2026-10-31

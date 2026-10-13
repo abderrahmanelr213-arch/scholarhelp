@@ -62,6 +62,7 @@ collections:
       - { name: dates, label: Event or program dates, widget: string, i18n: true, required: false, hint: "e.g. 22 to 25 March 2027" }
       - { name: fee, label: Application fee, widget: string, i18n: true, required: false, hint: "As stated on the official site, e.g. None or USD 50. Leave empty if unknown." }
       - { name: eligible, label: Who can apply, widget: string, i18n: true, default: "All nationalities" }
+      - { name: language, label: "Language requirement", widget: string, i18n: true, hint: "Always fill this in, from the official page. e.g. IELTS Academic 6.5 or TOEFL iBT 90 / No language test needed (English-taught degree is enough)" }
       - name: levels
         label: Study level
         widget: select

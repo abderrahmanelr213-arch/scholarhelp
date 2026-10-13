@@ -2,6 +2,10 @@
 
 Newest first. Every change is also in the GitHub commit history.
 
+## 2026-10-13
+
+- Every opportunity shows its language requirement (tests, scores, exemptions, checked on the official pages) in a yellow box under the summary and in the Quick overview, in English, Arabic and Pashto. New `language` field in the editor; the build warns if it is missing.
+
 ## 2026-10-12
 
 - All 15 opportunities now have Arabic and Pashto versions. `npm run build` warns about any listing missing a language, and a daily routine translates new listings automatically.

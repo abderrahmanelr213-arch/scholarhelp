@@ -7,6 +7,7 @@ hostUrl: https://www.oist.jp/
 country: Japan
 countryCode: "jp"
 eligible: Bachelor's or master's graduates of any nationality
+language: "English: TOEFL iBT or IELTS score if your degree was not taught in English; no minimum score (it only decides if you need English courses)"
 levels: [PhD]
 funding: full
 deadline: 2026-11-15
