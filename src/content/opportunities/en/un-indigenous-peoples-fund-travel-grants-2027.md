@@ -10,6 +10,7 @@ countryCode: "un"
 location: New York, United States, or Geneva, Switzerland
 dates: 10 to 21 May 2027 (New York) or 12 to 16 July 2027 (Geneva)
 fee: No fee mentioned on the official site
+language: "No test needed; apply in English, French or Spanish"
 eligible: Indigenous people active in defending Indigenous rights, with a recommendation from their organisation or community. No age limit or language test.
 levels: []
 funding: travel

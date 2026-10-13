@@ -10,6 +10,7 @@ countryCode: "gb"
 location: Glasgow (UK), Aarhus (Denmark), then Nantes (France), Tilburg (Netherlands) or Wrocław (Poland)
 duration: Two years
 fee: No application fee mentioned on the official site
+language: "English: IELTS Academic 6.5 (no part below 6.0), TOEFL iBT 92, PTE Academic 65 or Duolingo 120"
 eligible: Any nationality with a good first degree (UK 2:1 or equivalent) in literature, languages, media, history, education or a related field. IELTS 6.5 (no part below 6.0).
 levels: [Master]
 funding: full

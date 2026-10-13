@@ -10,6 +10,7 @@ countryCode: "eu"
 location: Dublin, Granada, Liège or Sheffield (year 1); Rennes, Bordeaux, Granada, Maastricht or Kraków (year 2)
 duration: Two years
 fee: No application fee mentioned on the official site
+language: "English: IELTS Academic 6.5, 6.0 or 5.5 (or equivalent) depending on your study track; some tracks also need Spanish or French at B2"
 eligible: All nationalities with a bachelor's degree (180 ECTS) in any subject. English IELTS 5.5 to 6.5 depending on the study track.
 levels: [Master]
 funding: full

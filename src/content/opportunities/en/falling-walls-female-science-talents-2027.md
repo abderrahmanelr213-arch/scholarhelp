@@ -11,6 +11,7 @@ location: Berlin, Germany, plus online sessions
 duration: One year (February 2027 to January 2028)
 dates: Spring gathering in May 2027 and fall gathering in November 2027, in Berlin
 fee: Free of charge
+language: "English: fluent English needed; no IELTS or TOEFL score required"
 eligible: Women and non-binary PhD students in the final stage of their PhD, or postdocs, from any country and any field. Fluent English, no test score asked.
 levels: [PhD, Postdoc]
 funding: travel
