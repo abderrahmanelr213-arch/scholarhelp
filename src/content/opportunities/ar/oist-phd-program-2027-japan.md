@@ -7,6 +7,7 @@ hostUrl: https://www.oist.jp/
 country: "اليابان"
 countryCode: "jp"
 eligible: "حاملو البكالوريوس أو الماجستير من أي جنسية"
+language: "الإنجليزية: درجة TOEFL iBT أو IELTS إذا لم تكن شهادتك بالإنجليزية؛ لا يوجد حد أدنى للدرجة (تُستخدم فقط لتحديد حاجتك إلى دورات في اللغة)"
 levels: [PhD]
 funding: full
 deadline: 2026-11-15

@@ -7,6 +7,7 @@ hostUrl: https://www.heidelberg-laureate-forum.org/
 country: Germany
 countryCode: "de"
 eligible: Bachelor's, master's, PhD students and postdocs in mathematics or computer science, worldwide
+language: "English (official language of the forum); no language test or certificate required"
 levels: [Bachelor, Master, PhD, Postdoc]
 funding: partial
 deadline: 2027-02-11

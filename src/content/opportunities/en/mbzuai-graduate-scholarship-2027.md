@@ -7,6 +7,7 @@ hostUrl: https://mbzuai.ac.ae/
 country: United Arab Emirates
 countryCode: "ae"
 eligible: STEM graduates of all nationalities
+language: "English: IELTS Academic 6.5, TOEFL iBT 90 (4.5 new scale), PTE 60 or Cambridge C1 180 (may be waived if your degree was taught fully in English)"
 levels: [Master, PhD]
 funding: full
 deadline: 2026-12-15

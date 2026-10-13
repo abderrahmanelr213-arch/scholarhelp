@@ -7,6 +7,7 @@ hostUrl: https://www.campusfrance.org/en
 country: "فرنسا"
 countryCode: "fr"
 eligible: "الطلاب الدوليون (غير الفرنسيين) المتقدمون عبر جامعة فرنسية"
+language: "الفرنسية أو الإنجليزية حسب البرنامج؛ تحدد المؤسسة المضيفة المستوى (بعضها يطلب الفرنسية C1-C2)؛ لا تشترط منحة إيفل درجة اختبار محددة"
 levels: [Master, PhD]
 funding: full
 deadline: 2027-01-06

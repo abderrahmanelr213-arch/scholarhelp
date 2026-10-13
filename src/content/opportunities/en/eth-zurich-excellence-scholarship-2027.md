@@ -7,6 +7,7 @@ hostUrl: https://ethz.ch/en.html
 country: Switzerland
 countryCode: "ch"
 eligible: Excellent bachelor's graduates of any nationality (top 10% of their class)
+language: "English (German for Pharmacy and Architecture MSc): TOEFL, IELTS, C1 Advanced or C2 Proficiency; not needed if your bachelor's was taught fully in English"
 levels: [Master]
 funding: full
 deadline: 2026-11-30

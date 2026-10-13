@@ -7,6 +7,7 @@ hostUrl: https://oead.at/en/
 country: Austria
 countryCode: "at"
 eligible: Young researchers from any country except Austria, aged 35 or under
+language: "English good enough for your research field; no TOEFL or other test certificate needed (your Austrian supervisor confirms the project can be done in English)"
 levels: [PhD, Postdoc]
 funding: partial
 deadline: 2026-12-01

@@ -7,6 +7,7 @@ hostUrl: https://www.heidelberg-laureate-forum.org/
 country: "ألمانيا"
 countryCode: "de"
 eligible: "طلاب البكالوريوس والماجستير والدكتوراه وباحثو ما بعد الدكتوراه في الرياضيات أو علوم الحاسوب من جميع أنحاء العالم"
+language: "الإنجليزية (اللغة الرسمية للمنتدى)؛ لا يُشترط اختبار لغة أو شهادة لغوية"
 levels: [Bachelor, Master, PhD, Postdoc]
 funding: partial
 deadline: 2027-02-11

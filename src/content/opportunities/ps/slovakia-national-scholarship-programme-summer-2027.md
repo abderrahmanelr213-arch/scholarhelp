@@ -7,6 +7,7 @@ hostUrl: https://www.saia.sk/en/
 country: "سلواکیا"
 countryCode: "sk"
 eligible: "د سلواکیا پرته د ټولو هېوادونو اتباع، چې له سلواکیا بهر په یوه پوهنتون کې شامل وي"
+language: "ستاسو په کوربه سلواکي اداره پورې اړه لري؛ بورسیه د ازموینې کومه ټاکلې نمره نه غواړي. غوښتنلیک او اسناد باید په انګلیسي یا سلواکي ژبه وي"
 levels: [Bachelor, Master, PhD, Postdoc]
 funding: partial
 deadline: 2026-10-31

@@ -7,6 +7,7 @@ hostUrl: https://oead.at/en/
 country: النمسا
 countryCode: "at"
 eligible: الباحثون الشباب من أي بلد باستثناء النمسا، بعمر 35 عامًا أو أقل
+language: "إنجليزية كافية في مجال بحثك؛ لا حاجة إلى شهادة TOEFL أو أي اختبار آخر (يؤكد مشرفك النمساوي إمكانية تنفيذ المشروع بالإنجليزية)"
 levels: [PhD, Postdoc]
 funding: partial
 deadline: 2026-12-01

@@ -7,6 +7,7 @@ hostUrl: https://ethz.ch/en.html
 country: سويسرا
 countryCode: "ch"
 eligible: خريجو البكالوريوس المتفوقون من أي جنسية (ضمن أفضل 10% من دفعتهم)
+language: "الإنجليزية (والألمانية لماجستير الصيدلة والعمارة): TOEFL أو IELTS أو C1 Advanced أو C2 Proficiency؛ لا يلزم إذا كانت دراسة البكالوريوس بالإنجليزية بالكامل"
 levels: [Master]
 funding: full
 deadline: 2026-11-30

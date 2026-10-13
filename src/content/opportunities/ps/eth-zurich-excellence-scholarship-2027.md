@@ -7,6 +7,7 @@ hostUrl: https://ethz.ch/en.html
 country: سویس
 countryCode: "ch"
 eligible: د هر تابعیت د لیسانس غوره فارغان (د خپل ټولګي په غوره 10% کې)
+language: "انګلیسي (د درملپوهنې او معمارۍ MSc لپاره الماني): TOEFL، IELTS، C1 Advanced یا C2 Proficiency؛ که ستاسو لیسانس بشپړ په انګلیسي وو، اړتیا نشته"
 levels: [Master]
 funding: full
 deadline: 2026-11-30

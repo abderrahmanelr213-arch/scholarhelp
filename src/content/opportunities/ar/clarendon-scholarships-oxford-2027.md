@@ -7,6 +7,7 @@ hostUrl: https://www.ox.ac.uk/
 country: "المملكة المتحدة"
 countryCode: "gb"
 eligible: "المتقدمون من جميع الجنسيات إلى برنامج دراسات عليا في أكسفورد"
+language: "الإنجليزية: IELTS Academic 7.0 (6.5 في كل قسم) أو TOEFL iBT 100؛ بعض البرامج تتطلب 7.5 / 110. يُعفى من ذلك من أنهى حديثًا شهادة دُرّست بالإنجليزية"
 levels: [Master, PhD]
 funding: full
 deadline: 2026-12-02

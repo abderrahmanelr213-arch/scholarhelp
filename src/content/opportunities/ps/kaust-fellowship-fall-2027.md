@@ -7,6 +7,7 @@ hostUrl: https://www.kaust.edu.sa/
 country: "سعودي عربستان"
 countryCode: "sa"
 eligible: "د ټولو هېوادونو زده کوونکي چې د ساینس، ټکنالوژۍ، انجنیرۍ او ریاضي (STEM) په برخه کې قوي سند ولري (GPA 3.0/4.0 یا لوړ)"
+language: "انګلیسي: IELTS 7.0 (په هره برخه کې 6.5)، TOEFL iBT 5 (نوې پیمانه)، PTE 71 یا Cambridge C1/C2 185 (د امریکا، بریتانیا، کاناډا، آیرلنډ، آسټرالیا او نیوزیلنډ حضوري سند لرونکي معاف دي)"
 levels: [Master, PhD]
 funding: full
 deadline: 2027-01-03

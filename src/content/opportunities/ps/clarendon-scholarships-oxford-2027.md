@@ -7,6 +7,7 @@ hostUrl: https://www.ox.ac.uk/
 country: "بریتانیا"
 countryCode: "gb"
 eligible: "د هر تابعیت غوښتونکي چې په اکسفورډ کې د لوړو زده کړو یوه کورس ته غوښتنلیک ورکوي"
+language: "انګلیسي: IELTS Academic 7.0 (په هره برخه کې 6.5) یا TOEFL iBT 100؛ ځینې کورسونه 7.5 / 110 غواړي. که مو وروستۍ درجه په انګلیسي ژبه لوستې وي، معاف یاست"
 levels: [Master, PhD]
 funding: full
 deadline: 2026-12-02

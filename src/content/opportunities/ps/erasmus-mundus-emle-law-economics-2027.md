@@ -7,6 +7,7 @@ hostUrl: https://www.emle.org/
 country: "اروپا"
 countryCode: "eu"
 eligible: "د هر تابعیت فارغان چې د 240 ECTS (یا ورته) درجه لري، غوره دا ده چې په حقوقو یا اقتصاد کې وي"
+language: "انګلیسي: IELTS Academic 7.0 (په هره برخه کې 6.0) یا TOEFL iBT 95، له منلو وروسته سپارل کېږي. د بریتانیا، امریکا، کاناډا، آیرلنډ، آسټرالیا یا نیوزیلنډ درجه لرونکي معاف دي"
 levels: [Master]
 funding: full
 deadline: 2026-12-31

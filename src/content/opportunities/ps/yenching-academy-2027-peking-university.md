@@ -7,6 +7,7 @@ hostUrl: https://yenchingacademy.pku.edu.cn/
 country: "چین"
 countryCode: "cn"
 eligible: "د هر تابعیت د لېسانس فارغان (یا د وروستي کال زده کوونکي)"
+language: "انګلیسي: IELTS Academic 7.0، TOEFL iBT 100 یا Cambridge English 185، له 1 سپتمبر 2025 وروسته (اصلي ویونکي او د انګلیسي درسي سند لرونکي معاف دي)"
 levels: [Master]
 funding: full
 deadline: 2026-11-30

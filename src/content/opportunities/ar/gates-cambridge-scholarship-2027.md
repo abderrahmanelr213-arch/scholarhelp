@@ -7,6 +7,7 @@ hostUrl: https://www.gatescambridge.org/
 country: المملكة المتحدة
 countryCode: "gb"
 eligible: مواطنو أي دولة خارج المملكة المتحدة
+language: "الإنجليزية: يحددها مقررك في كامبريدج، وغالبًا IELTS Academic 7.5 أو TOEFL iBT 110؛ لا يوجد اختبار منفصل لمنحة Gates؛ وغالبًا يُعفى منها من درس شهادة بالإنجليزية"
 levels: [Master, PhD]
 funding: full
 deadline: 2026-12-08

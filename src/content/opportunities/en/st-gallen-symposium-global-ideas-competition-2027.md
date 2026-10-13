@@ -7,6 +7,7 @@ hostUrl: https://symposium.org/
 country: Switzerland
 countryCode: "ch"
 eligible: Master's and PhD students worldwide born in 1997 or later
+language: "English: entries must be written in English; no language test required and non-native speakers are not disadvantaged"
 levels: [Master, PhD]
 funding: full
 deadline: 2027-02-01

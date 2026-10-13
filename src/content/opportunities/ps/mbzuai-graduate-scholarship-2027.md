@@ -7,6 +7,7 @@ hostUrl: https://mbzuai.ac.ae/
 country: "متحده عربي امارات"
 countryCode: "ae"
 eligible: "د ټولو هېوادونو د ساینس، ټکنالوژۍ، انجنیرۍ او ریاضي (STEM) فارغان"
+language: "انګلیسي: IELTS Academic 6.5، TOEFL iBT 90 (په نوې پیمانه 4.5)، PTE 60 یا Cambridge C1 180 (که مو سند بشپړ په انګلیسي ژبه وي، ښايي معاف شئ)"
 levels: [Master, PhD]
 funding: full
 deadline: 2026-12-15

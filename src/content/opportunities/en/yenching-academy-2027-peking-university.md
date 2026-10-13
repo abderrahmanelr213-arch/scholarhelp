@@ -7,6 +7,7 @@ hostUrl: https://yenchingacademy.pku.edu.cn/
 country: China
 countryCode: "cn"
 eligible: Bachelor's graduates (or final-year students) of any nationality
+language: "English: IELTS Academic 7.0, TOEFL iBT 100 or Cambridge English 185, taken after 1 Sep 2025 (waived for native speakers or English-taught degree holders)"
 levels: [Master]
 funding: full
 deadline: 2026-11-30
