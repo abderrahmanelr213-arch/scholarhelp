@@ -130,7 +130,7 @@ const shares = [
                 : href ? <a class="official" href={href} target="_blank" rel="noopener nofollow" data-gate>{v}<svg class="flip-rtl" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
                 : v}</li>
             ))}
-            <li class="dl"><strong>{t(lang, "opp.deadline")}: {d.deadline ? <time datetime={isoDate(d.deadline)}>{formatDate(d.deadline, lang)}</time> : t(lang, "opp.rolling")}</strong> <span class="closing" data-closing hidden></span></li>
+            <li class="dl"><strong>{t(lang, "opp.deadline")}: {d.deadline ? <time datetime={isoDate(d.deadline)}>{formatDate(d.deadline, lang)}</time> : t(lang, "opp.rolling")}</strong> <span class="left" data-left hidden></span></li>
             {d.deadlineNote && <li class="dl">{d.deadlineNote}</li>}
           </ul>
         </section>
@@ -148,7 +148,7 @@ const shares = [
           <div class="fact deadline">
             <span class="label">{t(lang, "opp.deadline")}</span>
             <strong>{d.deadline ? formatDate(d.deadline, lang) : t(lang, "opp.rolling")}</strong>
-            <span class="closing" data-closing hidden></span>
+            <span class="left" data-left hidden></span>
           </div>
           <dl>
             {d.host && <div><dt>{t(lang, "opp.host")}</dt><dd>{d.host}</dd></div>}
