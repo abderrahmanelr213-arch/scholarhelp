@@ -51,6 +51,8 @@ const guides = defineCollection({
     topic: z.enum(["apply", "documents", "visa", "tips"]).default("tips"),
     published: z.coerce.date(),
     readingMinutes: z.number().default(5),
+    /** Short questions and answers shown at the end of the guide and sent to Google as FAQPage data. */
+    faq: z.array(z.object({ q: z.string(), a: z.string() })).optional(),
     draft: z.boolean().default(false),
   }),
 });
