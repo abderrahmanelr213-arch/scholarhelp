@@ -111,5 +111,14 @@ collections:
           - { label: Tips, value: tips }
       - { name: published, label: Date posted, widget: datetime, i18n: duplicate, time_format: false, format: "YYYY-MM-DD", default: "{{now}}" }
       - { name: readingMinutes, label: Reading time (minutes), widget: number, value_type: int, i18n: duplicate, default: 5 }
+      - name: faq
+        label: Questions and answers (optional)
+        widget: list
+        i18n: true
+        required: false
+        hint: "Short questions people ask, each with a direct answer. Shown at the end and sent to Google."
+        fields:
+          - { name: q, label: Question, widget: string }
+          - { name: a, label: Answer, widget: text }
       - { name: draft, label: Draft (hidden from the site), widget: boolean, i18n: duplicate, default: false, required: false }
       - { name: body, label: Article, widget: markdown, i18n: true }
